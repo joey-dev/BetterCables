@@ -1,3 +1,4 @@
 tile.copper_ore.name=Copper Ore
 tile.sintering_furnace.name=Sintering Furnace
 container.sintering_furnace=Sintering Furnace
+tile.connector.name=Connector
