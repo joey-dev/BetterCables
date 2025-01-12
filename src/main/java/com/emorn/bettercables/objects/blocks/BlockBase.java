@@ -1,4 +1,3 @@
-
 package com.emorn.bettercables.objects.blocks;
 
 import com.emorn.bettercables.Main;
@@ -10,8 +9,13 @@ import net.minecraft.block.material.Material;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.ItemBlock;
 
-public class BlockBase extends Block implements IHasModel {
-    public BlockBase(String name, Material material) {
+public class BlockBase extends Block implements IHasModel
+{
+    public BlockBase(
+        String name,
+        Material material
+    )
+    {
         super(material);
 
         setUnlocalizedName(name);
@@ -23,7 +27,8 @@ public class BlockBase extends Block implements IHasModel {
     }
 
     @Override
-    public void registerModels() {
+    public void registerModels()
+    {
         Main.proxy.registerItemRenderer(ItemBlock.getItemFromBlock(this), 0, "inventory");
     }
 }
