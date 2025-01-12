@@ -1,0 +1,12 @@
+{
+  "parent": "block/orientable",
+  "textures": {
+    "particle": "bettercables:blocks/sintering_furnace_side",
+    "up": "bettercables:blocks/sintering_furnace_side",
+    "down": "bettercables:blocks/sintering_furnace_side",
+    "north": "bettercables:blocks/sintering_furnace_front_on",
+    "east": "bettercables:blocks/sintering_furnace_side",
+    "south": "bettercables:blocks/sintering_furnace_side",
+    "west": "bettercables:blocks/sintering_furnace_side"
+  }
+}
