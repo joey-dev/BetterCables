@@ -1,0 +1,55 @@
+{
+  "multipart": [
+    {
+      "apply": { "model": "bettercables:connector_base" }
+    },
+    {
+      "when": { "north": "inventory" },
+      "apply": { "model": "bettercables:connector_side_connection", "uvlock": true }
+    },
+    {
+      "when": { "east": "inventory" },
+      "apply": { "model": "bettercables:connector_side_connection", "y": 90, "uvlock": true }
+    },
+    {
+      "when": { "south": "inventory" },
+      "apply": { "model": "bettercables:connector_side_connection", "y": 180, "uvlock": true }
+    },
+    {
+      "when": { "west": "inventory" },
+      "apply": { "model": "bettercables:connector_side_connection", "y": 270, "uvlock": true }
+    },
+    {
+      "when": { "up": "inventory" },
+      "apply": { "model": "bettercables:connector_side_connection", "x": 270, "uvlock": true }
+    },
+    {
+      "when": { "down": "inventory" },
+      "apply": { "model": "bettercables:connector_side_connection", "x": 90, "uvlock": true }
+    },
+    {
+      "when": { "north": "connector" },
+      "apply": { "model": "bettercables:connector_side_line", "uvlock": true }
+    },
+    {
+      "when": { "east": "connector" },
+      "apply": { "model": "bettercables:connector_side_line", "y": 90, "uvlock": true }
+    },
+    {
+      "when": { "south": "connector" },
+      "apply": { "model": "bettercables:connector_side_line", "y": 180, "uvlock": true }
+    },
+    {
+      "when": { "west": "connector" },
+      "apply": { "model": "bettercables:connector_side_line", "y": 270, "uvlock": true }
+    },
+    {
+      "when": { "up": "connector" },
+      "apply": { "model": "bettercables:connector_side_line", "x": 270, "uvlock": true }
+    },
+    {
+      "when": { "down": "connector" },
+      "apply": { "model": "bettercables:connector_side_line", "x": 90, "uvlock": true }
+    }
+  ]
+}
