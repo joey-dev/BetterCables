@@ -2,6 +2,7 @@ package com.emorn.bettercables.objects.blocks.connector;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.text.ITextComponent;
@@ -18,6 +19,21 @@ public class TileEntityConnector extends TileEntity implements ITickable
     {
         this.isInsertEnabled = false;
         this.isExtractEnabled = false;
+    }
+
+    @Override
+    public NBTTagCompound getUpdateTag() {
+        return this.writeToNBT(new NBTTagCompound());
+    }
+
+    @Override
+    public void onDataPacket(net.minecraft.network.NetworkManager net, net.minecraft.network.play.server.SPacketUpdateTileEntity pkt) {
+        this.readFromNBT(pkt.getNbtCompound());
+    }
+
+    @Override
+    public SPacketUpdateTileEntity getUpdatePacket() {
+        return new SPacketUpdateTileEntity(this.pos, 1, this.writeToNBT(new NBTTagCompound()));
     }
 
     @Override
@@ -40,16 +56,6 @@ public class TileEntityConnector extends TileEntity implements ITickable
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound compound)
     {
-        System.out.println("before write");
-        System.out.println(compound.getBoolean("isInsertEnabled"));
-
-        if (this.isExtractEnabled) {
-            System.out.println("extract enabled");
-        }
-        if (this.isInsertEnabled) {
-            System.out.println("insert enabled");
-        }
-
         super.writeToNBT(compound);
         compound.setBoolean("isInsertEnabled", this.isInsertEnabled);
         compound.setBoolean("isExtractEnabled", this.isExtractEnabled);
@@ -119,6 +125,10 @@ public class TileEntityConnector extends TileEntity implements ITickable
     public void setInsertEnabled(boolean checked)
     {
         this.isInsertEnabled = checked;
+        this.markDirty();
+        if (!this.world.isRemote) {
+            this.world.notifyBlockUpdate(this.pos, this.world.getBlockState(this.pos), this.world.getBlockState(this.pos), 3);
+        }
     }
 
     public boolean isExtractEnabled()
@@ -129,5 +139,9 @@ public class TileEntityConnector extends TileEntity implements ITickable
     public void setExtractEnabled(boolean checked)
     {
         this.isExtractEnabled = checked;
+        this.markDirty();
+        if (!this.world.isRemote) {
+            this.world.notifyBlockUpdate(this.pos, this.world.getBlockState(this.pos), this.world.getBlockState(this.pos), 3);
+        }
     }
 }

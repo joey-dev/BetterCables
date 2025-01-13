@@ -1,6 +1,7 @@
 package com.emorn.bettercables.objects.blocks.connector;
 
 import com.emorn.bettercables.common.gui.GuiCheckbox;
+import com.emorn.bettercables.proxy.ModNetworkHandler;
 import com.emorn.bettercables.utils.Reference;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.inventory.GuiContainer;
@@ -107,5 +108,11 @@ public class GuiConnector extends GuiContainer
                 tileEntity.setExtractEnabled(checkbox.isChecked());
                 break;
         }
+
+        ModNetworkHandler.INSTANCE.sendToServer(new PacketUpdateConnector(
+            tileEntity.getPos(),
+            tileEntity.isInsertEnabled(),
+            tileEntity.isExtractEnabled()
+        ));
     }
 }

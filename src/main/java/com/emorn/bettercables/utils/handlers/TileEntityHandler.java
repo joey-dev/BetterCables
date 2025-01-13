@@ -12,6 +12,5 @@ public class TileEntityHandler
     {
         GameRegistry.registerTileEntity(TileEntitySinteringFurnace.class, new ResourceLocation(Reference.MODID + ":sintering_furnace"));
         GameRegistry.registerTileEntity(TileEntityConnector.class, new ResourceLocation(Reference.MODID + ":connector"));
-        System.out.println("Tile entities registered");
     }
 }
