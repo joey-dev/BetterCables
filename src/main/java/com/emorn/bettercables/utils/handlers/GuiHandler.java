@@ -1,5 +1,8 @@
 package com.emorn.bettercables.utils.handlers;
 
+import com.emorn.bettercables.objects.blocks.connector.ContainerConnector;
+import com.emorn.bettercables.objects.blocks.connector.GuiConnector;
+import com.emorn.bettercables.objects.blocks.connector.TileEntityConnector;
 import com.emorn.bettercables.objects.blocks.machines.sintering.ContainerSinteringFurnace;
 import com.emorn.bettercables.objects.blocks.machines.sintering.GuiSinteringFurnace;
 import com.emorn.bettercables.objects.blocks.machines.sintering.TileEntitySinteringFurnace;
@@ -27,6 +30,13 @@ public class GuiHandler implements IGuiHandler
                 (TileEntitySinteringFurnace) world.getTileEntity(new BlockPos(x, y, z))
             );
         }
+
+        if (ID == Reference.GUI_CONNECTOR) {
+            return new ContainerConnector(
+                player.inventory,
+                (TileEntityConnector) world.getTileEntity(new BlockPos(x, y, z))
+            );
+        }
         return null;
     }
 
@@ -44,6 +54,13 @@ public class GuiHandler implements IGuiHandler
             return new GuiSinteringFurnace(
                 player.inventory,
                 (TileEntitySinteringFurnace) world.getTileEntity(new BlockPos(x, y, z))
+            );
+        }
+
+        if (ID == Reference.GUI_CONNECTOR) {
+            return new GuiConnector(
+                player.inventory,
+                (TileEntityConnector) world.getTileEntity(new BlockPos(x, y, z))
             );
         }
         return null;

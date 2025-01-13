@@ -1,7 +1,10 @@
 package com.emorn.bettercables.objects.blocks.connector;
 
+import com.emorn.bettercables.Main;
+import com.emorn.bettercables.init.BlockInit;
 import com.emorn.bettercables.objects.blocks.BlockBase;
 import com.emorn.bettercables.utils.IHasModel;
+import com.emorn.bettercables.utils.Reference;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
@@ -106,8 +109,7 @@ public class BlockConnector extends BlockBase implements IHasModel
         int fortune
     )
     {
-        return Item.getItemFromBlock(this);
-        //        return Item.getItemFromBlock(BlockInit.CONNECTOR); todo
+        return Item.getItemFromBlock(BlockInit.CONNECTOR);
     }
 
     @Override
@@ -124,18 +126,17 @@ public class BlockConnector extends BlockBase implements IHasModel
     )
     {
         if (!worldIn.isRemote) {
-            //            playerIn.openGui( todo GUI
-            //                Main.instance,
-            //                Reference.GUI_CONNECTOR,
-            //                worldIn,
-            //                pos.getX(),
-            //                pos.getY(),
-            //                pos.getZ()
-            //            );
+            playerIn.openGui(
+                Main.instance,
+                Reference.GUI_CONNECTOR,
+                worldIn,
+                pos.getX(),
+                pos.getY(),
+                pos.getZ()
+            );
         }
 
-        return false;
-        //        return true;
+        return true;
     }
 
     @Override
@@ -145,9 +146,7 @@ public class BlockConnector extends BlockBase implements IHasModel
         IBlockState state
     )
     {
-        return new ItemStack(Item.getItemFromBlock(this), 1, this.damageDropped(state));
-
-        //        return new ItemStack(BlockInit.CONNECTOR); todo
+        return new ItemStack(BlockInit.CONNECTOR);
     }
 
     @Override
@@ -164,27 +163,19 @@ public class BlockConnector extends BlockBase implements IHasModel
         );
     }
 
-    //    @Override
-    //    public void onBlockPlacedBy( todo prob not needed
-    //        World worldIn,
-    //        BlockPos pos,
-    //        IBlockState state,
-    //        EntityLivingBase placer,
-    //        ItemStack stack
-    //    )
-    //    {
-    //        worldIn.setBlockState(
-    //            pos,
-    //            this.getDefaultState().withProperty(FACING, placer.getHorizontalFacing().getOpposite()),
-    //            2
-    //        );
-    //    }
-
     @Override
     public boolean hasTileEntity(IBlockState state)
     {
-        return false;
-        //        return true; todo
+        return true;
+    }
+
+    @Override
+    public TileEntity createTileEntity(
+        World world,
+        IBlockState state
+    )
+    {
+        return new TileEntityConnector();
     }
 
     private ConnectionType getConnectionType(
@@ -209,29 +200,4 @@ public class BlockConnector extends BlockBase implements IHasModel
 
         return ConnectionType.NONE;
     }
-
-    //    @Override
-    //    public TileEntity createTileEntity(
-    //        World world,
-    //        IBlockState state
-    //    )
-    //    {
-    //        return new TileEntitySinteringFurnace();
-    //    }
-
-    //    @Override
-    //    public IBlockState getStateForPlacement( todo prob not needed
-    //        World world,
-    //        BlockPos pos,
-    //        EnumFacing facing,
-    //        float hitX,
-    //        float hitY,
-    //        float hitZ,
-    //        int meta,
-    //        EntityLivingBase placer,
-    //        EnumHand hand
-    //    )
-    //    {
-    //        return this.getDefaultState().withProperty(FACING, placer.getHorizontalFacing().getOpposite());
-    //    }
 }
