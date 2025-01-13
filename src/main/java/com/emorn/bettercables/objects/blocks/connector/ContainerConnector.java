@@ -16,6 +16,10 @@ public class ContainerConnector extends Container
     {
         this.tileEntity = tileEntity;
 
+        initPlayerInventorySlots(player);
+    }
+
+    private void initPlayerInventorySlots(InventoryPlayer player) {
         for (int y = 0; y < 3; y++) {
             for (int x = 0; x < 9; x++) {
                 this.addSlotToContainer(new Slot(player, x + y * 9 + 9, 8 + x * 18, 84 + y * 18));

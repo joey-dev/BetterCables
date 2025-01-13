@@ -35,8 +35,13 @@ public class GuiCheckbox extends GuiButton
         if (!this.visible) {
             return;
         }
+        setupRenderState(mc);
+    }
+    
+    private void setupRenderState(net.minecraft.client.Minecraft mc) {
         mc.getTextureManager().bindTexture(TEXTURES);
         GlStateManager.color(1.0f, 1.0f, 1.0f, 1.0f);
+    }
 
         drawTexturedModalRect(this.x, this.y, 0, 0, 18, 18);
 

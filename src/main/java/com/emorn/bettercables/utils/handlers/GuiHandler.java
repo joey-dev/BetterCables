@@ -31,11 +31,15 @@ public class GuiHandler implements IGuiHandler
             );
         }
 
-        if (ID == Reference.GUI_CONNECTOR) {
-            return new ContainerConnector(
-                player.inventory,
-                (TileEntityConnector) world.getTileEntity(new BlockPos(x, y, z))
-            );
+       if (ID == Reference.GUI_CONNECTOR) {
+            TileEntity tileEntity = world.getTileEntity(new BlockPos(x, y, z));
+            if (!(tileEntity instanceof TileEntityConnector)) {
+                return null;
+            }
+           return new ContainerConnector(
+               player.inventory,
+                (TileEntityConnector) tileEntity
+           );
         }
         return null;
     }
