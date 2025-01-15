@@ -75,27 +75,6 @@ public class TileEntityConnector extends TileEntity implements ITickable
             : new TextComponentTranslation("container.connector");
     }
 
-    //    @Override
-    //    public boolean hasCapability(
-    //        Capability<?> capability,
-    //        EnumFacing facing
-    //    )
-    //    {
-    //        return capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY;
-    //    }
-    //
-    //    @Override
-    //    public <T> T getCapability(
-    //        Capability<T> capability,
-    //        EnumFacing facing
-    //    )
-    //    {
-    //        if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
-    //            return (T) this.handler;
-    //        }
-    //        return super.getCapability(capability, facing);
-    //    }
-
     public boolean hasCustomName()
     {
         return this.customName != null && !this.customName.isEmpty();
@@ -111,9 +90,9 @@ public class TileEntityConnector extends TileEntity implements ITickable
         return
             this.world.getTileEntity(this.pos) == this
                 && player.getDistanceSq(
-                (double) this.pos.getX() + 0.5D,
-                (double) this.pos.getY() + 0.5D,
-                (double) this.pos.getZ() + 0.5D
+                this.pos.getX() + 0.5D,
+                this.pos.getY() + 0.5D,
+                this.pos.getZ() + 0.5D
             ) <= 64.0D;
     }
 
@@ -125,10 +104,7 @@ public class TileEntityConnector extends TileEntity implements ITickable
     public void setInsertEnabled(boolean checked)
     {
         this.isInsertEnabled = checked;
-        this.markDirty();
-        if (!this.world.isRemote) {
-            this.world.notifyBlockUpdate(this.pos, this.world.getBlockState(this.pos), this.world.getBlockState(this.pos), 3);
-        }
+        notifyUpdate();
     }
 
     public boolean isExtractEnabled()
@@ -139,6 +115,11 @@ public class TileEntityConnector extends TileEntity implements ITickable
     public void setExtractEnabled(boolean checked)
     {
         this.isExtractEnabled = checked;
+        notifyUpdate();
+    }
+
+    private void notifyUpdate()
+    {
         this.markDirty();
         if (!this.world.isRemote) {
             this.world.notifyBlockUpdate(this.pos, this.world.getBlockState(this.pos), this.world.getBlockState(this.pos), 3);

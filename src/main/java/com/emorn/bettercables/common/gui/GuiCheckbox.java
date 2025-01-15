@@ -37,12 +37,11 @@ public class GuiCheckbox extends GuiButton
         }
         setupRenderState(mc);
     }
-    
-    private void setupRenderState(net.minecraft.client.Minecraft mc) {
+
+    private void setupRenderState(net.minecraft.client.Minecraft mc)
+    {
         mc.getTextureManager().bindTexture(TEXTURES);
         GlStateManager.color(1.0f, 1.0f, 1.0f, 1.0f);
-    }
-
         drawTexturedModalRect(this.x, this.y, 0, 0, 18, 18);
 
         if (isChecked) {
