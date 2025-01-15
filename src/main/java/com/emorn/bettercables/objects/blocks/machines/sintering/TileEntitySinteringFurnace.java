@@ -111,8 +111,6 @@ public class TileEntitySinteringFurnace extends TileEntity implements ITickable
     @Override
     public void readFromNBT(NBTTagCompound compound)
     {
-        System.out.println("before read");
-        System.out.println(compound.getInteger("BurnTime"));
         super.readFromNBT(compound);
         this.handler.deserializeNBT(compound.getCompoundTag("Inventory"));
         this.burnTime = compound.getInteger("BurnTime");
@@ -123,8 +121,6 @@ public class TileEntitySinteringFurnace extends TileEntity implements ITickable
         if (compound.hasKey("CustomName", 8)) {
             this.setCustomName(compound.getString("CustomName"));
         }
-        System.out.println("after read");
-        System.out.println(compound.getInteger("BurnTime"));
 
     }
 
@@ -136,9 +132,6 @@ public class TileEntitySinteringFurnace extends TileEntity implements ITickable
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound compound)
     {
-        System.out.println("before write");
-        System.out.println(compound.getInteger("BurnTime"));
-
         super.writeToNBT(compound);
         compound.setInteger("BurnTime", (short) this.burnTime);
         compound.setInteger("CookTime", (short) this.cookTime);
@@ -148,8 +141,6 @@ public class TileEntitySinteringFurnace extends TileEntity implements ITickable
         if (this.hasCustomName()) {
             compound.setString("CustomName", this.customName);
         }
-        System.out.println("after write");
-        System.out.println(compound.getInteger("BurnTime"));
 
         return compound;
     }
