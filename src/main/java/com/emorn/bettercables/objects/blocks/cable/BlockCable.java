@@ -1,26 +1,20 @@
-package com.emorn.bettercables.objects.blocks.connector;
+package com.emorn.bettercables.objects.blocks.cable;
 
-import com.emorn.bettercables.Main;
 import com.emorn.bettercables.init.BlockInit;
 import com.emorn.bettercables.objects.blocks.BlockBase;
-import com.emorn.bettercables.objects.blocks.cable.BlockCable;
+import com.emorn.bettercables.objects.blocks.connector.BlockConnector;
 import com.emorn.bettercables.utils.IHasModel;
-import com.emorn.bettercables.utils.Reference;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.properties.PropertyEnum;
+import net.minecraft.block.properties.PropertyBool;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.IInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
@@ -30,16 +24,16 @@ import java.util.Random;
 
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
-public class BlockConnector extends BlockBase implements IHasModel
+public class BlockCable extends BlockBase implements IHasModel
 {
-    public static final PropertyEnum<ConnectionType> NORTH = PropertyEnum.create("north", ConnectionType.class);
-    public static final PropertyEnum<ConnectionType> EAST = PropertyEnum.create("east", ConnectionType.class);
-    public static final PropertyEnum<ConnectionType> SOUTH = PropertyEnum.create("south", ConnectionType.class);
-    public static final PropertyEnum<ConnectionType> WEST = PropertyEnum.create("west", ConnectionType.class);
-    public static final PropertyEnum<ConnectionType> UP = PropertyEnum.create("up", ConnectionType.class);
-    public static final PropertyEnum<ConnectionType> DOWN = PropertyEnum.create("down", ConnectionType.class);
+    public static final PropertyBool NORTH = PropertyBool.create("north");
+    public static final PropertyBool EAST = PropertyBool.create("east");
+    public static final PropertyBool SOUTH = PropertyBool.create("south");
+    public static final PropertyBool WEST = PropertyBool.create("west");
+    public static final PropertyBool UP = PropertyBool.create("up");
+    public static final PropertyBool DOWN = PropertyBool.create("down");
 
-    public BlockConnector(String name)
+    public BlockCable(String name)
     {
         super(name, Material.IRON);
         setSoundType(SoundType.METAL);
@@ -110,34 +104,7 @@ public class BlockConnector extends BlockBase implements IHasModel
         int fortune
     )
     {
-        return Item.getItemFromBlock(BlockInit.CONNECTOR);
-    }
-
-    @Override
-    public boolean onBlockActivated(
-        World worldIn,
-        BlockPos pos,
-        IBlockState state,
-        EntityPlayer playerIn,
-        EnumHand hand,
-        EnumFacing facing,
-        float hitX,
-        float hitY,
-        float hitZ
-    )
-    {
-        if (!worldIn.isRemote) {
-            playerIn.openGui(
-                Main.instance,
-                Reference.GUI_CONNECTOR,
-                worldIn,
-                pos.getX(),
-                pos.getY(),
-                pos.getZ()
-            );
-        }
-
-        return true;
+        return Item.getItemFromBlock(BlockInit.CABLE);
     }
 
     @Override
@@ -147,7 +114,7 @@ public class BlockConnector extends BlockBase implements IHasModel
         IBlockState state
     )
     {
-        return new ItemStack(BlockInit.CONNECTOR);
+        return new ItemStack(BlockInit.CABLE);
     }
 
     @Override
@@ -167,19 +134,10 @@ public class BlockConnector extends BlockBase implements IHasModel
     @Override
     public boolean hasTileEntity(IBlockState state)
     {
-        return true;
+        return false;
     }
 
-    @Override
-    public TileEntity createTileEntity(
-        World world,
-        IBlockState state
-    )
-    {
-        return new TileEntityConnector();
-    }
-
-    private ConnectionType getConnectionType(
+    private boolean getConnectionType(
         IBlockAccess world,
         BlockPos pos,
         EnumFacing facing
@@ -188,17 +146,6 @@ public class BlockConnector extends BlockBase implements IHasModel
         IBlockState neighborState = world.getBlockState(pos.offset(facing));
         Block neighborBlock = neighborState.getBlock();
 
-        // Check for inventories first
-        TileEntity te = world.getTileEntity(pos.offset(facing));
-        if (te instanceof IInventory) {
-            return ConnectionType.INVENTORY;
-        }
-
-        // Check if neighbor is another connector block
-        if (neighborBlock instanceof BlockConnector || neighborBlock instanceof BlockCable) {
-            return ConnectionType.CONNECTOR;
-        }
-
-        return ConnectionType.NONE;
+        return (neighborBlock instanceof BlockCable || neighborBlock instanceof BlockConnector);
     }
 }

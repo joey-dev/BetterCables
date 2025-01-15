@@ -3,3 +3,4 @@ tile.sintering_furnace.name=Sintering Furnace
 container.sintering_furnace=Sintering Furnace
 tile.connector.name=Connector
 container.connector=Connector
+tile.cable.name=Cable
