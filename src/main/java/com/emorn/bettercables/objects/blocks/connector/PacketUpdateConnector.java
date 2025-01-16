@@ -11,13 +11,15 @@ public class PacketUpdateConnector implements IMessage {
     private BlockPos pos;
     private boolean isInsertEnabled;
     private boolean isExtractEnabled;
+    private Direction direction;
 
     public PacketUpdateConnector() {}
 
-    public PacketUpdateConnector(BlockPos pos, boolean isInsertEnabled, boolean isExtractEnabled) {
+    public PacketUpdateConnector(BlockPos pos, boolean isInsertEnabled, boolean isExtractEnabled, Direction direction) {
         this.pos = pos;
         this.isInsertEnabled = isInsertEnabled;
         this.isExtractEnabled = isExtractEnabled;
+        this.direction = direction;
     }
 
     @Override
@@ -25,6 +27,29 @@ public class PacketUpdateConnector implements IMessage {
         this.pos = new BlockPos(buf.readInt(), buf.readInt(), buf.readInt());
         this.isInsertEnabled = buf.readBoolean();
         this.isExtractEnabled = buf.readBoolean();
+
+        switch (buf.readChar()) {
+            case 'N':
+                this.direction = Direction.NORTH;
+                break;
+            case 'E':
+                this.direction = Direction.EAST;
+                break;
+            case 'S':
+                this.direction = Direction.SOUTH;
+                break;
+            case 'W':
+                this.direction = Direction.WEST;
+                break;
+            case 'U':
+                this.direction = Direction.UP;
+                break;
+            case 'D':
+                this.direction = Direction.DOWN;
+                break;
+            default:
+                this.direction = Direction.NORTH;
+        }
     }
 
     @Override
@@ -34,6 +59,8 @@ public class PacketUpdateConnector implements IMessage {
         buf.writeInt(pos.getZ());
         buf.writeBoolean(isInsertEnabled);
         buf.writeBoolean(isExtractEnabled);
+
+        buf.writeChar(direction.name().charAt(0));
     }
 
     public static class Handler implements IMessageHandler<PacketUpdateConnector, IMessage> {
@@ -43,8 +70,8 @@ public class PacketUpdateConnector implements IMessage {
                 TileEntity tileEntity = ctx.getServerHandler().player.world.getTileEntity(message.pos);
                 if (tileEntity instanceof TileEntityConnector) {
                     TileEntityConnector connector = (TileEntityConnector) tileEntity;
-                    connector.setInsertEnabled(message.isInsertEnabled);
-                    connector.setExtractEnabled(message.isExtractEnabled);
+                    connector.setInsertEnabled(message.isInsertEnabled, message.direction);
+                    connector.setExtractEnabled(message.isExtractEnabled, message.direction);
                     connector.markDirty(); // Mark the TileEntity as dirty to save changes
                 }
             });

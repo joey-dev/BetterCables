@@ -13,6 +13,7 @@ import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.PropertyEnum;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.Item;
@@ -21,17 +22,68 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
+import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
 public class BlockConnector extends BlockBase implements IHasModel
 {
+    public static final AxisAlignedBB BASE_AABB = new AxisAlignedBB(
+        (double) 7 / 16,
+        (double) 7 / 16,
+        (double) 7 / 16,
+        1 - ((double) 7 / 16),
+        (double) 9 / 16,
+        1 - ((double) 7 / 16)
+    );
+
+    public static final AxisAlignedBB NORTH_CABLE_AABB = new AxisAlignedBB(
+        (double) 7 / 16,
+        (double) 7 / 16,
+        0,
+        (double) 9 / 16, // was 7
+        (double) 9 / 16,
+        (double) 7 / 16 // was 9
+    );
+
+    public static final AxisAlignedBB EAST_CABLE_AABB = new AxisAlignedBB(
+        1,
+        (double) 7 / 16,
+        (double) 7 / 16,
+        (double) 7 / 16,
+        (double) 9 / 16,
+        (double) 9 / 16
+    );
+
+    public static final AxisAlignedBB SOUTH_CABLE_AABB = new AxisAlignedBB(
+        (double) 7 / 16,
+        (double) 7 / 16,
+        1,
+        (double) 9 / 16,
+        (double) 9 / 16,
+        (double) 7 / 16
+    );
+
+    public static final AxisAlignedBB WEST_CABLE_AABB = new AxisAlignedBB(
+        0,
+        (double) 7 / 16,
+        (double) 7 / 16,
+        (double) 7 / 16,
+        (double) 9 / 16,
+        (double) 9 / 16
+    );
+
     public static final PropertyEnum<ConnectionType> NORTH = PropertyEnum.create("north", ConnectionType.class);
     public static final PropertyEnum<ConnectionType> EAST = PropertyEnum.create("east", ConnectionType.class);
     public static final PropertyEnum<ConnectionType> SOUTH = PropertyEnum.create("south", ConnectionType.class);
@@ -43,6 +95,99 @@ public class BlockConnector extends BlockBase implements IHasModel
     {
         super(name, Material.IRON);
         setSoundType(SoundType.METAL);
+    }
+
+    @Override
+    public void addCollisionBoxToList(
+        IBlockState state, World worldIn, BlockPos pos, AxisAlignedBB entityBox,
+        List<AxisAlignedBB> collidingBoxes, @Nullable Entity entityIn, boolean isActualState
+    ) {
+        IBlockState actualState = getActualState(state, worldIn, pos);
+        List<AxisAlignedBB> allBoxes = retrieveAllBoxes(actualState);
+
+        for (AxisAlignedBB box : allBoxes) {
+            addCollisionBoxToList(pos, entityBox, collidingBoxes, box);
+        }
+    }
+
+    @Override
+    public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos)
+    {
+        EntityPlayer player = source instanceof World ? ((World) source).getClosestPlayer(pos.getX(), pos.getY(), pos.getZ(), 10, false) : null;
+        if (player == null) {
+            return BASE_AABB;
+        }
+
+        Vec3d start = player.getPositionEyes(1.0F);
+        Vec3d lookVec = player.getLook(1.0F);
+        Vec3d end = start.add(lookVec.scale(5));
+
+        IBlockState actualState = getActualState(state, source, pos);
+        List<AxisAlignedBB> allBoxes = retrieveAllBoxes(actualState);
+
+        AxisAlignedBB closestBox = BASE_AABB;
+        double closestDistance = Double.MAX_VALUE;
+
+        for (AxisAlignedBB box : allBoxes) {
+            RayTraceResult result = rayTrace(pos, start, end, box);
+            if (result != null) {
+                double distance = result.hitVec.distanceTo(start);
+                if (distance < closestDistance) {
+                    closestBox = box;
+                    closestDistance = distance;
+                }
+            }
+        }
+
+        return closestBox;
+    }
+
+    @Override
+    @Nullable
+    public RayTraceResult collisionRayTrace(IBlockState blockState, World worldIn, BlockPos pos, Vec3d start, Vec3d end) {
+        IBlockState actualState = getActualState(blockState, worldIn, pos); // Get the actual state
+        List<AxisAlignedBB> allBoxes = retrieveAllBoxes(actualState);
+
+        RayTraceResult closestResult = null;
+        double closestDistance = Double.MAX_VALUE;
+
+        for (AxisAlignedBB box : allBoxes) {
+            RayTraceResult result = rayTrace(pos, start, end, box);
+            if (result != null) {
+                double distance = result.hitVec.distanceTo(start);
+                if (distance < closestDistance) {
+                    closestResult = result;
+                    closestDistance = distance;
+                }
+            }
+        }
+
+        return closestResult;
+    }
+
+    private List<AxisAlignedBB> retrieveAllBoxes(IBlockState state)
+    {
+        List<AxisAlignedBB> allBoxes = new ArrayList<>();
+
+        allBoxes.add(BASE_AABB);
+
+        if (state.getValue(NORTH).toString().equals(ConnectionType.CONNECTOR.toString())) {
+            allBoxes.add(NORTH_CABLE_AABB);
+        }
+
+        if (state.getValue(EAST).toString().equals(ConnectionType.CONNECTOR.toString())) {
+            allBoxes.add(EAST_CABLE_AABB);
+        }
+
+        if (state.getValue(SOUTH).toString().equals(ConnectionType.CONNECTOR.toString())) {
+            allBoxes.add(SOUTH_CABLE_AABB);
+        }
+
+        if (state.getValue(WEST).toString().equals(ConnectionType.CONNECTOR.toString())) {
+            allBoxes.add(WEST_CABLE_AABB);
+        }
+
+        return allBoxes;
     }
 
     @Override
@@ -129,7 +274,7 @@ public class BlockConnector extends BlockBase implements IHasModel
         if (!worldIn.isRemote) {
             playerIn.openGui(
                 Main.instance,
-                Reference.GUI_CONNECTOR,
+                Reference.GUI_CONNECTOR_NORTH,
                 worldIn,
                 pos.getX(),
                 pos.getY(),
@@ -188,13 +333,11 @@ public class BlockConnector extends BlockBase implements IHasModel
         IBlockState neighborState = world.getBlockState(pos.offset(facing));
         Block neighborBlock = neighborState.getBlock();
 
-        // Check for inventories first
         TileEntity te = world.getTileEntity(pos.offset(facing));
         if (te instanceof IInventory) {
             return ConnectionType.INVENTORY;
         }
 
-        // Check if neighbor is another connector block
         if (neighborBlock instanceof BlockConnector || neighborBlock instanceof BlockCable) {
             return ConnectionType.CONNECTOR;
         }

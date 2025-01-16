@@ -16,18 +16,21 @@ public class GuiConnector extends GuiContainer
     );
     private final InventoryPlayer player;
     private final TileEntityConnector tileEntity;
+    private final Direction direction;
 
     private GuiCheckbox insertCheckbox;
     private GuiCheckbox extractCheckbox;
 
     public GuiConnector(
         InventoryPlayer player,
-        TileEntityConnector tileEntity
+        TileEntityConnector tileEntity,
+        Direction direction
     )
     {
         super(new ContainerConnector(player, tileEntity));
         this.player = player;
         this.tileEntity = tileEntity;
+        this.direction = direction;
     }
 
 
@@ -40,13 +43,19 @@ public class GuiConnector extends GuiContainer
         int checkboxInsertY = this.guiTop + 20;
         int checkboxExtractY = this.guiTop + 54;
 
-        this.insertCheckbox = new GuiCheckbox(0, checkboxX, checkboxInsertY, "Insert", tileEntity.isInsertEnabled());
+        this.insertCheckbox = new GuiCheckbox(
+            0,
+            checkboxX,
+            checkboxInsertY,
+            "Insert",
+            tileEntity.isInsertEnabled(this.direction)
+        );
         this.extractCheckbox = new GuiCheckbox(
             1,
             checkboxX,
             checkboxExtractY,
             "Extract",
-            tileEntity.isExtractEnabled()
+            tileEntity.isExtractEnabled(this.direction)
         );
 
         this.buttonList.add(insertCheckbox);
@@ -102,17 +111,18 @@ public class GuiConnector extends GuiContainer
     {
         switch (checkbox.id) {
             case 0:
-                tileEntity.setInsertEnabled(checkbox.isChecked());
+                tileEntity.setInsertEnabled(checkbox.isChecked(), this.direction);
                 break;
             case 1:
-                tileEntity.setExtractEnabled(checkbox.isChecked());
+                tileEntity.setExtractEnabled(checkbox.isChecked(), this.direction);
                 break;
         }
 
         ModNetworkHandler.INSTANCE.sendToServer(new PacketUpdateConnector(
             tileEntity.getPos(),
-            tileEntity.isInsertEnabled(),
-            tileEntity.isExtractEnabled()
+            tileEntity.isInsertEnabled(this.direction),
+            tileEntity.isExtractEnabled(this.direction),
+            this.direction
         ));
     }
 }
