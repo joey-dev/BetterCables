@@ -52,9 +52,9 @@ public class BlockConnector extends BlockBase implements IHasModel
         (double) 7 / 16,
         (double) 7 / 16,
         0,
-        (double) 9 / 16, // was 7
         (double) 9 / 16,
-        (double) 7 / 16 // was 9
+        (double) 9 / 16,
+        (double) 7 / 16
     );
 
     public static final AxisAlignedBB EAST_CABLE_AABB = new AxisAlignedBB(
@@ -81,6 +81,24 @@ public class BlockConnector extends BlockBase implements IHasModel
         (double) 7 / 16,
         (double) 7 / 16,
         (double) 9 / 16,
+        (double) 9 / 16
+    );
+
+    public static final AxisAlignedBB UP_CABLE_AABB = new AxisAlignedBB(
+        (double) 7 / 16,
+        (double) 7 / 16,
+        (double) 7 / 16,
+        (double) 9 / 16,
+        1,
+        (double) 9 / 16
+    );
+
+    public static final AxisAlignedBB DOWN_CABLE_AABB = new AxisAlignedBB(
+        (double) 7 / 16,
+        0,
+        (double) 7 / 16,
+        (double) 9 / 16,
+        (double) 7 / 16,
         (double) 9 / 16
     );
 
@@ -185,6 +203,14 @@ public class BlockConnector extends BlockBase implements IHasModel
 
         if (state.getValue(WEST).toString().equals(ConnectionType.CONNECTOR.toString())) {
             allBoxes.add(WEST_CABLE_AABB);
+        }
+
+        if (state.getValue(UP).toString().equals(ConnectionType.CONNECTOR.toString())) {
+            allBoxes.add(UP_CABLE_AABB);
+        }
+
+        if (state.getValue(DOWN).toString().equals(ConnectionType.CONNECTOR.toString())) {
+            allBoxes.add(DOWN_CABLE_AABB);
         }
 
         return allBoxes;
