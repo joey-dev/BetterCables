@@ -3,12 +3,17 @@ package com.emorn.bettercables.objects.blocks.connector;
 import com.emorn.bettercables.common.gui.GuiCheckbox;
 import com.emorn.bettercables.proxy.ModNetworkHandler;
 import com.emorn.bettercables.utils.Reference;
+import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.util.ResourceLocation;
 
+import javax.annotation.ParametersAreNonnullByDefault;
+
+@MethodsReturnNonnullByDefault
+@ParametersAreNonnullByDefault
 public class GuiConnector extends GuiContainer
 {
     private static final ResourceLocation TEXTURES = new ResourceLocation(
@@ -16,18 +21,18 @@ public class GuiConnector extends GuiContainer
     );
     private final InventoryPlayer player;
     private final TileEntityConnector tileEntity;
-
-    private GuiCheckbox insertCheckbox;
-    private GuiCheckbox extractCheckbox;
+    private final Direction direction;
 
     public GuiConnector(
         InventoryPlayer player,
-        TileEntityConnector tileEntity
+        TileEntityConnector tileEntity,
+        Direction direction
     )
     {
         super(new ContainerConnector(player, tileEntity));
         this.player = player;
         this.tileEntity = tileEntity;
+        this.direction = direction;
     }
 
 
@@ -40,13 +45,19 @@ public class GuiConnector extends GuiContainer
         int checkboxInsertY = this.guiTop + 20;
         int checkboxExtractY = this.guiTop + 54;
 
-        this.insertCheckbox = new GuiCheckbox(0, checkboxX, checkboxInsertY, "Insert", tileEntity.isInsertEnabled());
-        this.extractCheckbox = new GuiCheckbox(
+        GuiCheckbox insertCheckbox = new GuiCheckbox(
+            0,
+            checkboxX,
+            checkboxInsertY,
+            "Insert",
+            tileEntity.isInsertEnabled(this.direction)
+        );
+        GuiCheckbox extractCheckbox = new GuiCheckbox(
             1,
             checkboxX,
             checkboxExtractY,
             "Extract",
-            tileEntity.isExtractEnabled()
+            tileEntity.isExtractEnabled(this.direction)
         );
 
         this.buttonList.add(insertCheckbox);
@@ -102,17 +113,18 @@ public class GuiConnector extends GuiContainer
     {
         switch (checkbox.id) {
             case 0:
-                tileEntity.setInsertEnabled(checkbox.isChecked());
+                tileEntity.setInsertEnabled(checkbox.isChecked(), this.direction);
                 break;
             case 1:
-                tileEntity.setExtractEnabled(checkbox.isChecked());
+                tileEntity.setExtractEnabled(checkbox.isChecked(), this.direction);
                 break;
         }
 
         ModNetworkHandler.INSTANCE.sendToServer(new PacketUpdateConnector(
             tileEntity.getPos(),
-            tileEntity.isInsertEnabled(),
-            tileEntity.isExtractEnabled()
+            tileEntity.isInsertEnabled(this.direction),
+            tileEntity.isExtractEnabled(this.direction),
+            this.direction
         ));
     }
 }
