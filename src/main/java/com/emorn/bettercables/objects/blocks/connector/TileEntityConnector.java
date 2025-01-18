@@ -145,16 +145,20 @@ public class TileEntityConnector extends TileEntity implements ITickable
             throw new IllegalStateException("Network is null");
         }
         return this.network;
-    }    @Override
-    public NBTTagCompound getUpdateTag()
-    {
-        return this.writeToNBT(new NBTTagCompound());
     }
 
     public void setNetwork(ConnectorNetwork connectorNetwork)
     {
         this.network = connectorNetwork;
-    }    @Override
+    }
+
+    @Override
+    public NBTTagCompound getUpdateTag()
+    {
+        return this.writeToNBT(new NBTTagCompound());
+    }
+
+    @Override
     public void onDataPacket(
         net.minecraft.network.NetworkManager net,
         net.minecraft.network.play.server.SPacketUpdateTileEntity pkt
@@ -243,8 +247,6 @@ public class TileEntityConnector extends TileEntity implements ITickable
     {
         return this.customName != null && !this.customName.isEmpty();
     }
-
-
 
 
 }

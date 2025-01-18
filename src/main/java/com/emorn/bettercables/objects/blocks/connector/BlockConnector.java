@@ -8,7 +8,6 @@ import com.emorn.bettercables.utils.IHasModel;
 import com.emorn.bettercables.utils.Reference;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockAir;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.PropertyEnum;
@@ -32,10 +31,7 @@ import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Random;
+import java.util.*;
 
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
@@ -159,6 +155,8 @@ public class BlockConnector extends BlockBase implements IHasModel
     public static final PropertyEnum<ConnectionType> UP = PropertyEnum.create("up", ConnectionType.class);
     public static final PropertyEnum<ConnectionType> DOWN = PropertyEnum.create("down", ConnectionType.class);
 
+    private final Map<BlockPos, Boolean> foundCablePositions = new HashMap<>();
+
     public BlockConnector(String name)
     {
         super(name, Material.IRON);
@@ -279,7 +277,7 @@ public class BlockConnector extends BlockBase implements IHasModel
         IBlockState state
     )
     {
-        this.addNetwork(worldIn, pos, state);
+        this.addNetwork(worldIn, pos);
         if (!worldIn.isRemote) {
             worldIn.setBlockState(pos, state, 2);
         }
@@ -586,40 +584,48 @@ public class BlockConnector extends BlockBase implements IHasModel
 
     private void addNetwork(
         World worldIn,
-        BlockPos pos,
-        IBlockState state
+        BlockPos pos
     )
     {
+        this.foundCablePositions.clear();
+        this.foundCablePositions.put(pos, true);
         TileEntityConnector connector = (
             (TileEntityConnector) Objects.requireNonNull(
                 worldIn.getTileEntity(pos)
             )
         );
 
-        IBlockState actualState = getActualState(state, worldIn, pos);
-        ConnectorNetwork network = this.findNetwork(worldIn, pos, actualState);
+        ConnectorNetwork network = this.findNetwork(worldIn, pos);
         if (network == null) {
             connector.setNetwork(new ConnectorNetwork());
+            this.foundCablePositions.clear();
             return;
         }
 
         connector.setNetwork(network);
+        this.foundCablePositions.clear();
     }
 
     @Nullable
     private ConnectorNetwork findNetwork(
         World worldIn,
-        BlockPos pos,
-        IBlockState actualState
+        BlockPos pos
     )
     {
-        List<BlockPos> neighborBlockPositions = this.getConnectedBlockPositions(pos, actualState);
+        List<BlockPos> neighborBlockPositions = this.getPossibleConnectedBlocks(pos);
 
-        for (BlockPos neighborBlockPosition : neighborBlockPositions) { // infinite loop, if the cables loop
+        for (BlockPos neighborBlockPosition : neighborBlockPositions) {
+            System.out.println("Neighbor position: " + neighborBlockPosition);
+
+            if (this.foundCablePositions.containsKey(neighborBlockPosition)) {
+                continue;
+            }
+
+            this.foundCablePositions.put(neighborBlockPosition, true);
             Block neighborBlock = worldIn.getBlockState(neighborBlockPosition).getBlock();
 
-            if (neighborBlock instanceof BlockAir) {
-                throw new IllegalStateException("should never be air!");
+            if (!(neighborBlock instanceof BlockConnector) && !(neighborBlock instanceof BlockCable)) {
+                continue;
             }
 
             if (neighborBlock instanceof BlockConnector) {
@@ -629,7 +635,7 @@ public class BlockConnector extends BlockBase implements IHasModel
                     )
                 ).getNetwork();
             }
-            ConnectorNetwork connectorNetwork = this.findNetwork(worldIn, neighborBlockPosition, actualState);
+            ConnectorNetwork connectorNetwork = this.findNetwork(worldIn, neighborBlockPosition);
             if (connectorNetwork == null) {
                 continue;
             }
@@ -639,33 +645,17 @@ public class BlockConnector extends BlockBase implements IHasModel
         return null;
     }
 
-    private List<BlockPos> getConnectedBlockPositions(
-        BlockPos pos,
-        IBlockState state
+    private List<BlockPos> getPossibleConnectedBlocks(
+        BlockPos pos
     )
     {
         List<BlockPos> connectedBlocks = new ArrayList<>();
-        if (!this.hasAnyCableConnections(state)) {
-            return connectedBlocks;
-        }
-        if (this.hasConnectionToConnector(state, NORTH)) {
-            connectedBlocks.add(new BlockPos(pos.getX(), pos.getY(), pos.getZ() - 1));
-        }
-        if (this.hasConnectionToConnector(state, EAST)) {
-            connectedBlocks.add(new BlockPos(pos.getX() + 1, pos.getY(), pos.getZ()));
-        }
-        if (this.hasConnectionToConnector(state, SOUTH)) {
-            connectedBlocks.add(new BlockPos(pos.getX(), pos.getY(), pos.getZ() + 1));
-        }
-        if (this.hasConnectionToConnector(state, WEST)) {
-            connectedBlocks.add(new BlockPos(pos.getX() - 1, pos.getY(), pos.getZ()));
-        }
-        if (this.hasConnectionToConnector(state, UP)) {
-            connectedBlocks.add(new BlockPos(pos.getX(), pos.getY() + 1, pos.getZ()));
-        }
-        if (this.hasConnectionToConnector(state, DOWN)) {
-            connectedBlocks.add(new BlockPos(pos.getX(), pos.getY() - 1, pos.getZ()));
-        }
+        connectedBlocks.add(new BlockPos(pos.getX(), pos.getY(), pos.getZ() - 1));
+        connectedBlocks.add(new BlockPos(pos.getX() + 1, pos.getY(), pos.getZ()));
+        connectedBlocks.add(new BlockPos(pos.getX(), pos.getY(), pos.getZ() + 1));
+        connectedBlocks.add(new BlockPos(pos.getX() - 1, pos.getY(), pos.getZ()));
+        connectedBlocks.add(new BlockPos(pos.getX(), pos.getY() + 1, pos.getZ()));
+        connectedBlocks.add(new BlockPos(pos.getX(), pos.getY() - 1, pos.getZ()));
 
         return connectedBlocks;
     }
