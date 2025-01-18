@@ -30,7 +30,15 @@ public class TileEntityConnector extends TileEntity implements ITickable
 
     public void update()
     {
-        // TODO later
+        if (this.network == null) {
+            return;
+        }
+
+        System.out.println("Network ID: " + this.network.id());
+
+        if (this.network.isRemoved()) {
+            this.network = this.network.mergeToNetwork();
+        }
     }
 
     public boolean isUsableByPlayer(EntityPlayer player)
