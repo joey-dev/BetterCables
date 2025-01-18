@@ -3,12 +3,17 @@ package com.emorn.bettercables.objects.blocks.connector;
 import com.emorn.bettercables.common.gui.GuiCheckbox;
 import com.emorn.bettercables.proxy.ModNetworkHandler;
 import com.emorn.bettercables.utils.Reference;
+import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.util.ResourceLocation;
 
+import javax.annotation.ParametersAreNonnullByDefault;
+
+@MethodsReturnNonnullByDefault
+@ParametersAreNonnullByDefault
 public class GuiConnector extends GuiContainer
 {
     private static final ResourceLocation TEXTURES = new ResourceLocation(

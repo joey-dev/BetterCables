@@ -1,5 +1,11 @@
 package com.emorn.bettercables.objects.blocks.connector;
 
+import mcp.MethodsReturnNonnullByDefault;
+
+import javax.annotation.ParametersAreNonnullByDefault;
+
+@MethodsReturnNonnullByDefault
+@ParametersAreNonnullByDefault
 public class ConnectorSettings
 {
     private boolean isInsertEnabled;
@@ -34,15 +40,13 @@ public class ConnectorSettings
         this.isExtractEnabled = false;
     }
 
-    public ConnectorSettings enableInsert()
+    public void enableInsert()
     {
         this.isInsertEnabled = true;
-        return this;
     }
 
-    public ConnectorSettings disableInsert()
+    public void disableInsert()
     {
         this.isInsertEnabled = false;
-        return this;
     }
 }

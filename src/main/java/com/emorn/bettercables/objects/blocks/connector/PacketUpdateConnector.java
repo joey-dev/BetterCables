@@ -1,12 +1,18 @@
 package com.emorn.bettercables.objects.blocks.connector;
 
 import io.netty.buffer.ByteBuf;
+import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
+import javax.annotation.Nullable;
+import javax.annotation.ParametersAreNonnullByDefault;
+
+@MethodsReturnNonnullByDefault
+@ParametersAreNonnullByDefault
 public class PacketUpdateConnector implements IMessage
 {
     private BlockPos pos;
@@ -77,6 +83,7 @@ public class PacketUpdateConnector implements IMessage
     public static class Handler implements IMessageHandler<PacketUpdateConnector, IMessage>
     {
         @Override
+        @Nullable
         public IMessage onMessage(
             PacketUpdateConnector message,
             MessageContext ctx
@@ -88,7 +95,7 @@ public class PacketUpdateConnector implements IMessage
                     TileEntityConnector connector = (TileEntityConnector) tileEntity;
                     connector.setInsertEnabled(message.isInsertEnabled, message.direction);
                     connector.setExtractEnabled(message.isExtractEnabled, message.direction);
-                    connector.markDirty(); // Mark the TileEntity as dirty to save changes
+                    connector.markDirty();
                 }
             });
             return null;
