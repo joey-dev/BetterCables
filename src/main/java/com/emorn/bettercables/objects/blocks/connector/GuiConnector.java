@@ -27,7 +27,7 @@ public class GuiConnector extends GuiContainer
         Direction direction
     )
     {
-        super(new ContainerConnector(player, tileEntity));
+        super(new ContainerConnector(player, tileEntity, direction));
         this.player = player;
         this.tileEntity = tileEntity;
         this.direction = direction;

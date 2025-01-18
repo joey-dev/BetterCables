@@ -8,13 +8,16 @@ import net.minecraft.inventory.Slot;
 public class ContainerConnector extends Container
 {
     private final TileEntityConnector tileEntity;
+    private final Direction direction;
 
     public ContainerConnector(
         InventoryPlayer player,
-        TileEntityConnector tileEntity
+        TileEntityConnector tileEntity,
+        Direction direction
     )
     {
         this.tileEntity = tileEntity;
+        this.direction = direction;
 
         addPlayerInventorySlots(player);
     }

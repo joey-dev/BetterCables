@@ -8,6 +8,7 @@ import com.emorn.bettercables.objects.blocks.machines.sintering.ContainerSinteri
 import com.emorn.bettercables.objects.blocks.machines.sintering.GuiSinteringFurnace;
 import com.emorn.bettercables.objects.blocks.machines.sintering.TileEntitySinteringFurnace;
 import com.emorn.bettercables.utils.Reference;
+import com.google.common.collect.ImmutableMap;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
@@ -33,14 +34,26 @@ public class GuiHandler implements IGuiHandler
             );
         }
 
-        if (id == Reference.GUI_CONNECTOR_NORTH) {
+        ImmutableMap<Integer, Direction> connectorIds = ImmutableMap.<Integer, Direction>builder()
+            .put(Reference.GUI_CONNECTOR_NORTH, Direction.NORTH)
+            .put(Reference.GUI_CONNECTOR_EAST, Direction.EAST)
+            .put(Reference.GUI_CONNECTOR_SOUTH, Direction.SOUTH)
+            .put(Reference.GUI_CONNECTOR_WEST, Direction.WEST)
+            .put(Reference.GUI_CONNECTOR_UP, Direction.UP)
+            .put(Reference.GUI_CONNECTOR_DOWN, Direction.DOWN)
+            .build();
+
+        Direction direction = connectorIds.get(id);
+
+        if (direction != null) {
             TileEntity tileEntity = world.getTileEntity(new BlockPos(x, y, z));
             if (!(tileEntity instanceof TileEntityConnector)) {
                 return null;
             }
             return new ContainerConnector(
                 player.inventory,
-                (TileEntityConnector) tileEntity
+                (TileEntityConnector) tileEntity,
+                direction
             );
         }
         return null;
@@ -63,11 +76,22 @@ public class GuiHandler implements IGuiHandler
             );
         }
 
-        if (id == Reference.GUI_CONNECTOR_NORTH) {
+        ImmutableMap<Integer, Direction> connectorIds = ImmutableMap.<Integer, Direction>builder()
+            .put(Reference.GUI_CONNECTOR_NORTH, Direction.NORTH)
+            .put(Reference.GUI_CONNECTOR_EAST, Direction.EAST)
+            .put(Reference.GUI_CONNECTOR_SOUTH, Direction.SOUTH)
+            .put(Reference.GUI_CONNECTOR_WEST, Direction.WEST)
+            .put(Reference.GUI_CONNECTOR_UP, Direction.UP)
+            .put(Reference.GUI_CONNECTOR_DOWN, Direction.DOWN)
+            .build();
+
+        Direction direction = connectorIds.get(id);
+
+        if (direction != null) {
             return new GuiConnector(
                 player.inventory,
                 (TileEntityConnector) world.getTileEntity(new BlockPos(x, y, z)),
-                Direction.NORTH
+                direction
             );
         }
         return null;

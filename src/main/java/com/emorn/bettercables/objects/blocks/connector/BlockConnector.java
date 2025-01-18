@@ -189,31 +189,47 @@ public class BlockConnector extends BlockBase implements IHasModel
 
         allBoxes.add(BASE_AABB);
 
-        if (state.getValue(NORTH).toString().equals(ConnectionType.CONNECTOR.toString())) {
+        if (this.hasConnection(state,NORTH)) {
             allBoxes.add(NORTH_CABLE_AABB);
         }
 
-        if (state.getValue(EAST).toString().equals(ConnectionType.CONNECTOR.toString())) {
+        if (this.hasConnection(state,EAST)) {
             allBoxes.add(EAST_CABLE_AABB);
         }
 
-        if (state.getValue(SOUTH).toString().equals(ConnectionType.CONNECTOR.toString())) {
+        if (this.hasConnection(state,SOUTH)) {
             allBoxes.add(SOUTH_CABLE_AABB);
         }
 
-        if (state.getValue(WEST).toString().equals(ConnectionType.CONNECTOR.toString())) {
+        if (this.hasConnection(state,WEST)) {
             allBoxes.add(WEST_CABLE_AABB);
         }
 
-        if (state.getValue(UP).toString().equals(ConnectionType.CONNECTOR.toString())) {
+        if (this.hasConnection(state,UP)) {
             allBoxes.add(UP_CABLE_AABB);
         }
 
-        if (state.getValue(DOWN).toString().equals(ConnectionType.CONNECTOR.toString())) {
+        if (this.hasConnection(state,DOWN)) {
             allBoxes.add(DOWN_CABLE_AABB);
         }
 
         return allBoxes;
+    }
+
+    private boolean hasConnection(IBlockState state, PropertyEnum<ConnectionType> facing)
+    {
+        return this.hasConnectionToConnector(state, facing)
+            || this.hasConnectionToInventory(state, facing);
+    }
+
+    private boolean hasConnectionToConnector(IBlockState state, PropertyEnum<ConnectionType> facing)
+    {
+        return state.getValue(facing).toString().equals(ConnectionType.CONNECTOR.toString());
+    }
+
+    private boolean hasConnectionToInventory(IBlockState state, PropertyEnum<ConnectionType> facing)
+    {
+        return state.getValue(facing).toString().equals(ConnectionType.INVENTORY.toString());
     }
 
     @Override
@@ -295,17 +311,41 @@ public class BlockConnector extends BlockBase implements IHasModel
         float hitX,
         float hitY,
         float hitZ
-    )
-    {
+    ) {
         if (!worldIn.isRemote) {
-            playerIn.openGui(
-                Main.instance,
-                Reference.GUI_CONNECTOR_NORTH,
-                worldIn,
-                pos.getX(),
-                pos.getY(),
-                pos.getZ()
-            );
+            IBlockState actualState = getActualState(state, worldIn, pos);
+            // Convert hitVec to world coordinates
+            Vec3d hitVec = new Vec3d(pos.getX() + hitX, pos.getY() + hitY, pos.getZ() + hitZ);
+
+            // Get all bounding boxes
+            List<AxisAlignedBB> allBoxes = retrieveAllBoxes(actualState);
+
+            // Find the box that contains the hit
+            AxisAlignedBB clickedBox = null;
+            for (AxisAlignedBB box : allBoxes) {
+                AxisAlignedBB expandedBox = box.offset(pos).grow(0.001); // Expand the box slightly
+                if (expandedBox.contains(hitVec)) {
+                    clickedBox = box;
+                    break;
+                }
+            }
+
+            if (clickedBox != null) {
+                // Example: Open a GUI based on the clicked hitbox
+                if (clickedBox.equals(NORTH_CABLE_AABB) && this.hasConnectionToInventory(actualState, NORTH)) {
+                    playerIn.openGui(Main.instance, Reference.GUI_CONNECTOR_NORTH, worldIn, pos.getX(), pos.getY(), pos.getZ());
+                } else if (clickedBox.equals(EAST_CABLE_AABB) && this.hasConnectionToInventory(actualState, EAST)) {
+                    playerIn.openGui(Main.instance, Reference.GUI_CONNECTOR_EAST, worldIn, pos.getX(), pos.getY(), pos.getZ());
+                } else if (clickedBox.equals(SOUTH_CABLE_AABB) && this.hasConnectionToInventory(actualState, SOUTH)) {
+                    playerIn.openGui(Main.instance, Reference.GUI_CONNECTOR_SOUTH, worldIn, pos.getX(), pos.getY(), pos.getZ());
+                } else if (clickedBox.equals(WEST_CABLE_AABB) && this.hasConnectionToInventory(actualState, WEST)) {
+                    playerIn.openGui(Main.instance, Reference.GUI_CONNECTOR_WEST, worldIn, pos.getX(), pos.getY(), pos.getZ());
+                } else if (clickedBox.equals(UP_CABLE_AABB) && this.hasConnectionToInventory(actualState, UP)) {
+                    playerIn.openGui(Main.instance, Reference.GUI_CONNECTOR_UP, worldIn, pos.getX(), pos.getY(), pos.getZ());
+                } else if (clickedBox.equals(DOWN_CABLE_AABB) && this.hasConnectionToInventory(actualState, DOWN)) {
+                    playerIn.openGui(Main.instance, Reference.GUI_CONNECTOR_DOWN, worldIn, pos.getX(), pos.getY(), pos.getZ());
+                }
+            }
         }
 
         return true;
