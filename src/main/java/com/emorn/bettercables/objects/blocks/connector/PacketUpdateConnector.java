@@ -1,5 +1,6 @@
 package com.emorn.bettercables.objects.blocks.connector;
 
+import com.google.common.collect.ImmutableMap;
 import io.netty.buffer.ByteBuf;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.tileentity.TileEntity;
@@ -44,28 +45,16 @@ public class PacketUpdateConnector implements IMessage
         this.isInsertEnabled = buf.readBoolean();
         this.isExtractEnabled = buf.readBoolean();
 
-        switch (buf.readChar()) {
-            case 'N':
-                this.direction = Direction.NORTH;
-                break;
-            case 'E':
-                this.direction = Direction.EAST;
-                break;
-            case 'S':
-                this.direction = Direction.SOUTH;
-                break;
-            case 'W':
-                this.direction = Direction.WEST;
-                break;
-            case 'U':
-                this.direction = Direction.UP;
-                break;
-            case 'D':
-                this.direction = Direction.DOWN;
-                break;
-            default:
-                this.direction = Direction.NORTH;
-        }
+        ImmutableMap<Character, Direction> directions = ImmutableMap.<Character, Direction>builder()
+            .put(Direction.NORTH.name().charAt(0), Direction.NORTH)
+            .put(Direction.EAST.name().charAt(0), Direction.EAST)
+            .put(Direction.SOUTH.name().charAt(0), Direction.SOUTH)
+            .put(Direction.WEST.name().charAt(0), Direction.WEST)
+            .put(Direction.UP.name().charAt(0), Direction.UP)
+            .put(Direction.DOWN.name().charAt(0), Direction.DOWN)
+            .build();
+
+        this.direction = directions.getOrDefault(buf.readChar(), Direction.NORTH);
     }
 
     @Override
