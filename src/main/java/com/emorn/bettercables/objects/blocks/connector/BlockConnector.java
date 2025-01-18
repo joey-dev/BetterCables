@@ -8,6 +8,7 @@ import com.emorn.bettercables.utils.IHasModel;
 import com.emorn.bettercables.utils.Reference;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockAir;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.PropertyEnum;
@@ -33,6 +34,7 @@ import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 
 @MethodsReturnNonnullByDefault
@@ -264,6 +266,221 @@ public class BlockConnector extends BlockBase implements IHasModel
         }
     }
 
+    @Override
+    public boolean isOpaqueCube(IBlockState state)
+    {
+        return false;
+    }
+
+    @Override
+    public void onBlockAdded(
+        World worldIn,
+        BlockPos pos,
+        IBlockState state
+    )
+    {
+        this.addNetwork(worldIn, pos, state);
+        if (!worldIn.isRemote) {
+            worldIn.setBlockState(pos, state, 2);
+        }
+    }
+
+    @Override
+    public Item getItemDropped(
+        IBlockState state,
+        Random rand,
+        int fortune
+    )
+    {
+        return Item.getItemFromBlock(BlockInit.CONNECTOR);
+    }
+
+    @Override
+    @Nullable
+    public RayTraceResult collisionRayTrace(
+        IBlockState blockState,
+        World worldIn,
+        BlockPos pos,
+        Vec3d start,
+        Vec3d end
+    )
+    {
+        IBlockState actualState = getActualState(blockState, worldIn, pos); // Get the actual state
+        List<AxisAlignedBB> allBoxes = retrieveAllBoxes(actualState);
+
+        RayTraceResult closestResult = null;
+        double closestDistance = Double.MAX_VALUE;
+
+        for (AxisAlignedBB box : allBoxes) {
+            RayTraceResult result = rayTrace(pos, start, end, box);
+            if (result != null) {
+                double distance = result.hitVec.distanceTo(start);
+                if (distance < closestDistance) {
+                    closestResult = result;
+                    closestDistance = distance;
+                }
+            }
+        }
+
+        return closestResult;
+    }
+
+    @Override
+    public boolean onBlockActivated(
+        World worldIn,
+        BlockPos pos,
+        IBlockState state,
+        EntityPlayer playerIn,
+        EnumHand hand,
+        EnumFacing facing,
+        float hitX,
+        float hitY,
+        float hitZ
+    )
+    {
+        IBlockState actualState = getActualState(state, worldIn, pos);
+        Vec3d hitVec = new Vec3d(pos.getX() + hitX, pos.getY() + hitY, pos.getZ() + hitZ);
+
+        List<AxisAlignedBB> allBoxes = retrieveAllBoxes(actualState);
+
+        AxisAlignedBB clickedBox = null;
+        for (AxisAlignedBB box : allBoxes) {
+            AxisAlignedBB expandedBox = box.offset(pos).grow(0.001); // Expand the box slightly
+            if (expandedBox.contains(hitVec)) {
+                clickedBox = box;
+                break;
+            }
+        }
+
+        if (clickedBox != null) {
+            if ((clickedBox.equals(NORTH_CABLE_AABB) || clickedBox.equals(NORTH_CABLE_CONNECTOR_AABB)) &&
+                this.hasConnectionToInventory(actualState, NORTH)) {
+                if (!worldIn.isRemote) {
+                    playerIn.openGui(
+                        Main.instance,
+                        Reference.GUI_CONNECTOR_NORTH,
+                        worldIn,
+                        pos.getX(),
+                        pos.getY(),
+                        pos.getZ()
+                    );
+                }
+                return true;
+            }
+            if ((clickedBox.equals(EAST_CABLE_AABB) || clickedBox.equals(EAST_CABLE_CONNECTOR_AABB)) &&
+                this.hasConnectionToInventory(actualState, EAST)) {
+                if (!worldIn.isRemote) {
+                    playerIn.openGui(
+                        Main.instance,
+                        Reference.GUI_CONNECTOR_EAST,
+                        worldIn,
+                        pos.getX(),
+                        pos.getY(),
+                        pos.getZ()
+                    );
+                }
+                return true;
+            }
+            if ((clickedBox.equals(SOUTH_CABLE_AABB) || clickedBox.equals(SOUTH_CABLE_CONNECTOR_AABB)) &&
+                this.hasConnectionToInventory(actualState, SOUTH)) {
+                if (!worldIn.isRemote) {
+                    playerIn.openGui(
+                        Main.instance,
+                        Reference.GUI_CONNECTOR_SOUTH,
+                        worldIn,
+                        pos.getX(),
+                        pos.getY(),
+                        pos.getZ()
+                    );
+                }
+                return true;
+            }
+            if ((clickedBox.equals(WEST_CABLE_AABB) || clickedBox.equals(WEST_CABLE_CONNECTOR_AABB)) &&
+                this.hasConnectionToInventory(actualState, WEST)) {
+                if (!worldIn.isRemote) {
+                    playerIn.openGui(
+                        Main.instance,
+                        Reference.GUI_CONNECTOR_WEST,
+                        worldIn,
+                        pos.getX(),
+                        pos.getY(),
+                        pos.getZ()
+                    );
+                }
+                return true;
+            }
+            if ((clickedBox.equals(UP_CABLE_AABB) || clickedBox.equals(UP_CABLE_CONNECTOR_AABB)) &&
+                this.hasConnectionToInventory(actualState, UP)) {
+                if (!worldIn.isRemote) {
+                    playerIn.openGui(
+                        Main.instance,
+                        Reference.GUI_CONNECTOR_UP,
+                        worldIn,
+                        pos.getX(),
+                        pos.getY(),
+                        pos.getZ()
+                    );
+                }
+                return true;
+            }
+            if ((clickedBox.equals(DOWN_CABLE_AABB) || clickedBox.equals(DOWN_CABLE_CONNECTOR_AABB)) &&
+                this.hasConnectionToInventory(actualState, DOWN)) {
+                if (!worldIn.isRemote) {
+                    playerIn.openGui(
+                        Main.instance,
+                        Reference.GUI_CONNECTOR_DOWN,
+                        worldIn,
+                        pos.getX(),
+                        pos.getY(),
+                        pos.getZ()
+                    );
+                }
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    @Override
+    public ItemStack getItem(
+        World worldIn,
+        BlockPos pos,
+        IBlockState state
+    )
+    {
+        return new ItemStack(BlockInit.CONNECTOR);
+    }
+
+    @Override
+    protected BlockStateContainer createBlockState()
+    {
+        return new BlockStateContainer(
+            this,
+            NORTH,
+            EAST,
+            SOUTH,
+            WEST,
+            UP,
+            DOWN
+        );
+    }
+
+    @Override
+    public boolean hasTileEntity(IBlockState state)
+    {
+        return true;
+    }
+
+    @Override
+    public TileEntity createTileEntity(
+        World world,
+        IBlockState state
+    )
+    {
+        return new TileEntityConnector();
+    }
+
     private List<AxisAlignedBB> retrieveAllBoxes(IBlockState state)
     {
         List<AxisAlignedBB> allBoxes = new ArrayList<>();
@@ -351,14 +568,6 @@ public class BlockConnector extends BlockBase implements IHasModel
             || this.hasConnectionToInventory(state, facing);
     }
 
-    private boolean hasConnectionToConnector(
-        IBlockState state,
-        PropertyEnum<ConnectionType> facing
-    )
-    {
-        return state.getValue(facing).toString().equals(ConnectionType.CONNECTOR.toString());
-    }
-
     private boolean hasConnectionToInventory(
         IBlockState state,
         PropertyEnum<ConnectionType> facing
@@ -367,211 +576,109 @@ public class BlockConnector extends BlockBase implements IHasModel
         return state.getValue(facing).toString().equals(ConnectionType.INVENTORY.toString());
     }
 
-    @Override
-    public boolean isOpaqueCube(IBlockState state)
+    private boolean hasConnectionToConnector(
+        IBlockState state,
+        PropertyEnum<ConnectionType> facing
+    )
     {
-        return false;
+        return state.getValue(facing).toString().equals(ConnectionType.CONNECTOR.toString());
     }
 
-    @Override
-    public void onBlockAdded(
+    private void addNetwork(
         World worldIn,
         BlockPos pos,
         IBlockState state
     )
     {
-        if (!worldIn.isRemote) {
-            worldIn.setBlockState(pos, state, 2);
-        }
-    }
-
-    @Override
-    public Item getItemDropped(
-        IBlockState state,
-        Random rand,
-        int fortune
-    )
-    {
-        return Item.getItemFromBlock(BlockInit.CONNECTOR);
-    }
-
-    @Override
-    @Nullable
-    public RayTraceResult collisionRayTrace(
-        IBlockState blockState,
-        World worldIn,
-        BlockPos pos,
-        Vec3d start,
-        Vec3d end
-    )
-    {
-        IBlockState actualState = getActualState(blockState, worldIn, pos); // Get the actual state
-        List<AxisAlignedBB> allBoxes = retrieveAllBoxes(actualState);
-
-        RayTraceResult closestResult = null;
-        double closestDistance = Double.MAX_VALUE;
-
-        for (AxisAlignedBB box : allBoxes) {
-            RayTraceResult result = rayTrace(pos, start, end, box);
-            if (result != null) {
-                double distance = result.hitVec.distanceTo(start);
-                if (distance < closestDistance) {
-                    closestResult = result;
-                    closestDistance = distance;
-                }
-            }
-        }
-
-        return closestResult;
-    }
-
-    @Override
-    public boolean onBlockActivated(
-        World worldIn,
-        BlockPos pos,
-        IBlockState state,
-        EntityPlayer playerIn,
-        EnumHand hand,
-        EnumFacing facing,
-        float hitX,
-        float hitY,
-        float hitZ
-    )
-    {
-        IBlockState actualState = getActualState(state, worldIn, pos);
-        Vec3d hitVec = new Vec3d(pos.getX() + hitX, pos.getY() + hitY, pos.getZ() + hitZ);
-
-        List<AxisAlignedBB> allBoxes = retrieveAllBoxes(actualState);
-
-        AxisAlignedBB clickedBox = null;
-        for (AxisAlignedBB box : allBoxes) {
-            AxisAlignedBB expandedBox = box.offset(pos).grow(0.001); // Expand the box slightly
-            if (expandedBox.contains(hitVec)) {
-                clickedBox = box;
-                break;
-            }
-        }
-
-        if (clickedBox != null) {
-            if ((clickedBox.equals(NORTH_CABLE_AABB) || clickedBox.equals(NORTH_CABLE_CONNECTOR_AABB)) && this.hasConnectionToInventory(actualState, NORTH)) {
-                if (!worldIn.isRemote) {
-                    playerIn.openGui(
-                        Main.instance,
-                        Reference.GUI_CONNECTOR_NORTH,
-                        worldIn,
-                        pos.getX(),
-                        pos.getY(),
-                        pos.getZ()
-                    );
-                }
-                return true;
-            }
-            if ((clickedBox.equals(EAST_CABLE_AABB) || clickedBox.equals(EAST_CABLE_CONNECTOR_AABB)) && this.hasConnectionToInventory(actualState, EAST)) {
-                if (!worldIn.isRemote) {
-                    playerIn.openGui(
-                        Main.instance,
-                        Reference.GUI_CONNECTOR_EAST,
-                        worldIn,
-                        pos.getX(),
-                        pos.getY(),
-                        pos.getZ()
-                    );
-                }
-                return true;
-            }
-            if ((clickedBox.equals(SOUTH_CABLE_AABB) || clickedBox.equals(SOUTH_CABLE_CONNECTOR_AABB)) && this.hasConnectionToInventory(actualState, SOUTH)) {
-                if (!worldIn.isRemote) {
-                    playerIn.openGui(
-                        Main.instance,
-                        Reference.GUI_CONNECTOR_SOUTH,
-                        worldIn,
-                        pos.getX(),
-                        pos.getY(),
-                        pos.getZ()
-                    );
-                }
-                return true;
-            }
-            if ((clickedBox.equals(WEST_CABLE_AABB) || clickedBox.equals(WEST_CABLE_CONNECTOR_AABB)) && this.hasConnectionToInventory(actualState, WEST)) {
-                if (!worldIn.isRemote) {
-                    playerIn.openGui(
-                        Main.instance,
-                        Reference.GUI_CONNECTOR_WEST,
-                        worldIn,
-                        pos.getX(),
-                        pos.getY(),
-                        pos.getZ()
-                    );
-                }
-                return true;
-            }
-            if ((clickedBox.equals(UP_CABLE_AABB) || clickedBox.equals(UP_CABLE_CONNECTOR_AABB)) && this.hasConnectionToInventory(actualState, UP)) {
-                if (!worldIn.isRemote) {
-                    playerIn.openGui(
-                        Main.instance,
-                        Reference.GUI_CONNECTOR_UP,
-                        worldIn,
-                        pos.getX(),
-                        pos.getY(),
-                        pos.getZ()
-                    );
-                }
-                return true;
-            }
-            if ((clickedBox.equals(DOWN_CABLE_AABB) || clickedBox.equals(DOWN_CABLE_CONNECTOR_AABB)) && this.hasConnectionToInventory(actualState, DOWN)) {
-                if (!worldIn.isRemote) {
-                    playerIn.openGui(
-                        Main.instance,
-                        Reference.GUI_CONNECTOR_DOWN,
-                        worldIn,
-                        pos.getX(),
-                        pos.getY(),
-                        pos.getZ()
-                    );
-                }
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    @Override
-    public ItemStack getItem(
-        World worldIn,
-        BlockPos pos,
-        IBlockState state
-    )
-    {
-        return new ItemStack(BlockInit.CONNECTOR);
-    }
-
-    @Override
-    protected BlockStateContainer createBlockState()
-    {
-        return new BlockStateContainer(
-            this,
-            NORTH,
-            EAST,
-            SOUTH,
-            WEST,
-            UP,
-            DOWN
+        TileEntityConnector connector = (
+            (TileEntityConnector) Objects.requireNonNull(
+                worldIn.getTileEntity(pos)
+            )
         );
+
+        IBlockState actualState = getActualState(state, worldIn, pos);
+        ConnectorNetwork network = this.findNetwork(worldIn, pos, actualState);
+        if (network == null) {
+            connector.setNetwork(new ConnectorNetwork());
+            return;
+        }
+
+        connector.setNetwork(network);
     }
 
-    @Override
-    public boolean hasTileEntity(IBlockState state)
+    @Nullable
+    private ConnectorNetwork findNetwork(
+        World worldIn,
+        BlockPos pos,
+        IBlockState actualState
+    )
     {
-        return true;
+        List<BlockPos> neighborBlockPositions = this.getConnectedBlockPositions(pos, actualState);
+
+        for (BlockPos neighborBlockPosition : neighborBlockPositions) { // infinite loop, if the cables loop
+            Block neighborBlock = worldIn.getBlockState(neighborBlockPosition).getBlock();
+
+            if (neighborBlock instanceof BlockAir) {
+                throw new IllegalStateException("should never be air!");
+            }
+
+            if (neighborBlock instanceof BlockConnector) {
+                return (
+                    (TileEntityConnector) Objects.requireNonNull(
+                        worldIn.getTileEntity(neighborBlockPosition)
+                    )
+                ).getNetwork();
+            }
+            ConnectorNetwork connectorNetwork = this.findNetwork(worldIn, neighborBlockPosition, actualState);
+            if (connectorNetwork == null) {
+                continue;
+            }
+            return connectorNetwork;
+        }
+
+        return null;
     }
 
-    @Override
-    public TileEntity createTileEntity(
-        World world,
+    private List<BlockPos> getConnectedBlockPositions(
+        BlockPos pos,
         IBlockState state
     )
     {
-        return new TileEntityConnector();
+        List<BlockPos> connectedBlocks = new ArrayList<>();
+        if (!this.hasAnyCableConnections(state)) {
+            return connectedBlocks;
+        }
+        if (this.hasConnectionToConnector(state, NORTH)) {
+            connectedBlocks.add(new BlockPos(pos.getX(), pos.getY(), pos.getZ() - 1));
+        }
+        if (this.hasConnectionToConnector(state, EAST)) {
+            connectedBlocks.add(new BlockPos(pos.getX() + 1, pos.getY(), pos.getZ()));
+        }
+        if (this.hasConnectionToConnector(state, SOUTH)) {
+            connectedBlocks.add(new BlockPos(pos.getX(), pos.getY(), pos.getZ() + 1));
+        }
+        if (this.hasConnectionToConnector(state, WEST)) {
+            connectedBlocks.add(new BlockPos(pos.getX() - 1, pos.getY(), pos.getZ()));
+        }
+        if (this.hasConnectionToConnector(state, UP)) {
+            connectedBlocks.add(new BlockPos(pos.getX(), pos.getY() + 1, pos.getZ()));
+        }
+        if (this.hasConnectionToConnector(state, DOWN)) {
+            connectedBlocks.add(new BlockPos(pos.getX(), pos.getY() - 1, pos.getZ()));
+        }
+
+        return connectedBlocks;
+    }
+
+    private boolean hasAnyCableConnections(
+        IBlockState state
+    )
+    {
+        return this.hasConnectionToConnector(state, NORTH)
+            || this.hasConnectionToConnector(state, EAST)
+            || this.hasConnectionToConnector(state, SOUTH)
+            || this.hasConnectionToConnector(state, WEST)
+            || this.hasConnectionToConnector(state, UP)
+            || this.hasConnectionToConnector(state, DOWN);
     }
 }

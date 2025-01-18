@@ -25,6 +25,9 @@ public class TileEntityConnector extends TileEntity implements ITickable
     private ConnectorSettings upConnectorSettings = new ConnectorSettings(false, false);
     private ConnectorSettings downConnectorSettings = new ConnectorSettings(false, false);
 
+    @Nullable
+    private ConnectorNetwork network = null;
+
     public void update()
     {
         // TODO later
@@ -134,14 +137,24 @@ public class TileEntityConnector extends TileEntity implements ITickable
             connectorSettings.disableExtract();
         }
         notifyUpdate();
+    }
+
+    public ConnectorNetwork getNetwork()
+    {
+        if (this.network == null) {
+            throw new IllegalStateException("Network is null");
+        }
+        return this.network;
     }    @Override
     public NBTTagCompound getUpdateTag()
     {
         return this.writeToNBT(new NBTTagCompound());
     }
 
-
-    @Override
+    public void setNetwork(ConnectorNetwork connectorNetwork)
+    {
+        this.network = connectorNetwork;
+    }    @Override
     public void onDataPacket(
         net.minecraft.network.NetworkManager net,
         net.minecraft.network.play.server.SPacketUpdateTileEntity pkt
@@ -173,8 +186,6 @@ public class TileEntityConnector extends TileEntity implements ITickable
             this.setCustomName(compound.getString("CustomName"));
         }
     }
-
-
 
     private ConnectorSettings retrieveConnectorSettingsFromNBT(
         Direction direction,
@@ -232,4 +243,8 @@ public class TileEntityConnector extends TileEntity implements ITickable
     {
         return this.customName != null && !this.customName.isEmpty();
     }
+
+
+
+
 }
