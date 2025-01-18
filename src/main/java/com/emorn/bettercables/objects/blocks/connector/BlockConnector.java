@@ -56,6 +56,14 @@ public class BlockConnector extends BlockBase implements IHasModel
         (double) 9 / 16,
         (double) 7 / 16
     );
+    public static final AxisAlignedBB NORTH_CABLE_CONNECTOR_AABB = new AxisAlignedBB(
+        (double) 4 / 16,
+        (double) 4 / 16,
+        0,
+        (double) 12 / 16,
+        (double) 12 / 16,
+        (double) 1 / 16
+    );
 
     public static final AxisAlignedBB EAST_CABLE_AABB = new AxisAlignedBB(
         1,
@@ -64,6 +72,14 @@ public class BlockConnector extends BlockBase implements IHasModel
         (double) 7 / 16,
         (double) 9 / 16,
         (double) 9 / 16
+    );
+    public static final AxisAlignedBB EAST_CABLE_CONNECTOR_AABB = new AxisAlignedBB(
+        (double) 15 / 16,
+        (double) 4 / 16,
+        (double) 4 / 16,
+        (double) 16 / 16,
+        (double) 12 / 16,
+        (double) 12 / 16
     );
 
     public static final AxisAlignedBB SOUTH_CABLE_AABB = new AxisAlignedBB(
@@ -74,6 +90,14 @@ public class BlockConnector extends BlockBase implements IHasModel
         (double) 9 / 16,
         (double) 7 / 16
     );
+    public static final AxisAlignedBB SOUTH_CABLE_CONNECTOR_AABB = new AxisAlignedBB(
+        (double) 4 / 16,
+        (double) 4 / 16,
+        (double) 15 / 16,
+        (double) 12 / 16,
+        (double) 12 / 16,
+        (double) 16 / 16
+    );
 
     public static final AxisAlignedBB WEST_CABLE_AABB = new AxisAlignedBB(
         0,
@@ -82,6 +106,14 @@ public class BlockConnector extends BlockBase implements IHasModel
         (double) 7 / 16,
         (double) 9 / 16,
         (double) 9 / 16
+    );
+    public static final AxisAlignedBB WEST_CABLE_CONNECTOR_AABB = new AxisAlignedBB(
+        0,
+        (double) 4 / 16,
+        (double) 4 / 16,
+        (double) 1 / 16,
+        (double) 12 / 16,
+        (double) 12 / 16
     );
 
     public static final AxisAlignedBB UP_CABLE_AABB = new AxisAlignedBB(
@@ -92,6 +124,14 @@ public class BlockConnector extends BlockBase implements IHasModel
         1,
         (double) 9 / 16
     );
+    public static final AxisAlignedBB UP_CABLE_CONNECTOR_AABB = new AxisAlignedBB(
+        (double) 4 / 16,
+        (double) 15 / 16,
+        (double) 4 / 16,
+        (double) 12 / 16,
+        (double) 16 / 16,
+        (double) 12 / 16
+    );
 
     public static final AxisAlignedBB DOWN_CABLE_AABB = new AxisAlignedBB(
         (double) 7 / 16,
@@ -100,6 +140,14 @@ public class BlockConnector extends BlockBase implements IHasModel
         (double) 9 / 16,
         (double) 7 / 16,
         (double) 9 / 16
+    );
+    public static final AxisAlignedBB DOWN_CABLE_CONNECTOR_AABB = new AxisAlignedBB(
+        (double) 4 / 16,
+        0,
+        (double) 4 / 16,
+        (double) 12 / 16,
+        (double) 1 / 16,
+        (double) 12 / 16
     );
 
     public static final PropertyEnum<ConnectionType> NORTH = PropertyEnum.create("north", ConnectionType.class);
@@ -224,26 +272,50 @@ public class BlockConnector extends BlockBase implements IHasModel
 
         if (this.hasConnection(state, NORTH)) {
             allBoxes.add(NORTH_CABLE_AABB);
+
+            if (this.hasConnectionToInventory(state, NORTH)) {
+                allBoxes.add(NORTH_CABLE_CONNECTOR_AABB);
+            }
         }
 
         if (this.hasConnection(state, EAST)) {
             allBoxes.add(EAST_CABLE_AABB);
+
+            if (this.hasConnectionToInventory(state, EAST)) {
+                allBoxes.add(EAST_CABLE_CONNECTOR_AABB);
+            }
         }
 
         if (this.hasConnection(state, SOUTH)) {
             allBoxes.add(SOUTH_CABLE_AABB);
+
+            if (this.hasConnectionToInventory(state, SOUTH)) {
+                allBoxes.add(SOUTH_CABLE_CONNECTOR_AABB);
+            }
         }
 
         if (this.hasConnection(state, WEST)) {
             allBoxes.add(WEST_CABLE_AABB);
+
+            if (this.hasConnectionToInventory(state, WEST)) {
+                allBoxes.add(WEST_CABLE_CONNECTOR_AABB);
+            }
         }
 
         if (this.hasConnection(state, UP)) {
             allBoxes.add(UP_CABLE_AABB);
+
+            if (this.hasConnectionToInventory(state, UP)) {
+                allBoxes.add(UP_CABLE_CONNECTOR_AABB);
+            }
         }
 
         if (this.hasConnection(state, DOWN)) {
             allBoxes.add(DOWN_CABLE_AABB);
+
+            if (this.hasConnectionToInventory(state, DOWN)) {
+                allBoxes.add(DOWN_CABLE_CONNECTOR_AABB);
+            }
         }
 
         return allBoxes;
@@ -381,7 +453,7 @@ public class BlockConnector extends BlockBase implements IHasModel
         }
 
         if (clickedBox != null) {
-            if (clickedBox.equals(NORTH_CABLE_AABB) && this.hasConnectionToInventory(actualState, NORTH)) {
+            if ((clickedBox.equals(NORTH_CABLE_AABB) || clickedBox.equals(NORTH_CABLE_CONNECTOR_AABB)) && this.hasConnectionToInventory(actualState, NORTH)) {
                 if (!worldIn.isRemote) {
                     playerIn.openGui(
                         Main.instance,
@@ -394,7 +466,7 @@ public class BlockConnector extends BlockBase implements IHasModel
                 }
                 return true;
             }
-            if (clickedBox.equals(EAST_CABLE_AABB) && this.hasConnectionToInventory(actualState, EAST)) {
+            if ((clickedBox.equals(EAST_CABLE_AABB) || clickedBox.equals(EAST_CABLE_CONNECTOR_AABB)) && this.hasConnectionToInventory(actualState, EAST)) {
                 if (!worldIn.isRemote) {
                     playerIn.openGui(
                         Main.instance,
@@ -407,7 +479,7 @@ public class BlockConnector extends BlockBase implements IHasModel
                 }
                 return true;
             }
-            if (clickedBox.equals(SOUTH_CABLE_AABB) && this.hasConnectionToInventory(actualState, SOUTH)) {
+            if ((clickedBox.equals(SOUTH_CABLE_AABB) || clickedBox.equals(SOUTH_CABLE_CONNECTOR_AABB)) && this.hasConnectionToInventory(actualState, SOUTH)) {
                 if (!worldIn.isRemote) {
                     playerIn.openGui(
                         Main.instance,
@@ -420,7 +492,7 @@ public class BlockConnector extends BlockBase implements IHasModel
                 }
                 return true;
             }
-            if (clickedBox.equals(WEST_CABLE_AABB) && this.hasConnectionToInventory(actualState, WEST)) {
+            if ((clickedBox.equals(WEST_CABLE_AABB) || clickedBox.equals(WEST_CABLE_CONNECTOR_AABB)) && this.hasConnectionToInventory(actualState, WEST)) {
                 if (!worldIn.isRemote) {
                     playerIn.openGui(
                         Main.instance,
@@ -433,7 +505,7 @@ public class BlockConnector extends BlockBase implements IHasModel
                 }
                 return true;
             }
-            if (clickedBox.equals(UP_CABLE_AABB) && this.hasConnectionToInventory(actualState, UP)) {
+            if ((clickedBox.equals(UP_CABLE_AABB) || clickedBox.equals(UP_CABLE_CONNECTOR_AABB)) && this.hasConnectionToInventory(actualState, UP)) {
                 if (!worldIn.isRemote) {
                     playerIn.openGui(
                         Main.instance,
@@ -446,7 +518,7 @@ public class BlockConnector extends BlockBase implements IHasModel
                 }
                 return true;
             }
-            if (clickedBox.equals(DOWN_CABLE_AABB) && this.hasConnectionToInventory(actualState, DOWN)) {
+            if ((clickedBox.equals(DOWN_CABLE_AABB) || clickedBox.equals(DOWN_CABLE_CONNECTOR_AABB)) && this.hasConnectionToInventory(actualState, DOWN)) {
                 if (!worldIn.isRemote) {
                     playerIn.openGui(
                         Main.instance,
