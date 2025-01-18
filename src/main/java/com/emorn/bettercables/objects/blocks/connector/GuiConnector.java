@@ -18,16 +18,13 @@ public class GuiConnector extends GuiContainer
     private final TileEntityConnector tileEntity;
     private final Direction direction;
 
-    private GuiCheckbox insertCheckbox;
-    private GuiCheckbox extractCheckbox;
-
     public GuiConnector(
         InventoryPlayer player,
         TileEntityConnector tileEntity,
         Direction direction
     )
     {
-        super(new ContainerConnector(player, tileEntity, direction));
+        super(new ContainerConnector(player, tileEntity));
         this.player = player;
         this.tileEntity = tileEntity;
         this.direction = direction;
@@ -43,14 +40,14 @@ public class GuiConnector extends GuiContainer
         int checkboxInsertY = this.guiTop + 20;
         int checkboxExtractY = this.guiTop + 54;
 
-        this.insertCheckbox = new GuiCheckbox(
+        GuiCheckbox insertCheckbox = new GuiCheckbox(
             0,
             checkboxX,
             checkboxInsertY,
             "Insert",
             tileEntity.isInsertEnabled(this.direction)
         );
-        this.extractCheckbox = new GuiCheckbox(
+        GuiCheckbox extractCheckbox = new GuiCheckbox(
             1,
             checkboxX,
             checkboxExtractY,

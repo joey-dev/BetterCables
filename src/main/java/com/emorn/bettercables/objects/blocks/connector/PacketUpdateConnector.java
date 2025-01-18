@@ -7,15 +7,24 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-public class PacketUpdateConnector implements IMessage {
+public class PacketUpdateConnector implements IMessage
+{
     private BlockPos pos;
     private boolean isInsertEnabled;
     private boolean isExtractEnabled;
     private Direction direction;
 
-    public PacketUpdateConnector() {}
+    public PacketUpdateConnector()
+    {
+    }
 
-    public PacketUpdateConnector(BlockPos pos, boolean isInsertEnabled, boolean isExtractEnabled, Direction direction) {
+    public PacketUpdateConnector(
+        BlockPos pos,
+        boolean isInsertEnabled,
+        boolean isExtractEnabled,
+        Direction direction
+    )
+    {
         this.pos = pos;
         this.isInsertEnabled = isInsertEnabled;
         this.isExtractEnabled = isExtractEnabled;
@@ -23,7 +32,8 @@ public class PacketUpdateConnector implements IMessage {
     }
 
     @Override
-    public void fromBytes(ByteBuf buf) {
+    public void fromBytes(ByteBuf buf)
+    {
         this.pos = new BlockPos(buf.readInt(), buf.readInt(), buf.readInt());
         this.isInsertEnabled = buf.readBoolean();
         this.isExtractEnabled = buf.readBoolean();
@@ -53,7 +63,8 @@ public class PacketUpdateConnector implements IMessage {
     }
 
     @Override
-    public void toBytes(ByteBuf buf) {
+    public void toBytes(ByteBuf buf)
+    {
         buf.writeInt(pos.getX());
         buf.writeInt(pos.getY());
         buf.writeInt(pos.getZ());
@@ -63,9 +74,14 @@ public class PacketUpdateConnector implements IMessage {
         buf.writeChar(direction.name().charAt(0));
     }
 
-    public static class Handler implements IMessageHandler<PacketUpdateConnector, IMessage> {
+    public static class Handler implements IMessageHandler<PacketUpdateConnector, IMessage>
+    {
         @Override
-        public IMessage onMessage(PacketUpdateConnector message, MessageContext ctx) {
+        public IMessage onMessage(
+            PacketUpdateConnector message,
+            MessageContext ctx
+        )
+        {
             ctx.getServerHandler().player.getServerWorld().addScheduledTask(() -> {
                 TileEntity tileEntity = ctx.getServerHandler().player.world.getTileEntity(message.pos);
                 if (tileEntity instanceof TileEntityConnector) {

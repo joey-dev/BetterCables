@@ -8,21 +8,19 @@ import net.minecraft.inventory.Slot;
 public class ContainerConnector extends Container
 {
     private final TileEntityConnector tileEntity;
-    private final Direction direction;
 
     public ContainerConnector(
         InventoryPlayer player,
-        TileEntityConnector tileEntity,
-        Direction direction
+        TileEntityConnector tileEntity
     )
     {
         this.tileEntity = tileEntity;
-        this.direction = direction;
 
         addPlayerInventorySlots(player);
     }
 
-    private void addPlayerInventorySlots(InventoryPlayer player) {
+    private void addPlayerInventorySlots(InventoryPlayer player)
+    {
         for (int y = 0; y < 3; y++) {
             for (int x = 0; x < 9; x++) {
                 this.addSlotToContainer(new Slot(player, x + y * 9 + 9, 8 + x * 18, 84 + y * 18));

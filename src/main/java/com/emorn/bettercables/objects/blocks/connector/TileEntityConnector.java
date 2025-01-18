@@ -48,7 +48,31 @@ public class TileEntityConnector extends TileEntity implements ITickable
         return connectorSettings.isInsertEnabled();
     }
 
-    public void setInsertEnabled(boolean checked, Direction direction)
+    @Nullable
+    private ConnectorSettings findConnectorSettingsByDirection(Direction direction)
+    {
+        switch (direction) {
+            case NORTH:
+                return this.northConnectorSettings;
+            case EAST:
+                return this.eastConnectorSettings;
+            case SOUTH:
+                return this.southConnectorSettings;
+            case WEST:
+                return this.westConnectorSettings;
+            case UP:
+                return this.upConnectorSettings;
+            case DOWN:
+                return this.downConnectorSettings;
+            default:
+                return null;
+        }
+    }
+
+    public void setInsertEnabled(
+        boolean checked,
+        Direction direction
+    )
     {
         ConnectorSettings connectorSettings = this.findConnectorSettingsByDirection(direction);
 
@@ -89,7 +113,10 @@ public class TileEntityConnector extends TileEntity implements ITickable
         return connectorSettings.isExtractEnabled();
     }
 
-    public void setExtractEnabled(boolean checked, Direction direction)
+    public void setExtractEnabled(
+        boolean checked,
+        Direction direction
+    )
     {
         ConnectorSettings connectorSettings = this.findConnectorSettingsByDirection(direction);
 
@@ -103,10 +130,7 @@ public class TileEntityConnector extends TileEntity implements ITickable
             connectorSettings.disableExtract();
         }
         notifyUpdate();
-    }
-
-
-    @Override
+    }    @Override
     public NBTTagCompound getUpdateTag()
     {
         return this.writeToNBT(new NBTTagCompound());
@@ -146,26 +170,7 @@ public class TileEntityConnector extends TileEntity implements ITickable
         }
     }
 
-    @Nullable
-    private ConnectorSettings findConnectorSettingsByDirection(Direction direction)
-    {
-        switch (direction) {
-            case NORTH:
-                return this.northConnectorSettings;
-            case EAST:
-                return this.eastConnectorSettings;
-            case SOUTH:
-                return this.southConnectorSettings;
-            case WEST:
-                return this.westConnectorSettings;
-            case UP:
-                return this.upConnectorSettings;
-            case DOWN:
-                return this.downConnectorSettings;
-            default:
-                return null;
-        }
-    }
+
 
     private ConnectorSettings retrieveConnectorSettingsFromNBT(
         Direction direction,

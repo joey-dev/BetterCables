@@ -52,8 +52,7 @@ public class GuiHandler implements IGuiHandler
             }
             return new ContainerConnector(
                 player.inventory,
-                (TileEntityConnector) tileEntity,
-                direction
+                (TileEntityConnector) tileEntity
             );
         }
         return null;
