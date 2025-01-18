@@ -312,15 +312,11 @@ public class BlockConnector extends BlockBase implements IHasModel
         float hitY,
         float hitZ
     ) {
-        if (!worldIn.isRemote) {
             IBlockState actualState = getActualState(state, worldIn, pos);
-            // Convert hitVec to world coordinates
             Vec3d hitVec = new Vec3d(pos.getX() + hitX, pos.getY() + hitY, pos.getZ() + hitZ);
 
-            // Get all bounding boxes
             List<AxisAlignedBB> allBoxes = retrieveAllBoxes(actualState);
 
-            // Find the box that contains the hit
             AxisAlignedBB clickedBox = null;
             for (AxisAlignedBB box : allBoxes) {
                 AxisAlignedBB expandedBox = box.offset(pos).grow(0.001); // Expand the box slightly
@@ -331,24 +327,40 @@ public class BlockConnector extends BlockBase implements IHasModel
             }
 
             if (clickedBox != null) {
-                // Example: Open a GUI based on the clicked hitbox
                 if (clickedBox.equals(NORTH_CABLE_AABB) && this.hasConnectionToInventory(actualState, NORTH)) {
-                    playerIn.openGui(Main.instance, Reference.GUI_CONNECTOR_NORTH, worldIn, pos.getX(), pos.getY(), pos.getZ());
-                } else if (clickedBox.equals(EAST_CABLE_AABB) && this.hasConnectionToInventory(actualState, EAST)) {
+                    if (!worldIn.isRemote) {
+                        playerIn.openGui(Main.instance, Reference.GUI_CONNECTOR_NORTH, worldIn, pos.getX(), pos.getY(), pos.getZ());
+                    }
+                    return true;
+                } if (clickedBox.equals(EAST_CABLE_AABB) && this.hasConnectionToInventory(actualState, EAST)) {
+                    if (!worldIn.isRemote) {
                     playerIn.openGui(Main.instance, Reference.GUI_CONNECTOR_EAST, worldIn, pos.getX(), pos.getY(), pos.getZ());
-                } else if (clickedBox.equals(SOUTH_CABLE_AABB) && this.hasConnectionToInventory(actualState, SOUTH)) {
+                    }
+                    return true;
+                } if (clickedBox.equals(SOUTH_CABLE_AABB) && this.hasConnectionToInventory(actualState, SOUTH)) {
+                        if (!worldIn.isRemote) {
                     playerIn.openGui(Main.instance, Reference.GUI_CONNECTOR_SOUTH, worldIn, pos.getX(), pos.getY(), pos.getZ());
-                } else if (clickedBox.equals(WEST_CABLE_AABB) && this.hasConnectionToInventory(actualState, WEST)) {
+                        }
+                    return true;
+                } if (clickedBox.equals(WEST_CABLE_AABB) && this.hasConnectionToInventory(actualState, WEST)) {
+                            if (!worldIn.isRemote) {
                     playerIn.openGui(Main.instance, Reference.GUI_CONNECTOR_WEST, worldIn, pos.getX(), pos.getY(), pos.getZ());
-                } else if (clickedBox.equals(UP_CABLE_AABB) && this.hasConnectionToInventory(actualState, UP)) {
+                            }
+                    return true;
+                } if (clickedBox.equals(UP_CABLE_AABB) && this.hasConnectionToInventory(actualState, UP)) {
+                                if (!worldIn.isRemote) {
                     playerIn.openGui(Main.instance, Reference.GUI_CONNECTOR_UP, worldIn, pos.getX(), pos.getY(), pos.getZ());
-                } else if (clickedBox.equals(DOWN_CABLE_AABB) && this.hasConnectionToInventory(actualState, DOWN)) {
+                                }
+                    return true;
+                } if (clickedBox.equals(DOWN_CABLE_AABB) && this.hasConnectionToInventory(actualState, DOWN)) {
+                                    if (!worldIn.isRemote) {
                     playerIn.openGui(Main.instance, Reference.GUI_CONNECTOR_DOWN, worldIn, pos.getX(), pos.getY(), pos.getZ());
+                                    }
+                    return true;
                 }
             }
-        }
 
-        return true;
+            return false;
     }
 
     @Override
