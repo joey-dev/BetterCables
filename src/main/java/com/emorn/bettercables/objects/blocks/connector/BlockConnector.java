@@ -615,8 +615,6 @@ public class BlockConnector extends BlockBase implements IHasModel
         List<BlockPos> neighborBlockPositions = this.getPossibleConnectedBlocks(pos);
 
         for (BlockPos neighborBlockPosition : neighborBlockPositions) {
-            System.out.println("Neighbor position: " + neighborBlockPosition);
-
             if (this.foundCablePositions.containsKey(neighborBlockPosition)) {
                 continue;
             }
@@ -658,17 +656,5 @@ public class BlockConnector extends BlockBase implements IHasModel
         connectedBlocks.add(new BlockPos(pos.getX(), pos.getY() - 1, pos.getZ()));
 
         return connectedBlocks;
-    }
-
-    private boolean hasAnyCableConnections(
-        IBlockState state
-    )
-    {
-        return this.hasConnectionToConnector(state, NORTH)
-            || this.hasConnectionToConnector(state, EAST)
-            || this.hasConnectionToConnector(state, SOUTH)
-            || this.hasConnectionToConnector(state, WEST)
-            || this.hasConnectionToConnector(state, UP)
-            || this.hasConnectionToConnector(state, DOWN);
     }
 }
