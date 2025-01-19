@@ -661,7 +661,7 @@ public class BlockConnector extends BlockBase implements IHasModel
 
         ConnectorNetwork network = this.findNetwork(worldIn, pos);
         if (network == null) {
-            connector.setNetwork(new ConnectorNetwork());
+            connector.setNetwork(ConnectorNetwork.create());
             this.foundCablePositions.clear();
             return;
         }

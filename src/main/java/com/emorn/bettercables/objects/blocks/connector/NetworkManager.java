@@ -91,7 +91,7 @@ public class NetworkManager
         }
 
         for (BlockPos neighborBlockPosition : actualNeighborBlockPositions) {
-            ConnectorNetwork newNetwork = new ConnectorNetwork();
+            ConnectorNetwork newNetwork = ConnectorNetwork.create();
             newlyCreatedNetworksById.put(newNetwork.id(), true);
             reCalculateNetworkFrom(neighborBlockPosition, worldIn, newNetwork);
         }

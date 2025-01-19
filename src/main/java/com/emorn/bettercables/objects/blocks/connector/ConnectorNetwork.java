@@ -12,15 +12,42 @@ import java.util.Map;
 @ParametersAreNonnullByDefault
 public class ConnectorNetwork
 {
-    private static int lastId = 0;
+    private static int lastId = 1;
+    private static final Map<Integer, ConnectorNetwork> createdNetworksById = new HashMap<>();
     private final int id;
 
     private boolean shouldMerge = false;
-    private Map<BlockPos, ConnectorNetwork> mergeToNetwork = new HashMap<>();
+    private final Map<BlockPos, ConnectorNetwork> mergeToNetwork = new HashMap<>();
 
-    public ConnectorNetwork()
+    private ConnectorNetwork()
     {
         id = lastId++;
+    }
+
+    private ConnectorNetwork(int savedId)
+    {
+        if (savedId >= lastId) {
+            lastId = savedId + 1;
+        }
+
+        id = savedId;
+    }
+
+    public static ConnectorNetwork create(int savedId)
+    {
+        if (createdNetworksById.containsKey(savedId)) {
+            return createdNetworksById.get(savedId);
+        }
+        ConnectorNetwork network = new ConnectorNetwork(savedId);
+        createdNetworksById.put(network.id, network);
+        return network;
+    }
+
+    public static ConnectorNetwork create()
+    {
+        ConnectorNetwork network = new ConnectorNetwork();
+        createdNetworksById.put(network.id, network);
+        return network;
     }
 
     public int id()
