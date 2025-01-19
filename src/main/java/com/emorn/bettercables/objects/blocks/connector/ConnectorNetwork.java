@@ -5,7 +5,9 @@ import net.minecraft.util.math.BlockPos;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @MethodsReturnNonnullByDefault
@@ -13,8 +15,10 @@ import java.util.Map;
 public class ConnectorNetwork
 {
     private static int lastId = 1;
-    private static final Map<Integer, ConnectorNetwork> createdNetworksById = new HashMap<>();
     private final int id;
+    private static final Map<Integer, ConnectorNetwork> createdNetworksById = new HashMap<>();
+    // key = inventory, value = list of connectors
+    private final Map<BlockPos, List<BlockPos>> insertInventoryPositions = new HashMap<>();
 
     private boolean shouldMerge = false;
     private final Map<BlockPos, ConnectorNetwork> mergeToNetwork = new HashMap<>();
@@ -59,6 +63,23 @@ public class ConnectorNetwork
     {
         this.shouldMerge = true;
         this.mergeToNetwork.put(new BlockPos(0, 0, 0), newNetwork);
+    }
+
+    public void addInsertInventoryPosition(BlockPos inventoryPosition, BlockPos connectorPosition)
+    {
+        this.insertInventoryPositions.computeIfAbsent(inventoryPosition, k -> new ArrayList<>());
+
+        if (this.insertInventoryPositions.get(inventoryPosition).contains(connectorPosition)) {
+            return;
+        }
+        this.insertInventoryPositions.get(inventoryPosition).add(connectorPosition);
+    }
+
+    public void removeInsertInventoryPosition(BlockPos inventoryPosition, BlockPos connectorPosition)
+    {
+        this.insertInventoryPositions.computeIfAbsent(inventoryPosition, k -> new ArrayList<>());
+
+        this.insertInventoryPositions.get(inventoryPosition).remove(connectorPosition);
     }
 
     public void remove(
