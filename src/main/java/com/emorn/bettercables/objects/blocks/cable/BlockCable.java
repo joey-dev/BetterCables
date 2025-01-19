@@ -3,6 +3,7 @@ package com.emorn.bettercables.objects.blocks.cable;
 import com.emorn.bettercables.init.BlockInit;
 import com.emorn.bettercables.objects.blocks.BlockBase;
 import com.emorn.bettercables.objects.blocks.connector.BlockConnector;
+import com.emorn.bettercables.objects.blocks.connector.NetworkManager;
 import com.emorn.bettercables.utils.IHasModel;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.block.Block;
@@ -21,6 +22,7 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.Explosion;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
@@ -218,15 +220,64 @@ public class BlockCable extends BlockBase implements IHasModel
     }
 
     @Override
+    public void onBlockDestroyedByPlayer(
+        World worldIn,
+        BlockPos pos,
+        IBlockState state
+    )
+    {
+        super.onBlockDestroyedByPlayer(worldIn, pos, state);
+        if (!worldIn.isRemote) {
+            NetworkManager.reCalculateNetworksAround(pos, worldIn);
+        }
+    }
+
+    @Override
     public void onBlockAdded(
         World worldIn,
         BlockPos pos,
         IBlockState state
     )
     {
+        IBlockState actualState = getActualState(state, worldIn, pos);
+        NetworkManager.mergeNetworks(worldIn, pos, findTotalConnections(actualState));
+
         if (!worldIn.isRemote) {
             worldIn.setBlockState(pos, state, 2);
         }
+    }
+
+    private int findTotalConnections(
+        IBlockState actualState
+    )
+    {
+        int totalConnections = 0;
+
+        if (Boolean.TRUE.equals(actualState.getValue(NORTH))) {
+            totalConnections++;
+        }
+
+        if (Boolean.TRUE.equals(actualState.getValue(EAST))) {
+            totalConnections++;
+        }
+
+        if (Boolean.TRUE.equals(actualState.getValue(SOUTH))) {
+            totalConnections++;
+        }
+
+        if (Boolean.TRUE.equals(actualState.getValue(WEST))) {
+            totalConnections++;
+        }
+
+        if (Boolean.TRUE.equals(actualState.getValue(UP))) {
+            totalConnections++;
+        }
+
+        if (Boolean.TRUE.equals(actualState.getValue(DOWN))) {
+            totalConnections++;
+        }
+
+        return totalConnections;
     }
 
     @Override
@@ -237,6 +288,19 @@ public class BlockCable extends BlockBase implements IHasModel
     )
     {
         return Item.getItemFromBlock(BlockInit.CABLE);
+    }
+
+    @Override
+    public void onBlockDestroyedByExplosion(
+        World worldIn,
+        BlockPos pos,
+        Explosion explosionIn
+    )
+    {
+        super.onBlockDestroyedByExplosion(worldIn, pos, explosionIn);
+        if (worldIn.isRemote) {
+            NetworkManager.reCalculateNetworksAround(pos, worldIn);
+        }
     }
 
     @Override
@@ -321,4 +385,5 @@ public class BlockCable extends BlockBase implements IHasModel
     {
         return state.getValue(facing).equals(true);
     }
+
 }

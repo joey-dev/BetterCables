@@ -25,9 +25,18 @@ public class TileEntityConnector extends TileEntity implements ITickable
     private ConnectorSettings upConnectorSettings = new ConnectorSettings(false, false);
     private ConnectorSettings downConnectorSettings = new ConnectorSettings(false, false);
 
+    @Nullable
+    private ConnectorNetwork network = null;
+
     public void update()
     {
-        // TODO later
+        if (this.network == null) {
+            return;
+        }
+
+        if (this.network.isRemoved()) {
+            this.network = this.network.mergeToNetwork(this.getPos());
+        }
     }
 
     public boolean isUsableByPlayer(EntityPlayer player)
@@ -134,12 +143,26 @@ public class TileEntityConnector extends TileEntity implements ITickable
             connectorSettings.disableExtract();
         }
         notifyUpdate();
-    }    @Override
+    }
+
+    public ConnectorNetwork getNetwork()
+    {
+        if (this.network == null) {
+            throw new IllegalStateException("Network is null");
+        }
+        return this.network;
+    }
+
+    public void setNetwork(ConnectorNetwork connectorNetwork)
+    {
+        this.network = connectorNetwork;
+    }
+
+    @Override
     public NBTTagCompound getUpdateTag()
     {
         return this.writeToNBT(new NBTTagCompound());
     }
-
 
     @Override
     public void onDataPacket(
@@ -168,13 +191,12 @@ public class TileEntityConnector extends TileEntity implements ITickable
         this.westConnectorSettings = this.retrieveConnectorSettingsFromNBT(Direction.WEST, compound);
         this.upConnectorSettings = this.retrieveConnectorSettingsFromNBT(Direction.UP, compound);
         this.downConnectorSettings = this.retrieveConnectorSettingsFromNBT(Direction.DOWN, compound);
+        this.network = this.retrieveNetworkFromNBT(compound);
 
         if (compound.hasKey("CustomName", 8)) {
             this.setCustomName(compound.getString("CustomName"));
         }
     }
-
-
 
     private ConnectorSettings retrieveConnectorSettingsFromNBT(
         Direction direction,
@@ -185,6 +207,19 @@ public class TileEntityConnector extends TileEntity implements ITickable
             compound.getBoolean(direction + "-isInsertEnabled"),
             compound.getBoolean(direction + "-isExtractEnabled")
         );
+    }
+
+    @Nullable
+    private ConnectorNetwork retrieveNetworkFromNBT(
+        NBTTagCompound compound
+    )
+    {
+        int networkId = compound.getInteger("NetworkId");
+        if (networkId == 0) {
+            return null;
+        }
+
+        return ConnectorNetwork.create(compound.getInteger("NetworkId"));
     }
 
     public void setCustomName(String customName)
@@ -202,6 +237,7 @@ public class TileEntityConnector extends TileEntity implements ITickable
         this.storeConnectorSettingsFromNBT(this.westConnectorSettings, Direction.WEST, compound);
         this.storeConnectorSettingsFromNBT(this.upConnectorSettings, Direction.UP, compound);
         this.storeConnectorSettingsFromNBT(this.downConnectorSettings, Direction.DOWN, compound);
+        this.storeNetworkFromNBT(compound);
 
         if (this.hasCustomName()) {
             compound.setString("CustomName", this.customName);
@@ -220,6 +256,17 @@ public class TileEntityConnector extends TileEntity implements ITickable
         compound.setBoolean(direction + "-isExtractEnabled", settings.isExtractEnabled());
     }
 
+    private void storeNetworkFromNBT(
+        NBTTagCompound compound
+    )
+    {
+        if (this.network == null) {
+            compound.setInteger("NetworkId", 0);
+        } else {
+            compound.setInteger("NetworkId", this.network.id());
+        }
+    }
+
     @Override
     public ITextComponent getDisplayName()
     {
@@ -232,4 +279,6 @@ public class TileEntityConnector extends TileEntity implements ITickable
     {
         return this.customName != null && !this.customName.isEmpty();
     }
+
+
 }
