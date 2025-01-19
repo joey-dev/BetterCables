@@ -22,6 +22,7 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.Explosion;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
@@ -219,6 +220,19 @@ public class BlockCable extends BlockBase implements IHasModel
     }
 
     @Override
+    public void onBlockDestroyedByPlayer(
+        World worldIn,
+        BlockPos pos,
+        IBlockState state
+    )
+    {
+        super.onBlockDestroyedByPlayer(worldIn, pos, state);
+        if (!worldIn.isRemote) {
+            NetworkManager.reCalculateNetworksAround(pos, worldIn);
+        }
+    }
+
+    @Override
     public void onBlockAdded(
         World worldIn,
         BlockPos pos,
@@ -274,6 +288,19 @@ public class BlockCable extends BlockBase implements IHasModel
     )
     {
         return Item.getItemFromBlock(BlockInit.CABLE);
+    }
+
+    @Override
+    public void onBlockDestroyedByExplosion(
+        World worldIn,
+        BlockPos pos,
+        Explosion explosionIn
+    )
+    {
+        super.onBlockDestroyedByExplosion(worldIn, pos, explosionIn);
+        if (worldIn.isRemote) {
+            NetworkManager.reCalculateNetworksAround(pos, worldIn);
+        }
     }
 
     @Override

@@ -34,10 +34,8 @@ public class TileEntityConnector extends TileEntity implements ITickable
             return;
         }
 
-        System.out.println("Network ID: " + this.network.id());
-
         if (this.network.isRemoved()) {
-            this.network = this.network.mergeToNetwork();
+            this.network = this.network.mergeToNetwork(this.getPos());
         }
     }
 

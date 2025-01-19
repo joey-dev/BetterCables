@@ -14,6 +14,7 @@ import java.util.*;
 public class NetworkManager
 {
     private static final Map<BlockPos, Boolean> foundCablePositions = new HashMap<>();
+    private static final Map<Integer, Boolean> newlyCreatedNetworksById = new HashMap<>();
 
     private NetworkManager()
     {
@@ -61,6 +62,81 @@ public class NetworkManager
 
         foundCablePositions.clear();
         return isRemovingANetwork;
+    }
+
+    public static void reCalculateNetworksAround(
+        BlockPos position,
+        World worldIn
+    )
+    {
+        foundCablePositions.clear();
+        newlyCreatedNetworksById.clear();
+
+        foundCablePositions.put(position, true);
+        List<BlockPos> neighborBlockPositions = getPossibleConnectedBlocks(position);
+
+        List<BlockPos> actualNeighborBlockPositions = new ArrayList<>();
+
+        for (BlockPos neighborBlockPosition : neighborBlockPositions) {
+            Block neighborBlock = worldIn.getBlockState(neighborBlockPosition).getBlock();
+            if (!(neighborBlock instanceof BlockConnector) && !(neighborBlock instanceof BlockCable)) {
+                continue;
+            }
+
+            actualNeighborBlockPositions.add(neighborBlockPosition);
+        }
+
+        if (actualNeighborBlockPositions.size() < 2) {
+            return;
+        }
+
+        for (BlockPos neighborBlockPosition : actualNeighborBlockPositions) {
+            ConnectorNetwork newNetwork = new ConnectorNetwork();
+            newlyCreatedNetworksById.put(newNetwork.id(), true);
+            reCalculateNetworkFrom(neighborBlockPosition, worldIn, newNetwork);
+        }
+
+        foundCablePositions.clear();
+        newlyCreatedNetworksById.clear();
+    }
+
+    private static void reCalculateNetworkFrom(
+        BlockPos position,
+        World worldIn,
+        ConnectorNetwork network
+    )
+    {
+        List<BlockPos> neighborBlockPositions = getPossibleConnectedBlocks(position);
+
+        for (BlockPos neighborBlockPosition : neighborBlockPositions) {
+            if (foundCablePositions.containsKey(neighborBlockPosition)) {
+                continue;
+            }
+
+            foundCablePositions.put(neighborBlockPosition, true);
+            Block neighborBlock = worldIn.getBlockState(neighborBlockPosition).getBlock();
+
+            if (!(neighborBlock instanceof BlockConnector) && !(neighborBlock instanceof BlockCable)) {
+                continue;
+            }
+
+            if (neighborBlock instanceof BlockConnector) {
+                ConnectorNetwork oldNetwork = (
+                    (TileEntityConnector) Objects.requireNonNull(
+                        worldIn.getTileEntity(neighborBlockPosition)
+                    )
+                )
+                    .getNetwork();
+
+                if (oldNetwork.id() == network.id()) {
+                    continue;
+                }
+
+                oldNetwork.remove(neighborBlockPosition, network);
+            }
+
+            reCalculateNetworkFrom(neighborBlockPosition, worldIn, network);
+        }
     }
 
     private static Map<Integer, ConnectorNetwork> findNetworks(
