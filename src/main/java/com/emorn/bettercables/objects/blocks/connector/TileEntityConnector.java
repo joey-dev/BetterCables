@@ -5,6 +5,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
@@ -260,7 +261,50 @@ public class TileEntityConnector extends TileEntity implements ITickable
             return null;
         }
 
-        return ConnectorNetwork.create(compound.getInteger("NetworkId"));
+        ConnectorNetwork network = ConnectorNetwork.create(compound.getInteger("NetworkId"));
+
+        this.addConnectorInformationToNetwork(network);
+
+        return network;
+    }
+
+    private void addConnectorInformationToNetwork(ConnectorNetwork network)
+    {
+        if (this.northConnectorSettings.isInsertEnabled()) {
+            network.addInsertInventoryPosition(this.getPos().offset(EnumFacing.NORTH), this.getPos());
+        } else {
+            network.removeInsertInventoryPosition(this.getPos().offset(EnumFacing.NORTH), this.getPos());
+        }
+
+        if (this.eastConnectorSettings.isInsertEnabled()) {
+            network.addInsertInventoryPosition(this.getPos().offset(EnumFacing.EAST), this.getPos());
+        } else {
+            network.removeInsertInventoryPosition(this.getPos().offset(EnumFacing.EAST), this.getPos());
+        }
+
+        if (this.southConnectorSettings.isInsertEnabled()) {
+            network.addInsertInventoryPosition(this.getPos().offset(EnumFacing.SOUTH), this.getPos());
+        } else {
+            network.removeInsertInventoryPosition(this.getPos().offset(EnumFacing.SOUTH), this.getPos());
+        }
+
+        if (this.westConnectorSettings.isInsertEnabled()) {
+            network.addInsertInventoryPosition(this.getPos().offset(EnumFacing.WEST), this.getPos());
+        } else {
+            network.removeInsertInventoryPosition(this.getPos().offset(EnumFacing.WEST), this.getPos());
+        }
+
+        if (this.upConnectorSettings.isInsertEnabled()) {
+            network.addInsertInventoryPosition(this.getPos().offset(EnumFacing.UP), this.getPos());
+        } else {
+            network.removeInsertInventoryPosition(this.getPos().offset(EnumFacing.UP), this.getPos());
+        }
+
+        if (this.downConnectorSettings.isInsertEnabled()) {
+            network.addInsertInventoryPosition(this.getPos().offset(EnumFacing.DOWN), this.getPos());
+        } else {
+            network.removeInsertInventoryPosition(this.getPos().offset(EnumFacing.DOWN), this.getPos());
+        }
     }
 
     public void setCustomName(String customName)

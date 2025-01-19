@@ -69,11 +69,16 @@ public class ConnectorNetwork
     {
         this.insertInventoryPositions.computeIfAbsent(inventoryPosition, k -> new ArrayList<>());
 
+        if (this.insertInventoryPositions.get(inventoryPosition).contains(connectorPosition)) {
+            return;
+        }
         this.insertInventoryPositions.get(inventoryPosition).add(connectorPosition);
     }
 
     public void removeInsertInventoryPosition(BlockPos inventoryPosition, BlockPos connectorPosition)
     {
+        this.insertInventoryPositions.computeIfAbsent(inventoryPosition, k -> new ArrayList<>());
+
         this.insertInventoryPositions.get(inventoryPosition).remove(connectorPosition);
     }
 
