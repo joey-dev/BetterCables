@@ -277,11 +277,48 @@ public class BlockConnector extends BlockBase implements IHasModel
         IBlockState state
     )
     {
-        this.addNetwork(worldIn, pos);
+        boolean didMergeCurrentNetwork = NetworkManager.mergeNetworks(worldIn, pos, findTotalConnections(getActualState(state, worldIn, pos)));
+        if (!didMergeCurrentNetwork) {
+            this.addNetwork(worldIn, pos);
+        }
         if (!worldIn.isRemote) {
             worldIn.setBlockState(pos, state, 2);
         }
     }
+
+    private int findTotalConnections(
+        IBlockState state
+    )
+    {
+        int totalConnections = 0;
+
+        if (this.hasConnection(state, NORTH)) {
+            totalConnections++;
+        }
+
+        if (this.hasConnection(state, EAST)) {
+            totalConnections++;
+        }
+
+        if (this.hasConnection(state, SOUTH)) {
+            totalConnections++;
+        }
+
+        if (this.hasConnection(state, WEST)) {
+            totalConnections++;
+        }
+
+        if (this.hasConnection(state, UP)) {
+            totalConnections++;
+        }
+
+        if (this.hasConnection(state, DOWN)) {
+            totalConnections++;
+        }
+
+        return totalConnections;
+    }
+
 
     @Override
     public Item getItemDropped(

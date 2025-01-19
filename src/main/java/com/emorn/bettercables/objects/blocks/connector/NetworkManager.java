@@ -19,16 +19,17 @@ public class NetworkManager
     {
     }
 
-    public static void mergeNetworks(
+    public static boolean mergeNetworks(
         World worldIn,
         BlockPos pos,
         int totalConnections
     )
     {
         foundCablePositions.clear();
+        boolean isRemovingANetwork = false;
 
         if (totalConnections == 0 || totalConnections == 1) {
-            return;
+            return isRemovingANetwork;
         }
 
         foundCablePositions.put(pos, true);
@@ -50,14 +51,16 @@ public class NetworkManager
                     continue;
                 }
 
+                isRemovingANetwork = true;
                 network.remove(firstNetwork);
             }
 
             foundCablePositions.clear();
-            return;
+            return isRemovingANetwork;
         }
 
         foundCablePositions.clear();
+        return isRemovingANetwork;
     }
 
     private static Map<Integer, ConnectorNetwork> findNetworks(

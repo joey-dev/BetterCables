@@ -233,7 +233,7 @@ public class BlockCable extends BlockBase implements IHasModel
         }
     }
 
-    private static int findTotalConnections(
+    private int findTotalConnections(
         IBlockState actualState
     )
     {
