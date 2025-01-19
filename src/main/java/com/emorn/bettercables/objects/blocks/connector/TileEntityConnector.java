@@ -85,7 +85,10 @@ public class TileEntityConnector extends TileEntity implements ITickable
 
         this.directionToIndexMap.putIfAbsent(direction, 0);
 
-        BlockPos inventoryPosition = this.network.findInventoryPositionBy(this.directionToIndexMap.get(direction));
+        int currentIndex = this.directionToIndexMap.get(direction);
+        BlockPos inventoryPosition = this.network.findInventoryPositionBy(currentIndex);
+
+        this.directionToIndexMap.put(direction, this.network.findNextIndex(currentIndex));
 
         if (inventoryPosition == null) {
             System.err.println("No chest found at: " + direction);

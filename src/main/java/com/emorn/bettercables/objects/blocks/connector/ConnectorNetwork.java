@@ -35,10 +35,12 @@ public class ConnectorNetwork
     }
 
     public int findNextIndex(int index) {
+        this.cleanInsertInventoryPositions();
+
         int totalItems = this.insertInventoryPositions.size();
         index++;
 
-        if (index > totalItems) {
+        if (index >= totalItems) {
             index = 0;
         }
 
