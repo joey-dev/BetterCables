@@ -3,8 +3,7 @@ package com.emorn.bettercables.objects.blocks.cable;
 import com.emorn.bettercables.init.BlockInit;
 import com.emorn.bettercables.objects.blocks.BlockBase;
 import com.emorn.bettercables.objects.blocks.connector.BlockConnector;
-import com.emorn.bettercables.objects.blocks.connector.ConnectorNetwork;
-import com.emorn.bettercables.objects.blocks.connector.TileEntityConnector;
+import com.emorn.bettercables.objects.blocks.connector.NetworkManager;
 import com.emorn.bettercables.utils.IHasModel;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.block.Block;
@@ -28,7 +27,9 @@ import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
@@ -103,8 +104,6 @@ public class BlockCable extends BlockBase implements IHasModel
         (double) 7 / 16,
         (double) 9 / 16
     );
-
-    private final Map<BlockPos, Boolean> foundCablePositions = new HashMap<>();
 
     public BlockCable(String name)
     {
@@ -226,22 +225,45 @@ public class BlockCable extends BlockBase implements IHasModel
         IBlockState state
     )
     {
-        // look at the total connections of the added block
-        // when 0, then there is no network, so no merging
-        // when 1, there is only 1 network, so no merging
-        // when 2, then there could be 2 networks
-        // when 3, then there could be 3 networks
-        // when 4, then there could be 4 networks
-        // when 5, then there could be 5 networks
-        // when 6, then there could be 6 networks
-
-        // when needing to merge, merge all to the earliest id
-
-        this.mergeNetworks(worldIn, pos, state);
+        IBlockState actualState = getActualState(state, worldIn, pos);
+        NetworkManager.mergeNetworks(worldIn, pos, findTotalConnections(actualState));
 
         if (!worldIn.isRemote) {
             worldIn.setBlockState(pos, state, 2);
         }
+    }
+
+    private static int findTotalConnections(
+        IBlockState actualState
+    )
+    {
+        int totalConnections = 0;
+
+        if (Boolean.TRUE.equals(actualState.getValue(NORTH))) {
+            totalConnections++;
+        }
+
+        if (Boolean.TRUE.equals(actualState.getValue(EAST))) {
+            totalConnections++;
+        }
+
+        if (Boolean.TRUE.equals(actualState.getValue(SOUTH))) {
+            totalConnections++;
+        }
+
+        if (Boolean.TRUE.equals(actualState.getValue(WEST))) {
+            totalConnections++;
+        }
+
+        if (Boolean.TRUE.equals(actualState.getValue(UP))) {
+            totalConnections++;
+        }
+
+        if (Boolean.TRUE.equals(actualState.getValue(DOWN))) {
+            totalConnections++;
+        }
+
+        return totalConnections;
     }
 
     @Override
@@ -337,144 +359,4 @@ public class BlockCable extends BlockBase implements IHasModel
         return state.getValue(facing).equals(true);
     }
 
-    private void mergeNetworks(
-        World worldIn,
-        BlockPos pos,
-        IBlockState state
-    )
-    {
-        this.foundCablePositions.clear();
-        IBlockState actualState = getActualState(state, worldIn, pos);
-        int totalConnections = this.findTotalConnections(actualState);
-
-        if (totalConnections == 0 || totalConnections == 1) {
-            return;
-        }
-
-        this.foundCablePositions.put(pos, true);
-
-        Map<Integer, ConnectorNetwork> networks = this.findNetworks(
-            worldIn,
-            pos,
-            totalConnections,
-            new HashMap<>()
-        );
-        if (networks.size() > 1) {
-            TreeMap<Integer, ConnectorNetwork> sortedNetworks = new TreeMap<>(networks);
-            ConnectorNetwork firstNetwork = sortedNetworks.firstEntry().getValue();
-
-            for (Map.Entry<Integer, ConnectorNetwork> entry : sortedNetworks.entrySet()) {
-                ConnectorNetwork network = entry.getValue();
-
-                if (network.id() == firstNetwork.id()) {
-                    continue;
-                }
-
-                network.remove(firstNetwork);
-            }
-
-            this.foundCablePositions.clear();
-            return;
-        }
-
-        this.foundCablePositions.clear();
-    }
-
-    private Map<Integer, ConnectorNetwork> findNetworks(
-        World worldIn,
-        BlockPos pos,
-        int totalConnections,
-        Map<Integer, ConnectorNetwork> networks
-    )
-    {
-        List<BlockPos> neighborBlockPositions = this.getPossibleConnectedBlocks(pos);
-
-        for (BlockPos neighborBlockPosition : neighborBlockPositions) {
-            if (this.foundCablePositions.containsKey(neighborBlockPosition)) {
-                continue;
-            }
-
-            this.foundCablePositions.put(neighborBlockPosition, true);
-            Block neighborBlock = worldIn.getBlockState(neighborBlockPosition).getBlock();
-
-            if (!(neighborBlock instanceof BlockConnector) && !(neighborBlock instanceof BlockCable)) {
-                continue;
-            }
-
-            if (neighborBlock instanceof BlockConnector) {
-                ConnectorNetwork network = (
-                    (TileEntityConnector) Objects.requireNonNull(
-                        worldIn.getTileEntity(neighborBlockPosition)
-                    )
-                ).getNetwork();
-
-                if (!networks.containsKey(network.id())) {
-                    networks.put(network.id(), network);
-
-                    if (networks.size() == totalConnections) {
-                        return networks;
-                    }
-                }
-            }
-            Map<Integer, ConnectorNetwork> connectorNetworks = this.findNetworks(
-                worldIn,
-                neighborBlockPosition,
-                totalConnections,
-                networks
-            );
-            if (connectorNetworks.size() == totalConnections) {
-                return connectorNetworks;
-            }
-        }
-
-        return networks;
-    }
-
-    private List<BlockPos> getPossibleConnectedBlocks(
-        BlockPos pos
-    )
-    {
-        List<BlockPos> connectedBlocks = new ArrayList<>();
-        connectedBlocks.add(new BlockPos(pos.getX(), pos.getY(), pos.getZ() - 1));
-        connectedBlocks.add(new BlockPos(pos.getX() + 1, pos.getY(), pos.getZ()));
-        connectedBlocks.add(new BlockPos(pos.getX(), pos.getY(), pos.getZ() + 1));
-        connectedBlocks.add(new BlockPos(pos.getX() - 1, pos.getY(), pos.getZ()));
-        connectedBlocks.add(new BlockPos(pos.getX(), pos.getY() + 1, pos.getZ()));
-        connectedBlocks.add(new BlockPos(pos.getX(), pos.getY() - 1, pos.getZ()));
-
-        return connectedBlocks;
-    }
-
-    private int findTotalConnections(
-        IBlockState actualState
-    )
-    {
-        int totalConnections = 0;
-
-        if (Boolean.TRUE.equals(actualState.getValue(NORTH))) {
-            totalConnections++;
-        }
-
-        if (Boolean.TRUE.equals(actualState.getValue(EAST))) {
-            totalConnections++;
-        }
-
-        if (Boolean.TRUE.equals(actualState.getValue(SOUTH))) {
-            totalConnections++;
-        }
-
-        if (Boolean.TRUE.equals(actualState.getValue(WEST))) {
-            totalConnections++;
-        }
-
-        if (Boolean.TRUE.equals(actualState.getValue(UP))) {
-            totalConnections++;
-        }
-
-        if (Boolean.TRUE.equals(actualState.getValue(DOWN))) {
-            totalConnections++;
-        }
-
-        return totalConnections;
-    }
 }
