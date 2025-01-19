@@ -6,6 +6,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ITickable;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -89,17 +90,52 @@ public class TileEntityConnector extends TileEntity implements ITickable
     {
         ConnectorSettings connectorSettings = this.findConnectorSettingsByDirection(direction);
 
+        if (this.network == null) {
+            return;
+        }
+
         if (connectorSettings == null) {
             return;
         }
 
         if (checked) {
             connectorSettings.enableInsert();
+            this.network.addInsertInventoryPosition(this.findPositionByDirection(direction));
         } else {
+            this.network.removeInsertInventoryPosition(this.findPositionByDirection(direction));
             connectorSettings.disableInsert();
         }
         notifyUpdate();
         notifyUpdate();
+    }
+
+    private BlockPos findPositionByDirection(Direction direction)
+    {
+        if (direction == Direction.NORTH) {
+            return this.getPos().north();
+        }
+
+        if (direction == Direction.EAST) {
+            return this.getPos().east();
+        }
+
+        if (direction == Direction.SOUTH) {
+            return this.getPos().south();
+        }
+
+        if (direction == Direction.WEST) {
+            return this.getPos().west();
+        }
+
+        if (direction == Direction.UP) {
+            return this.getPos().up();
+        }
+
+        if (direction == Direction.DOWN) {
+            return this.getPos().down();
+        }
+
+        throw new IllegalStateException("Unknown direction: " + direction);
     }
 
     private void notifyUpdate()
