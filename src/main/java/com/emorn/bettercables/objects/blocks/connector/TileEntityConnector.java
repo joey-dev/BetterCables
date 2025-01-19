@@ -34,8 +34,6 @@ public class TileEntityConnector extends TileEntity implements ITickable
             return;
         }
 
-        System.out.println(this.network.id());
-
         if (this.network.isRemoved()) {
             this.network = this.network.mergeToNetwork(this.getPos());
         }
@@ -194,12 +192,6 @@ public class TileEntityConnector extends TileEntity implements ITickable
         this.upConnectorSettings = this.retrieveConnectorSettingsFromNBT(Direction.UP, compound);
         this.downConnectorSettings = this.retrieveConnectorSettingsFromNBT(Direction.DOWN, compound);
         this.network = this.retrieveNetworkFromNBT(compound);
-
-        if (this.network != null) {
-            System.out.println("read: " + network.id());
-        } else {
-            System.out.println("read: empty");
-        }
 
         if (compound.hasKey("CustomName", 8)) {
             this.setCustomName(compound.getString("CustomName"));

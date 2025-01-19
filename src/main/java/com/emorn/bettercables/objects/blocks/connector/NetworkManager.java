@@ -14,7 +14,6 @@ import java.util.*;
 public class NetworkManager
 {
     private static final Map<BlockPos, Boolean> foundCablePositions = new HashMap<>();
-    private static final Map<Integer, Boolean> newlyCreatedNetworksById = new HashMap<>();
 
     private NetworkManager()
     {
@@ -70,7 +69,6 @@ public class NetworkManager
     )
     {
         foundCablePositions.clear();
-        newlyCreatedNetworksById.clear();
 
         foundCablePositions.put(position, true);
         List<BlockPos> neighborBlockPositions = getPossibleConnectedBlocks(position);
@@ -92,12 +90,10 @@ public class NetworkManager
 
         for (BlockPos neighborBlockPosition : actualNeighborBlockPositions) {
             ConnectorNetwork newNetwork = ConnectorNetwork.create();
-            newlyCreatedNetworksById.put(newNetwork.id(), true);
             reCalculateNetworkFrom(neighborBlockPosition, worldIn, newNetwork);
         }
 
         foundCablePositions.clear();
-        newlyCreatedNetworksById.clear();
     }
 
     private static void reCalculateNetworkFrom(
