@@ -98,12 +98,17 @@ public class TileEntityConnector extends TileEntity implements ITickable
             return;
         }
 
+        boolean isRemote = this.getWorld().isRemote;
         if (checked) {
             connectorSettings.enableInsert();
-            this.network.addInsertInventoryPosition(this.findPositionByDirection(direction));
+            if (!isRemote) {
+                this.network.addInsertInventoryPosition(this.findPositionByDirection(direction), this.getPos());
+            }
         } else {
-            this.network.removeInsertInventoryPosition(this.findPositionByDirection(direction));
             connectorSettings.disableInsert();
+            if (!isRemote) {
+                this.network.removeInsertInventoryPosition(this.findPositionByDirection(direction), this.getPos());
+            }
         }
         notifyUpdate();
         notifyUpdate();

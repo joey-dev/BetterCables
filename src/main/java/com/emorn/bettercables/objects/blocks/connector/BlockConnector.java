@@ -8,6 +8,7 @@ import com.emorn.bettercables.utils.IHasModel;
 import com.emorn.bettercables.utils.Reference;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockAir;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.PropertyEnum;
@@ -165,32 +166,6 @@ public class BlockConnector extends BlockBase implements IHasModel
     }
 
     @Override
-    public void onBlockDestroyedByPlayer(
-        World worldIn,
-        BlockPos pos,
-        IBlockState state
-    )
-    {
-        super.onBlockDestroyedByPlayer(worldIn, pos, state);
-        if (!worldIn.isRemote) {
-            NetworkManager.reCalculateNetworksAround(pos, worldIn);
-        }
-    }
-
-    @Override
-    public void onBlockDestroyedByExplosion(
-        World worldIn,
-        BlockPos pos,
-        Explosion explosionIn
-    )
-    {
-        super.onBlockDestroyedByExplosion(worldIn, pos, explosionIn);
-        if (worldIn.isRemote) {
-            NetworkManager.reCalculateNetworksAround(pos, worldIn);
-        }
-    }
-
-    @Override
     public IBlockState getStateFromMeta(int meta)
     {
         return this.getDefaultState();
@@ -298,13 +273,36 @@ public class BlockConnector extends BlockBase implements IHasModel
     }
 
     @Override
+    public void onBlockDestroyedByPlayer(
+        World worldIn,
+        BlockPos pos,
+        IBlockState state
+    )
+    {
+        super.onBlockDestroyedByPlayer(worldIn, pos, state);
+        this.onBlockDestroyed(worldIn, pos);
+    }
+
+    private void onBlockDestroyed(
+        World worldIn,
+        BlockPos pos
+    )
+    {
+        NetworkManager.reCalculateNetworksAround(pos, worldIn);
+    }
+
+    @Override
     public void onBlockAdded(
         World worldIn,
         BlockPos pos,
         IBlockState state
     )
     {
-        boolean didMergeCurrentNetwork = NetworkManager.mergeNetworks(worldIn, pos, findTotalConnections(getActualState(state, worldIn, pos)));
+        boolean didMergeCurrentNetwork = NetworkManager.mergeNetworks(
+            worldIn,
+            pos,
+            findTotalConnections(getActualState(state, worldIn, pos))
+        );
         if (!didMergeCurrentNetwork) {
             this.addNetwork(worldIn, pos);
         }
@@ -312,40 +310,6 @@ public class BlockConnector extends BlockBase implements IHasModel
             worldIn.setBlockState(pos, state, 2);
         }
     }
-
-    private int findTotalConnections(
-        IBlockState state
-    )
-    {
-        int totalConnections = 0;
-
-        if (this.hasConnection(state, NORTH)) {
-            totalConnections++;
-        }
-
-        if (this.hasConnection(state, EAST)) {
-            totalConnections++;
-        }
-
-        if (this.hasConnection(state, SOUTH)) {
-            totalConnections++;
-        }
-
-        if (this.hasConnection(state, WEST)) {
-            totalConnections++;
-        }
-
-        if (this.hasConnection(state, UP)) {
-            totalConnections++;
-        }
-
-        if (this.hasConnection(state, DOWN)) {
-            totalConnections++;
-        }
-
-        return totalConnections;
-    }
-
 
     @Override
     public Item getItemDropped(
@@ -385,6 +349,17 @@ public class BlockConnector extends BlockBase implements IHasModel
         }
 
         return closestResult;
+    }
+
+    @Override
+    public void onBlockDestroyedByExplosion(
+        World worldIn,
+        BlockPos pos,
+        Explosion explosionIn
+    )
+    {
+        super.onBlockDestroyedByExplosion(worldIn, pos, explosionIn);
+        this.onBlockDestroyed(worldIn, pos);
     }
 
     @Override
@@ -512,6 +487,42 @@ public class BlockConnector extends BlockBase implements IHasModel
     )
     {
         return new ItemStack(BlockInit.CONNECTOR);
+    }
+
+    @Override
+
+    public void onNeighborChange(IBlockAccess world, BlockPos pos, BlockPos neighbor)
+    {
+        super.onNeighborChange(world, pos, neighbor);
+        IBlockState neighborBlock = world.getBlockState(neighbor);
+
+        if (!(neighborBlock.getBlock() instanceof BlockAir)) {
+           return;
+        }
+
+        TileEntity tileEntity = world.getTileEntity(pos);
+        if (tileEntity instanceof TileEntityConnector) {
+            TileEntityConnector connector = (TileEntityConnector) tileEntity;
+
+            connector.getNetwork().removeInsertInventoryPosition(
+                neighbor,
+                pos
+            );
+
+            if (neighbor.getX() == pos.getX() + 1) {
+                connector.setInsertEnabled(false, Direction.EAST);
+            } else if (neighbor.getX() + 1 == pos.getX()) {
+                connector.setInsertEnabled(false, Direction.WEST);
+            } else if (neighbor.getY() + 1 == pos.getY()) {
+                connector.setInsertEnabled(false, Direction.DOWN);
+            } else if (neighbor.getY() == pos.getY() + 1) {
+                connector.setInsertEnabled(false, Direction.UP);
+            } else if (neighbor.getZ() == pos.getZ() + 1) {
+                connector.setInsertEnabled(false, Direction.SOUTH);
+            } else if (neighbor.getZ() + 1 == pos.getZ()) {
+                connector.setInsertEnabled(false, Direction.NORTH);
+            }
+        }
     }
 
     @Override
@@ -644,6 +655,39 @@ public class BlockConnector extends BlockBase implements IHasModel
     )
     {
         return state.getValue(facing).toString().equals(ConnectionType.CONNECTOR.toString());
+    }
+
+    private int findTotalConnections(
+        IBlockState state
+    )
+    {
+        int totalConnections = 0;
+
+        if (this.hasConnection(state, NORTH)) {
+            totalConnections++;
+        }
+
+        if (this.hasConnection(state, EAST)) {
+            totalConnections++;
+        }
+
+        if (this.hasConnection(state, SOUTH)) {
+            totalConnections++;
+        }
+
+        if (this.hasConnection(state, WEST)) {
+            totalConnections++;
+        }
+
+        if (this.hasConnection(state, UP)) {
+            totalConnections++;
+        }
+
+        if (this.hasConnection(state, DOWN)) {
+            totalConnections++;
+        }
+
+        return totalConnections;
     }
 
     private void addNetwork(
