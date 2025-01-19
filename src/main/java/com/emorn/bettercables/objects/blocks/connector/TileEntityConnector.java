@@ -96,6 +96,10 @@ public class TileEntityConnector extends TileEntity implements ITickable
         }
 
         ItemStack items = this.extractItemFromChest(this.world, this.findPositionByDirection(direction), 0, 1);
+        if (items == null || items.isEmpty()) {
+            return;
+        }
+
         boolean didItemsInsert = this.insertItemIntoChest(this.world, inventoryPosition, items);
 
         if (!didItemsInsert) {
@@ -103,6 +107,7 @@ public class TileEntityConnector extends TileEntity implements ITickable
         }
     }
 
+    @Nullable
     private ItemStack extractItemFromChest(World world, BlockPos chestPos, int slotIndex, int amount) {
         TileEntity tileEntity = world.getTileEntity(chestPos);
         if (!(tileEntity instanceof TileEntityChest)) {
@@ -123,10 +128,15 @@ public class TileEntityConnector extends TileEntity implements ITickable
             return ItemStack.EMPTY;
         }
 
-        ItemStack extracted = itemHandler.extractItem(slotIndex, amount, false);
-        chest.markDirty();
+        for (int slot = 0; slot < itemHandler.getSlots(); slot++) {
+            ItemStack extracted = itemHandler.extractItem(slot, amount, false);
+            if (!extracted.isEmpty()) {
+                chest.markDirty();
+                return extracted;
+            }
+        }
 
-        return extracted;
+        return null;
     }
 
     private boolean insertItemIntoChest(World world, BlockPos chestPos, ItemStack stackToInsert) {
