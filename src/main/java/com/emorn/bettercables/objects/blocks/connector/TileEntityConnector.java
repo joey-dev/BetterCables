@@ -2,18 +2,25 @@ package com.emorn.bettercables.objects.blocks.connector;
 
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.world.World;
+import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.items.IItemHandler;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.HashMap;
+import java.util.Map;
 
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
@@ -27,11 +34,20 @@ public class TileEntityConnector extends TileEntity implements ITickable
     private ConnectorSettings upConnectorSettings = new ConnectorSettings(false, false);
     private ConnectorSettings downConnectorSettings = new ConnectorSettings(false, false);
 
+    private Map<Direction, Integer> directionToIndexMap = new HashMap<>();
+
     @Nullable
     private ConnectorNetwork network = null;
 
+    private int currentTick = 0;
+
     public void update()
     {
+        currentTick++;
+        if (currentTick >= 20) {
+            currentTick = 0;
+        }
+
         if (this.network == null) {
             return;
         }
@@ -39,6 +55,101 @@ public class TileEntityConnector extends TileEntity implements ITickable
         if (this.network.isRemoved()) {
             this.network = this.network.mergeToNetwork(this.getPos());
         }
+
+        this.exportItems();
+    }
+
+    private void exportItems()
+    {
+        if (this.currentTick % 2 != 0) {
+            return;
+        }
+
+        if (this.network == null) {
+            return;
+        }
+
+        for (Direction direction : Direction.values()) {
+            if (!this.isExtractEnabled(direction)) {
+                continue;
+            }
+            this.exportItem(direction);
+        }
+    }
+
+    private void exportItem(Direction direction)
+    {
+        if (this.network == null) {
+            return;
+        }
+
+        this.directionToIndexMap.putIfAbsent(direction, 0);
+
+        BlockPos inventoryPosition = this.network.findInventoryPositionBy(this.directionToIndexMap.get(direction));
+
+        if (inventoryPosition == null) {
+            System.err.println("No chest found at: " + direction);
+            return;
+        }
+
+        ItemStack items = this.extractItemFromChest(this.world, this.findPositionByDirection(direction), 0, 1);
+        boolean didItemsInsert = this.insertItemIntoChest(this.world, inventoryPosition, items);
+
+        if (!didItemsInsert) {
+            this.insertItemIntoChest(this.world, this.findPositionByDirection(direction), items);
+        }
+    }
+
+    private ItemStack extractItemFromChest(World world, BlockPos chestPos, int slotIndex, int amount) {
+        TileEntity tileEntity = world.getTileEntity(chestPos);
+        if (!(tileEntity instanceof TileEntityChest)) {
+            System.err.println("No chest found at: " + chestPos);
+            return ItemStack.EMPTY;
+        }
+
+        TileEntityChest chest = (TileEntityChest) tileEntity;
+
+        IItemHandler itemHandler = chest.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
+        if (itemHandler == null) {
+            System.err.println("Failed to get chest inventory.");
+            return ItemStack.EMPTY;
+        }
+
+        if (slotIndex < 0 || slotIndex >= itemHandler.getSlots()) {
+            System.err.println("Invalid slot index: " + slotIndex);
+            return ItemStack.EMPTY;
+        }
+
+        ItemStack extracted = itemHandler.extractItem(slotIndex, amount, false);
+        chest.markDirty();
+
+        return extracted;
+    }
+
+    private boolean insertItemIntoChest(World world, BlockPos chestPos, ItemStack stackToInsert) {
+        TileEntity tileEntity = world.getTileEntity(chestPos);
+        if (!(tileEntity instanceof TileEntityChest)) {
+            System.err.println("No chest found at: " + chestPos);
+            return false;
+        }
+
+        TileEntityChest chest = (TileEntityChest) tileEntity;
+
+        IItemHandler inventory = chest.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
+        if (inventory == null) {
+            System.err.println("Failed to get chest inventory.");
+            return false;
+        }
+
+        for (int slot = 0; slot < inventory.getSlots(); slot++) {
+            stackToInsert = inventory.insertItem(slot, stackToInsert, false);
+            if (stackToInsert.isEmpty()) {
+                chest.markDirty();
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public boolean isUsableByPlayer(EntityPlayer player)

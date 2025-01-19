@@ -5,10 +5,7 @@ import net.minecraft.util.math.BlockPos;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
@@ -35,6 +32,30 @@ public class ConnectorNetwork
         }
 
         id = savedId;
+    }
+
+    public int findNextIndex(int index) {
+        int totalItems = this.insertInventoryPositions.size();
+        index++;
+
+        if (index > totalItems) {
+            index = 0;
+        }
+
+        return index;
+    }
+
+    @Nullable
+    public BlockPos findInventoryPositionBy(int index)
+    {
+        this.cleanInsertInventoryPositions();
+
+        return (BlockPos) this.insertInventoryPositions.keySet().toArray()[index];
+    }
+
+    private void cleanInsertInventoryPositions() // todo this is prob a bug
+    {
+        this.insertInventoryPositions.entrySet().removeIf(entry -> entry.getValue().isEmpty());
     }
 
     public static ConnectorNetwork create(int savedId)
