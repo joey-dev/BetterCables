@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "RQR",
+    "ODO",
+    " Q "
+  ],
+  "key": {
+    "Q": {
+      "item": "minecraft:quartz",
+      "data": 0
+    },
+    "O": {
+      "item": "minecraft:obsidian",
+      "data": 0
+    },
+    "D": {
+      "item": "minecraft:diamond",
+      "data": 0
+    },
+    "R": {
+      "item": "minecraft:redstone",
+      "data": 0
+    }
+  },
+  "result": {
+    "item": "bettercables:connector",
+    "count": 1
+  }
+}

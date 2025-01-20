@@ -4,6 +4,7 @@ import com.emorn.bettercables.Main;
 import com.emorn.bettercables.init.BlockInit;
 import com.emorn.bettercables.init.ItemInit;
 import com.emorn.bettercables.utils.IHasModel;
+import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraftforge.client.event.ModelRegistryEvent;
@@ -12,7 +13,11 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 
+import javax.annotation.ParametersAreNonnullByDefault;
+
 @Mod.EventBusSubscriber
+@MethodsReturnNonnullByDefault
+@ParametersAreNonnullByDefault
 public class RegistryHandler
 {
     @SubscribeEvent
@@ -33,15 +38,13 @@ public class RegistryHandler
     @SubscribeEvent
     public static void onModelRegister(ModelRegistryEvent event)
     {
-        for (Item item : ItemInit.ITEMS)
-        {
+        for (Item item : ItemInit.ITEMS) {
             if (item instanceof IHasModel) {
                 ((IHasModel) item).registerModels();
             }
         }
 
-        for (Block block : BlockInit.BLOCKS)
-        {
+        for (Block block : BlockInit.BLOCKS) {
             if (block instanceof IHasModel) {
                 ((IHasModel) block).registerModels();
             }

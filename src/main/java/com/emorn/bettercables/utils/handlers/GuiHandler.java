@@ -4,17 +4,19 @@ import com.emorn.bettercables.objects.blocks.connector.ContainerConnector;
 import com.emorn.bettercables.objects.blocks.connector.Direction;
 import com.emorn.bettercables.objects.blocks.connector.GuiConnector;
 import com.emorn.bettercables.objects.blocks.connector.TileEntityConnector;
-import com.emorn.bettercables.objects.blocks.machines.sintering.ContainerSinteringFurnace;
-import com.emorn.bettercables.objects.blocks.machines.sintering.GuiSinteringFurnace;
-import com.emorn.bettercables.objects.blocks.machines.sintering.TileEntitySinteringFurnace;
 import com.emorn.bettercables.utils.Reference;
 import com.google.common.collect.ImmutableMap;
+import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.IGuiHandler;
 
+import javax.annotation.ParametersAreNonnullByDefault;
+
+@MethodsReturnNonnullByDefault
+@ParametersAreNonnullByDefault
 public class GuiHandler implements IGuiHandler
 {
     @Override
@@ -27,13 +29,6 @@ public class GuiHandler implements IGuiHandler
         int z
     )
     {
-        if (id == Reference.GUI_SINTERING_FURNACE) {
-            return new ContainerSinteringFurnace(
-                player.inventory,
-                (TileEntitySinteringFurnace) world.getTileEntity(new BlockPos(x, y, z))
-            );
-        }
-
         ImmutableMap<Integer, Direction> connectorIds = ImmutableMap.<Integer, Direction>builder()
             .put(Reference.GUI_CONNECTOR_NORTH, Direction.NORTH)
             .put(Reference.GUI_CONNECTOR_EAST, Direction.EAST)
@@ -68,13 +63,6 @@ public class GuiHandler implements IGuiHandler
         int z
     )
     {
-        if (id == Reference.GUI_SINTERING_FURNACE) {
-            return new GuiSinteringFurnace(
-                player.inventory,
-                (TileEntitySinteringFurnace) world.getTileEntity(new BlockPos(x, y, z))
-            );
-        }
-
         ImmutableMap<Integer, Direction> connectorIds = ImmutableMap.<Integer, Direction>builder()
             .put(Reference.GUI_CONNECTOR_NORTH, Direction.NORTH)
             .put(Reference.GUI_CONNECTOR_EAST, Direction.EAST)

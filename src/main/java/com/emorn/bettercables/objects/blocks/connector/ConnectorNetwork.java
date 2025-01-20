@@ -5,20 +5,22 @@ import net.minecraft.util.math.BlockPos;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
 public class ConnectorNetwork
 {
+    private static final Map<Integer, ConnectorNetwork> createdNetworksById = new HashMap<>();
     private static int lastId = 1;
     private final int id;
-    private static final Map<Integer, ConnectorNetwork> createdNetworksById = new HashMap<>();
     // key = inventory, value = list of connectors
     private final Map<BlockPos, List<BlockPos>> insertInventoryPositions = new HashMap<>();
-
-    private boolean shouldMerge = false;
     private final Map<BlockPos, ConnectorNetwork> mergeToNetwork = new HashMap<>();
+    private boolean shouldMerge = false;
 
     private ConnectorNetwork()
     {
@@ -32,38 +34,6 @@ public class ConnectorNetwork
         }
 
         id = savedId;
-    }
-
-    public int findNextIndex(int index) {
-        this.cleanInsertInventoryPositions();
-
-        int totalItems = this.insertInventoryPositions.size();
-        index++;
-
-        if (index >= totalItems) {
-            index = 0;
-        }
-
-        return index;
-    }
-
-    @Nullable
-    public BlockPos findInventoryPositionBy(int index)
-    {
-        this.cleanInsertInventoryPositions();
-
-        int totalItems = this.insertInventoryPositions.size();
-
-        if (index >= totalItems) {
-            return null;
-        }
-
-        return (BlockPos) this.insertInventoryPositions.keySet().toArray()[index];
-    }
-
-    private void cleanInsertInventoryPositions() // todo this is prob a bug
-    {
-        this.insertInventoryPositions.entrySet().removeIf(entry -> entry.getValue().isEmpty());
     }
 
     public static ConnectorNetwork create(int savedId)
@@ -83,6 +53,44 @@ public class ConnectorNetwork
         return network;
     }
 
+    @Nullable
+    public Integer findNextIndex(int index)
+    {
+        this.cleanInsertInventoryPositions();
+
+        int totalItems = this.insertInventoryPositions.size();
+        if (totalItems == 0) {
+            return null;
+        }
+
+        index++;
+
+        if (index >= totalItems) {
+            index = 0;
+        }
+
+        return index;
+    }
+
+    private void cleanInsertInventoryPositions() // todo this is prob a bug
+    {
+        this.insertInventoryPositions.entrySet().removeIf(entry -> entry.getValue().isEmpty());
+    }
+
+    @Nullable
+    public BlockPos findInventoryPositionBy(int index)
+    {
+        this.cleanInsertInventoryPositions();
+
+        int totalItems = this.insertInventoryPositions.size();
+
+        if (index >= totalItems) {
+            return null;
+        }
+
+        return (BlockPos) this.insertInventoryPositions.keySet().toArray()[index];
+    }
+
     public int id()
     {
         return id;
@@ -94,7 +102,10 @@ public class ConnectorNetwork
         this.mergeToNetwork.put(new BlockPos(0, 0, 0), newNetwork);
     }
 
-    public void addInsertInventoryPosition(BlockPos inventoryPosition, BlockPos connectorPosition)
+    public void addInsertInventoryPosition(
+        BlockPos inventoryPosition,
+        BlockPos connectorPosition
+    )
     {
         this.insertInventoryPositions.computeIfAbsent(inventoryPosition, k -> new ArrayList<>());
 
@@ -104,7 +115,10 @@ public class ConnectorNetwork
         this.insertInventoryPositions.get(inventoryPosition).add(connectorPosition);
     }
 
-    public void removeInsertInventoryPosition(BlockPos inventoryPosition, BlockPos connectorPosition)
+    public void removeInsertInventoryPosition(
+        BlockPos inventoryPosition,
+        BlockPos connectorPosition
+    )
     {
         this.insertInventoryPositions.computeIfAbsent(inventoryPosition, k -> new ArrayList<>());
 

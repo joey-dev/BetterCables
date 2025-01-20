@@ -490,42 +490,6 @@ public class BlockConnector extends BlockBase implements IHasModel
     }
 
     @Override
-
-    public void onNeighborChange(IBlockAccess world, BlockPos pos, BlockPos neighbor)
-    {
-        super.onNeighborChange(world, pos, neighbor);
-        IBlockState neighborBlock = world.getBlockState(neighbor);
-
-        if (!(neighborBlock.getBlock() instanceof BlockAir)) {
-           return;
-        }
-
-        TileEntity tileEntity = world.getTileEntity(pos);
-        if (tileEntity instanceof TileEntityConnector) {
-            TileEntityConnector connector = (TileEntityConnector) tileEntity;
-
-            connector.getNetwork().removeInsertInventoryPosition(
-                neighbor,
-                pos
-            );
-
-            if (neighbor.getX() == pos.getX() + 1) {
-                connector.setInsertEnabled(false, Direction.EAST);
-            } else if (neighbor.getX() + 1 == pos.getX()) {
-                connector.setInsertEnabled(false, Direction.WEST);
-            } else if (neighbor.getY() + 1 == pos.getY()) {
-                connector.setInsertEnabled(false, Direction.DOWN);
-            } else if (neighbor.getY() == pos.getY() + 1) {
-                connector.setInsertEnabled(false, Direction.UP);
-            } else if (neighbor.getZ() == pos.getZ() + 1) {
-                connector.setInsertEnabled(false, Direction.SOUTH);
-            } else if (neighbor.getZ() + 1 == pos.getZ()) {
-                connector.setInsertEnabled(false, Direction.NORTH);
-            }
-        }
-    }
-
-    @Override
     protected BlockStateContainer createBlockState()
     {
         return new BlockStateContainer(
@@ -552,6 +516,46 @@ public class BlockConnector extends BlockBase implements IHasModel
     )
     {
         return new TileEntityConnector();
+    }
+
+    @Override
+
+    public void onNeighborChange(
+        IBlockAccess world,
+        BlockPos pos,
+        BlockPos neighbor
+    )
+    {
+        super.onNeighborChange(world, pos, neighbor);
+        IBlockState neighborBlock = world.getBlockState(neighbor);
+
+        if (!(neighborBlock.getBlock() instanceof BlockAir)) {
+            return;
+        }
+
+        TileEntity tileEntity = world.getTileEntity(pos);
+        if (tileEntity instanceof TileEntityConnector) {
+            TileEntityConnector connector = (TileEntityConnector) tileEntity;
+
+            connector.getNetwork().removeInsertInventoryPosition(
+                neighbor,
+                pos
+            );
+
+            if (neighbor.getX() == pos.getX() + 1) {
+                connector.setInsertEnabled(false, Direction.EAST);
+            } else if (neighbor.getX() + 1 == pos.getX()) {
+                connector.setInsertEnabled(false, Direction.WEST);
+            } else if (neighbor.getY() + 1 == pos.getY()) {
+                connector.setInsertEnabled(false, Direction.DOWN);
+            } else if (neighbor.getY() == pos.getY() + 1) {
+                connector.setInsertEnabled(false, Direction.UP);
+            } else if (neighbor.getZ() == pos.getZ() + 1) {
+                connector.setInsertEnabled(false, Direction.SOUTH);
+            } else if (neighbor.getZ() + 1 == pos.getZ()) {
+                connector.setInsertEnabled(false, Direction.NORTH);
+            }
+        }
     }
 
     private List<AxisAlignedBB> retrieveAllBoxes(IBlockState state)

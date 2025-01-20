@@ -1,14 +1,23 @@
 package com.emorn.bettercables.proxy;
 
+import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.item.Item;
 import net.minecraftforge.client.model.ModelLoader;
 
-import static net.minecraftforge.common.ForgeHooks.getRegistryName;
+import javax.annotation.ParametersAreNonnullByDefault;
 
-public class ClientProxy extends CommonProxy {
+@MethodsReturnNonnullByDefault
+@ParametersAreNonnullByDefault
+public class ClientProxy extends CommonProxy
+{
     @Override
-    public void registerItemRenderer(Item item, int meta, String id) {
+    public void registerItemRenderer(
+        Item item,
+        int meta,
+        String id
+    )
+    {
         ModelLoader.setCustomModelResourceLocation(item, meta, new ModelResourceLocation(item.getRegistryName(), id));
     }
 }

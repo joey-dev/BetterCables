@@ -26,6 +26,8 @@ import java.util.Map;
 @ParametersAreNonnullByDefault
 public class TileEntityConnector extends TileEntity implements ITickable
 {
+    private static final int TICK_INTERVAL = 20;
+    private final Map<Direction, Integer> directionToIndexMap = new HashMap<>();
     private String customName;
     private ConnectorSettings northConnectorSettings = new ConnectorSettings(false, false);
     private ConnectorSettings eastConnectorSettings = new ConnectorSettings(false, false);
@@ -33,18 +35,14 @@ public class TileEntityConnector extends TileEntity implements ITickable
     private ConnectorSettings westConnectorSettings = new ConnectorSettings(false, false);
     private ConnectorSettings upConnectorSettings = new ConnectorSettings(false, false);
     private ConnectorSettings downConnectorSettings = new ConnectorSettings(false, false);
-
-    private Map<Direction, Integer> directionToIndexMap = new HashMap<>();
-
     @Nullable
     private ConnectorNetwork network = null;
-
     private int currentTick = 0;
 
     public void update()
     {
         currentTick++;
-        if (currentTick >= 20) {
+        if (currentTick >= TICK_INTERVAL) {
             currentTick = 0;
         }
 
@@ -77,6 +75,17 @@ public class TileEntityConnector extends TileEntity implements ITickable
         }
     }
 
+    public boolean isExtractEnabled(Direction direction)
+    {
+        ConnectorSettings connectorSettings = this.findConnectorSettingsByDirection(direction);
+
+        if (connectorSettings == null) {
+            return false;
+        }
+
+        return connectorSettings.isExtractEnabled();
+    }
+
     private void exportItem(Direction direction)
     {
         if (this.network == null) {
@@ -88,9 +97,14 @@ public class TileEntityConnector extends TileEntity implements ITickable
         int currentIndex = this.directionToIndexMap.get(direction);
         BlockPos inventoryPosition = this.network.findInventoryPositionBy(currentIndex);
 
-        this.directionToIndexMap.put(direction, this.network.findNextIndex(currentIndex));
+        Integer nextIndex = this.network.findNextIndex(currentIndex);
+        if (nextIndex == null) {
+            return;
+        }
 
-        if (inventoryPosition == null) {
+        this.directionToIndexMap.put(direction, nextIndex);
+
+        if (inventoryPosition == null) { // bug, when turning off the insert while it tries to insert, it goes here
             System.err.println("No chest found at: " + direction);
             return;
         }
@@ -108,7 +122,34 @@ public class TileEntityConnector extends TileEntity implements ITickable
     }
 
     @Nullable
-    private ItemStack extractItemFromChest(World world, BlockPos chestPos, int slotIndex, int amount) {
+    private ConnectorSettings findConnectorSettingsByDirection(Direction direction)
+    {
+        switch (direction) {
+            case NORTH:
+                return this.northConnectorSettings;
+            case EAST:
+                return this.eastConnectorSettings;
+            case SOUTH:
+                return this.southConnectorSettings;
+            case WEST:
+                return this.westConnectorSettings;
+            case UP:
+                return this.upConnectorSettings;
+            case DOWN:
+                return this.downConnectorSettings;
+            default:
+                return null;
+        }
+    }
+
+    @Nullable
+    private ItemStack extractItemFromChest(
+        World world,
+        BlockPos chestPos,
+        int slotIndex,
+        int amount
+    )
+    {
         TileEntity tileEntity = world.getTileEntity(chestPos);
         if (!(tileEntity instanceof TileEntityChest)) {
             System.err.println("No chest found at: " + chestPos);
@@ -139,7 +180,41 @@ public class TileEntityConnector extends TileEntity implements ITickable
         return null;
     }
 
-    private boolean insertItemIntoChest(World world, BlockPos chestPos, ItemStack stackToInsert) {
+    private BlockPos findPositionByDirection(Direction direction)
+    {
+        if (direction == Direction.NORTH) {
+            return this.getPos().north();
+        }
+
+        if (direction == Direction.EAST) {
+            return this.getPos().east();
+        }
+
+        if (direction == Direction.SOUTH) {
+            return this.getPos().south();
+        }
+
+        if (direction == Direction.WEST) {
+            return this.getPos().west();
+        }
+
+        if (direction == Direction.UP) {
+            return this.getPos().up();
+        }
+
+        if (direction == Direction.DOWN) {
+            return this.getPos().down();
+        }
+
+        throw new IllegalStateException("Unknown direction: " + direction);
+    }
+
+    private boolean insertItemIntoChest(
+        World world,
+        BlockPos chestPos,
+        ItemStack stackToInsert
+    )
+    {
         TileEntity tileEntity = world.getTileEntity(chestPos);
         if (!(tileEntity instanceof TileEntityChest)) {
             System.err.println("No chest found at: " + chestPos);
@@ -187,27 +262,6 @@ public class TileEntityConnector extends TileEntity implements ITickable
         return connectorSettings.isInsertEnabled();
     }
 
-    @Nullable
-    private ConnectorSettings findConnectorSettingsByDirection(Direction direction)
-    {
-        switch (direction) {
-            case NORTH:
-                return this.northConnectorSettings;
-            case EAST:
-                return this.eastConnectorSettings;
-            case SOUTH:
-                return this.southConnectorSettings;
-            case WEST:
-                return this.westConnectorSettings;
-            case UP:
-                return this.upConnectorSettings;
-            case DOWN:
-                return this.downConnectorSettings;
-            default:
-                return null;
-        }
-    }
-
     public void setInsertEnabled(
         boolean checked,
         Direction direction
@@ -239,35 +293,6 @@ public class TileEntityConnector extends TileEntity implements ITickable
         notifyUpdate();
     }
 
-    private BlockPos findPositionByDirection(Direction direction)
-    {
-        if (direction == Direction.NORTH) {
-            return this.getPos().north();
-        }
-
-        if (direction == Direction.EAST) {
-            return this.getPos().east();
-        }
-
-        if (direction == Direction.SOUTH) {
-            return this.getPos().south();
-        }
-
-        if (direction == Direction.WEST) {
-            return this.getPos().west();
-        }
-
-        if (direction == Direction.UP) {
-            return this.getPos().up();
-        }
-
-        if (direction == Direction.DOWN) {
-            return this.getPos().down();
-        }
-
-        throw new IllegalStateException("Unknown direction: " + direction);
-    }
-
     private void notifyUpdate()
     {
         this.markDirty();
@@ -279,17 +304,6 @@ public class TileEntityConnector extends TileEntity implements ITickable
                 3
             );
         }
-    }
-
-    public boolean isExtractEnabled(Direction direction)
-    {
-        ConnectorSettings connectorSettings = this.findConnectorSettingsByDirection(direction);
-
-        if (connectorSettings == null) {
-            return false;
-        }
-
-        return connectorSettings.isExtractEnabled();
     }
 
     public void setExtractEnabled(
