@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "IGI",
+    "IRI",
+    "IGI"
+  ],
+  "key": {
+    "R": {
+      "item": "minecraft:redstone",
+      "data": 0
+    },
+    "I": {
+      "item": "minecraft:iron_ingot",
+      "data": 0
+    },
+    "G": {
+      "item": "minecraft:glass",
+      "data": 0
+    }
+
+  },
+  "result": {
+    "item": "bettercables:cable",
+    "count": 4
+  }
+}
