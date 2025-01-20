@@ -52,6 +52,12 @@ public class ConnectorNetwork
     {
         this.cleanInsertInventoryPositions();
 
+        int totalItems = this.insertInventoryPositions.size();
+
+        if (index >= totalItems) {
+            return null;
+        }
+
         return (BlockPos) this.insertInventoryPositions.keySet().toArray()[index];
     }
 
