@@ -4,12 +4,17 @@ import com.emorn.bettercables.Main;
 import com.emorn.bettercables.init.BlockInit;
 import com.emorn.bettercables.init.ItemInit;
 import com.emorn.bettercables.utils.IHasModel;
+import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 
+import javax.annotation.ParametersAreNonnullByDefault;
+
+@MethodsReturnNonnullByDefault
+@ParametersAreNonnullByDefault
 public class BlockBase extends Block implements IHasModel
 {
     public BlockBase(

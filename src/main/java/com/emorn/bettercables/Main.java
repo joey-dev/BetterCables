@@ -21,14 +21,18 @@ public class Main
     public static CommonProxy proxy;
 
     @EventHandler
-    public static void preInit(FMLPreInitializationEvent event) {
+    public static void preInit(FMLPreInitializationEvent event)
+    {
         ModNetworkHandler.registerMessages();
     }
 
     @EventHandler
-    public static void init(FMLInitializationEvent event) {}
+    public static void init(FMLInitializationEvent event)
+    {
+    }
 
     @EventHandler
-    public static void postInit(FMLPostInitializationEvent event) {
+    public static void postInit(FMLPostInitializationEvent event)
+    {
     }
 }

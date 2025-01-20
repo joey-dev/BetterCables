@@ -1,9 +1,20 @@
 package com.emorn.bettercables.proxy;
 
+import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.item.Item;
 
-public class CommonProxy {
-    public void registerItemRenderer(Item item, int meta, String id) {
+import javax.annotation.ParametersAreNonnullByDefault;
+
+@MethodsReturnNonnullByDefault
+@ParametersAreNonnullByDefault
+public class CommonProxy
+{
+    public void registerItemRenderer(
+        Item item,
+        int meta,
+        String id
+    )
+    {
 
     }
 }

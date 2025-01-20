@@ -1,9 +1,13 @@
 package com.emorn.bettercables.objects.blocks.connector;
 
+import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.util.IStringSerializable;
 
 import javax.annotation.Nonnull;
+import javax.annotation.ParametersAreNonnullByDefault;
 
+@MethodsReturnNonnullByDefault
+@ParametersAreNonnullByDefault
 public enum Direction implements IStringSerializable
 {
     NORTH,
