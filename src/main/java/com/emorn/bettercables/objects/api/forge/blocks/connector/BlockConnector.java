@@ -225,94 +225,153 @@ public class BlockConnector extends BaseCable implements IHasModel
             }
         }
 
-        if (clickedBox != null) {
-            if ((clickedBox.equals(NORTH_CABLE_AABB) || clickedBox.equals(NORTH_CABLE_CONNECTOR_AABB)) &&
-                this.hasConnectionToInventory(actualState, NORTH)) {
-                if (!worldIn.isRemote) {
-                    playerIn.openGui(
-                        Main.instance,
-                        Reference.GUI_CONNECTOR_NORTH,
-                        worldIn,
-                        pos.getX(),
-                        pos.getY(),
-                        pos.getZ()
-                    );
-                }
-                return true;
-            }
-            if ((clickedBox.equals(EAST_CABLE_AABB) || clickedBox.equals(EAST_CABLE_CONNECTOR_AABB)) &&
-                this.hasConnectionToInventory(actualState, EAST)) {
-                if (!worldIn.isRemote) {
-                    playerIn.openGui(
-                        Main.instance,
-                        Reference.GUI_CONNECTOR_EAST,
-                        worldIn,
-                        pos.getX(),
-                        pos.getY(),
-                        pos.getZ()
-                    );
-                }
-                return true;
-            }
-            if ((clickedBox.equals(SOUTH_CABLE_AABB) || clickedBox.equals(SOUTH_CABLE_CONNECTOR_AABB)) &&
-                this.hasConnectionToInventory(actualState, SOUTH)) {
-                if (!worldIn.isRemote) {
-                    playerIn.openGui(
-                        Main.instance,
-                        Reference.GUI_CONNECTOR_SOUTH,
-                        worldIn,
-                        pos.getX(),
-                        pos.getY(),
-                        pos.getZ()
-                    );
-                }
-                return true;
-            }
-            if ((clickedBox.equals(WEST_CABLE_AABB) || clickedBox.equals(WEST_CABLE_CONNECTOR_AABB)) &&
-                this.hasConnectionToInventory(actualState, WEST)) {
-                if (!worldIn.isRemote) {
-                    playerIn.openGui(
-                        Main.instance,
-                        Reference.GUI_CONNECTOR_WEST,
-                        worldIn,
-                        pos.getX(),
-                        pos.getY(),
-                        pos.getZ()
-                    );
-                }
-                return true;
-            }
-            if ((clickedBox.equals(UP_CABLE_AABB) || clickedBox.equals(UP_CABLE_CONNECTOR_AABB)) &&
-                this.hasConnectionToInventory(actualState, UP)) {
-                if (!worldIn.isRemote) {
-                    playerIn.openGui(
-                        Main.instance,
-                        Reference.GUI_CONNECTOR_UP,
-                        worldIn,
-                        pos.getX(),
-                        pos.getY(),
-                        pos.getZ()
-                    );
-                }
-                return true;
-            }
-            if ((clickedBox.equals(DOWN_CABLE_AABB) || clickedBox.equals(DOWN_CABLE_CONNECTOR_AABB)) &&
-                this.hasConnectionToInventory(actualState, DOWN)) {
-                if (!worldIn.isRemote) {
-                    playerIn.openGui(
-                        Main.instance,
-                        Reference.GUI_CONNECTOR_DOWN,
-                        worldIn,
-                        pos.getX(),
-                        pos.getY(),
-                        pos.getZ()
-                    );
-                }
-                return true;
-            }
+        if (clickedBox == null) {
+            return false;
+        }
+        return this.openGui(
+            clickedBox,
+            actualState,
+            worldIn,
+            pos,
+            playerIn
+        );
+    }
+
+    private boolean openGui(
+        AxisAlignedBB clickedBox,
+        IBlockState actualState,
+        World worldIn,
+        BlockPos pos,
+        EntityPlayer playerIn
+    ) {
+        EnumFacing facing = findClickedCable(clickedBox, actualState);
+        if (facing == null) {
+            return false;
         }
 
-        return false;
+        return this.openGui(facing, worldIn, pos, playerIn);
+    }
+
+    private boolean openGui(
+        EnumFacing facing,
+        World worldIn,
+        BlockPos pos,
+        EntityPlayer playerIn
+    )
+    {
+        if (facing.equals(EnumFacing.NORTH) && !worldIn.isRemote) {
+            this.openGui(
+                Reference.GUI_CONNECTOR_NORTH,
+                worldIn,
+                pos,
+                playerIn
+            );
+            return true;
+        }
+        if (facing.equals(EnumFacing.EAST) && !worldIn.isRemote) {
+            this.openGui(
+                Reference.GUI_CONNECTOR_EAST,
+                worldIn,
+                pos,
+                playerIn
+            );
+            return true;
+        }
+        if (facing.equals(EnumFacing.SOUTH) && !worldIn.isRemote) {
+            this.openGui(
+                Reference.GUI_CONNECTOR_SOUTH,
+                worldIn,
+                pos,
+                playerIn
+            );
+            return true;
+        }
+        if (facing.equals(EnumFacing.WEST) && !worldIn.isRemote) {
+            this.openGui(
+                Reference.GUI_CONNECTOR_WEST,
+                worldIn,
+                pos,
+                playerIn
+            );
+            return true;
+        }
+        if (facing.equals(EnumFacing.UP) && !worldIn.isRemote) {
+            this.openGui(
+                Reference.GUI_CONNECTOR_UP,
+                worldIn,
+                pos,
+                playerIn
+            );
+            return true;
+        }
+
+        if (facing.equals(EnumFacing.DOWN) && !worldIn.isRemote) {
+            this.openGui(
+                Reference.GUI_CONNECTOR_DOWN,
+                worldIn,
+                pos,
+                playerIn
+            );
+            return true;
+        }
+
+        return worldIn.isRemote;
+    }
+
+    private void openGui(
+        int reference,
+        World worldIn,
+        BlockPos pos,
+        EntityPlayer playerIn
+    ) {
+        playerIn.openGui(
+            Main.instance,
+            reference,
+            worldIn,
+            pos.getX(),
+            pos.getY(),
+            pos.getZ()
+        );
+    }
+
+    @Nullable
+    private EnumFacing findClickedCable(
+        AxisAlignedBB clickedBox,
+        IBlockState actualState
+    )
+    {
+        if (this.hasClickedOn(clickedBox, actualState, NORTH_CABLE_AABB, NORTH_CABLE_CONNECTOR_AABB, NORTH)) {
+            return EnumFacing.NORTH;
+        }
+        if (this.hasClickedOn(clickedBox, actualState, EAST_CABLE_AABB, EAST_CABLE_CONNECTOR_AABB, EAST)) {
+            return EnumFacing.EAST;
+        }
+        if (this.hasClickedOn(clickedBox, actualState, SOUTH_CABLE_AABB, SOUTH_CABLE_CONNECTOR_AABB, SOUTH)) {
+            return EnumFacing.SOUTH;
+        }
+        if (this.hasClickedOn(clickedBox, actualState, WEST_CABLE_AABB, WEST_CABLE_CONNECTOR_AABB, WEST)) {
+            return EnumFacing.WEST;
+        }
+        if (this.hasClickedOn(clickedBox, actualState, UP_CABLE_AABB, UP_CABLE_CONNECTOR_AABB, UP)) {
+            return EnumFacing.UP;
+        }
+        if (this.hasClickedOn(clickedBox, actualState, DOWN_CABLE_AABB, DOWN_CABLE_CONNECTOR_AABB, DOWN)) {
+            return EnumFacing.DOWN;
+        }
+
+        return null;
+    }
+
+    private boolean hasClickedOn(
+        AxisAlignedBB clickedBox,
+        IBlockState actualState,
+        AxisAlignedBB cableBox,
+        AxisAlignedBB connectorBox,
+        PropertyEnum<ConnectionType> direction
+    )
+    {
+        return (clickedBox.equals(cableBox) || clickedBox.equals(connectorBox)) &&
+            this.hasConnectionToInventory(actualState, direction);
     }
 
     @Override
@@ -401,52 +460,34 @@ public class BlockConnector extends BaseCable implements IHasModel
 
         allBoxes.add(BASE_AABB);
 
-        if (this.hasConnection(state, NORTH)) {
-            allBoxes.add(NORTH_CABLE_AABB);
+        allBoxes.addAll(this.retrieveBoxesFor(NORTH, state, NORTH_CABLE_AABB, NORTH_CABLE_CONNECTOR_AABB));
+        allBoxes.addAll(this.retrieveBoxesFor(EAST, state, EAST_CABLE_AABB, EAST_CABLE_CONNECTOR_AABB));
+        allBoxes.addAll(this.retrieveBoxesFor(SOUTH, state, SOUTH_CABLE_AABB, SOUTH_CABLE_CONNECTOR_AABB));
+        allBoxes.addAll(this.retrieveBoxesFor(WEST, state, WEST_CABLE_AABB, WEST_CABLE_CONNECTOR_AABB));
+        allBoxes.addAll(this.retrieveBoxesFor(UP, state, UP_CABLE_AABB, UP_CABLE_CONNECTOR_AABB));
+        allBoxes.addAll(this.retrieveBoxesFor(DOWN, state, DOWN_CABLE_AABB, DOWN_CABLE_CONNECTOR_AABB));
 
-            if (this.hasConnectionToInventory(state, NORTH)) {
-                allBoxes.add(NORTH_CABLE_CONNECTOR_AABB);
-            }
+        return allBoxes;
+    }
+
+    private List<AxisAlignedBB> retrieveBoxesFor(
+        PropertyEnum<ConnectionType> direction,
+        IBlockState state,
+        AxisAlignedBB cableBox,
+        AxisAlignedBB connectorBox
+    )
+    {
+        List<AxisAlignedBB> allBoxes = new ArrayList<>();
+
+        if (this.hasConnectionToInventory(state, direction)) {
+            allBoxes.add(connectorBox);
+            allBoxes.add(cableBox);
+
+            return allBoxes;
         }
 
-        if (this.hasConnection(state, EAST)) {
-            allBoxes.add(EAST_CABLE_AABB);
-
-            if (this.hasConnectionToInventory(state, EAST)) {
-                allBoxes.add(EAST_CABLE_CONNECTOR_AABB);
-            }
-        }
-
-        if (this.hasConnection(state, SOUTH)) {
-            allBoxes.add(SOUTH_CABLE_AABB);
-
-            if (this.hasConnectionToInventory(state, SOUTH)) {
-                allBoxes.add(SOUTH_CABLE_CONNECTOR_AABB);
-            }
-        }
-
-        if (this.hasConnection(state, WEST)) {
-            allBoxes.add(WEST_CABLE_AABB);
-
-            if (this.hasConnectionToInventory(state, WEST)) {
-                allBoxes.add(WEST_CABLE_CONNECTOR_AABB);
-            }
-        }
-
-        if (this.hasConnection(state, UP)) {
-            allBoxes.add(UP_CABLE_AABB);
-
-            if (this.hasConnectionToInventory(state, UP)) {
-                allBoxes.add(UP_CABLE_CONNECTOR_AABB);
-            }
-        }
-
-        if (this.hasConnection(state, DOWN)) {
-            allBoxes.add(DOWN_CABLE_AABB);
-
-            if (this.hasConnectionToInventory(state, DOWN)) {
-                allBoxes.add(DOWN_CABLE_CONNECTOR_AABB);
-            }
+        if (this.hasConnection(state, direction)) {
+            allBoxes.add(cableBox);
         }
 
         return allBoxes;
