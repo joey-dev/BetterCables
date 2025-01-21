@@ -4,34 +4,29 @@ import com.emorn.bettercables.Main;
 import com.emorn.bettercables.init.BlockInit;
 import com.emorn.bettercables.objects.api.forge.blocks.cable.BlockCable;
 import com.emorn.bettercables.objects.api.forge.common.AxisAlignedBoundingBoxConverter;
+import com.emorn.bettercables.objects.api.forge.common.BaseCable;
 import com.emorn.bettercables.objects.application.blocks.cable.CableAxisAlignedBoundingBox;
 import com.emorn.bettercables.objects.application.blocks.connector.ConnectorAxisAlignedBoundingBox;
-import com.emorn.bettercables.objects.blocks.BlockBase;
 import com.emorn.bettercables.objects.blocks.connector.*;
 import com.emorn.bettercables.utils.IHasModel;
 import com.emorn.bettercables.utils.Reference;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockAir;
-import net.minecraft.block.SoundType;
-import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.PropertyEnum;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.Explosion;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
@@ -41,7 +36,7 @@ import java.util.*;
 
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
-public class BlockConnector extends BlockBase implements IHasModel
+public class BlockConnector extends BaseCable implements IHasModel
 {
     private static final AxisAlignedBB BASE_AABB = AxisAlignedBoundingBoxConverter.from(
         CableAxisAlignedBoundingBox.BASE
@@ -100,8 +95,19 @@ public class BlockConnector extends BlockBase implements IHasModel
 
     public BlockConnector(String name)
     {
-        super(name, Material.IRON);
-        setSoundType(SoundType.METAL);
+        super(name);
+    }
+
+    @Override
+    protected AxisAlignedBB baseAABB()
+    {
+        return BASE_AABB;
+    }
+
+    @Override
+    protected Block currentBlock()
+    {
+        return BlockInit.CONNECTOR;
     }
 
     @Override
@@ -130,104 +136,6 @@ public class BlockConnector extends BlockBase implements IHasModel
             .withProperty(WEST, getConnectionType(world, pos, EnumFacing.WEST))
             .withProperty(UP, getConnectionType(world, pos, EnumFacing.UP))
             .withProperty(DOWN, getConnectionType(world, pos, EnumFacing.DOWN));
-    }
-
-    @Override
-    public boolean isFullCube(IBlockState state)
-    {
-        return false;
-    }
-
-    @Override
-    public EnumBlockRenderType getRenderType(IBlockState state)
-    {
-        return EnumBlockRenderType.MODEL;
-    }
-
-    @Override
-    public AxisAlignedBB getBoundingBox(
-        IBlockState state,
-        IBlockAccess source,
-        BlockPos pos
-    )
-    {
-        EntityPlayer player = source instanceof World ? ((World) source).getClosestPlayer(
-            pos.getX(),
-            pos.getY(),
-            pos.getZ(),
-            10,
-            false
-        ) : null;
-        if (player == null) {
-            return BASE_AABB;
-        }
-
-        Vec3d start = player.getPositionEyes(1.0F);
-        Vec3d lookVec = player.getLook(1.0F);
-        Vec3d end = start.add(lookVec.scale(5));
-
-        IBlockState actualState = getActualState(state, source, pos);
-        List<AxisAlignedBB> allBoxes = retrieveAllBoxes(actualState);
-
-        AxisAlignedBB closestBox = BASE_AABB;
-        double closestDistance = Double.MAX_VALUE;
-
-        for (AxisAlignedBB box : allBoxes) {
-            RayTraceResult result = rayTrace(pos, start, end, box);
-            if (result != null) {
-                double distance = result.hitVec.distanceTo(start);
-                if (distance < closestDistance) {
-                    closestBox = box;
-                    closestDistance = distance;
-                }
-            }
-        }
-
-        return closestBox;
-    }
-
-    @Override
-    public void addCollisionBoxToList(
-        IBlockState state,
-        World worldIn,
-        BlockPos pos,
-        AxisAlignedBB entityBox,
-        List<AxisAlignedBB> collidingBoxes,
-        @Nullable Entity entityIn,
-        boolean isActualState
-    )
-    {
-        IBlockState actualState = getActualState(state, worldIn, pos);
-        List<AxisAlignedBB> allBoxes = retrieveAllBoxes(actualState);
-
-        for (AxisAlignedBB box : allBoxes) {
-            addCollisionBoxToList(pos, entityBox, collidingBoxes, box);
-        }
-    }
-
-    @Override
-    public boolean isOpaqueCube(IBlockState state)
-    {
-        return false;
-    }
-
-    @Override
-    public void onBlockDestroyedByPlayer(
-        World worldIn,
-        BlockPos pos,
-        IBlockState state
-    )
-    {
-        super.onBlockDestroyedByPlayer(worldIn, pos, state);
-        this.onBlockDestroyed(worldIn, pos);
-    }
-
-    private void onBlockDestroyed(
-        World worldIn,
-        BlockPos pos
-    )
-    {
-        NetworkManager.reCalculateNetworksAround(pos, worldIn);
     }
 
     @Override
@@ -288,17 +196,6 @@ public class BlockConnector extends BlockBase implements IHasModel
         }
 
         return closestResult;
-    }
-
-    @Override
-    public void onBlockDestroyedByExplosion(
-        World worldIn,
-        BlockPos pos,
-        Explosion explosionIn
-    )
-    {
-        super.onBlockDestroyedByExplosion(worldIn, pos, explosionIn);
-        this.onBlockDestroyed(worldIn, pos);
     }
 
     @Override
@@ -497,7 +394,8 @@ public class BlockConnector extends BlockBase implements IHasModel
         }
     }
 
-    private List<AxisAlignedBB> retrieveAllBoxes(IBlockState state)
+    @Override
+    protected List<AxisAlignedBB> retrieveAllBoxes(IBlockState state)
     {
         List<AxisAlignedBB> allBoxes = new ArrayList<>();
 
