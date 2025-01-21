@@ -1,9 +1,13 @@
-package com.emorn.bettercables.objects.blocks.connector;
+package com.emorn.bettercables.objects.api.forge.blocks.connector;
 
 import com.emorn.bettercables.Main;
 import com.emorn.bettercables.init.BlockInit;
+import com.emorn.bettercables.objects.api.forge.blocks.cable.BlockCable;
+import com.emorn.bettercables.objects.api.forge.common.AxisAlignedBoundingBoxConverter;
+import com.emorn.bettercables.objects.application.blocks.cable.CableAxisAlignedBoundingBox;
+import com.emorn.bettercables.objects.application.blocks.connector.ConnectorAxisAlignedBoundingBox;
 import com.emorn.bettercables.objects.blocks.BlockBase;
-import com.emorn.bettercables.objects.blocks.cable.BlockCable;
+import com.emorn.bettercables.objects.blocks.connector.*;
 import com.emorn.bettercables.utils.IHasModel;
 import com.emorn.bettercables.utils.Reference;
 import mcp.MethodsReturnNonnullByDefault;
@@ -39,123 +43,58 @@ import java.util.*;
 @ParametersAreNonnullByDefault
 public class BlockConnector extends BlockBase implements IHasModel
 {
-    public static final AxisAlignedBB BASE_AABB = new AxisAlignedBB(
-        (double) 7 / 16,
-        (double) 7 / 16,
-        (double) 7 / 16,
-        1 - ((double) 7 / 16),
-        (double) 9 / 16,
-        1 - ((double) 7 / 16)
+    private static final AxisAlignedBB BASE_AABB = AxisAlignedBoundingBoxConverter.from(
+        CableAxisAlignedBoundingBox.BASE
     );
 
-    public static final AxisAlignedBB NORTH_CABLE_AABB = new AxisAlignedBB(
-        (double) 7 / 16,
-        (double) 7 / 16,
-        0,
-        (double) 9 / 16,
-        (double) 9 / 16,
-        (double) 7 / 16
+    private static final AxisAlignedBB NORTH_CABLE_AABB = AxisAlignedBoundingBoxConverter.from(
+        CableAxisAlignedBoundingBox.NORTH
     );
-    public static final AxisAlignedBB NORTH_CABLE_CONNECTOR_AABB = new AxisAlignedBB(
-        (double) 4 / 16,
-        (double) 4 / 16,
-        0,
-        (double) 12 / 16,
-        (double) 12 / 16,
-        (double) 1 / 16
+    private static final AxisAlignedBB NORTH_CABLE_CONNECTOR_AABB = AxisAlignedBoundingBoxConverter.from(
+        ConnectorAxisAlignedBoundingBox.NORTH
     );
 
-    public static final AxisAlignedBB EAST_CABLE_AABB = new AxisAlignedBB(
-        1,
-        (double) 7 / 16,
-        (double) 7 / 16,
-        (double) 7 / 16,
-        (double) 9 / 16,
-        (double) 9 / 16
+    private static final AxisAlignedBB EAST_CABLE_AABB = AxisAlignedBoundingBoxConverter.from(
+        CableAxisAlignedBoundingBox.EAST
     );
-    public static final AxisAlignedBB EAST_CABLE_CONNECTOR_AABB = new AxisAlignedBB(
-        (double) 15 / 16,
-        (double) 4 / 16,
-        (double) 4 / 16,
-        (double) 16 / 16,
-        (double) 12 / 16,
-        (double) 12 / 16
+    private static final AxisAlignedBB EAST_CABLE_CONNECTOR_AABB = AxisAlignedBoundingBoxConverter.from(
+        ConnectorAxisAlignedBoundingBox.EAST
     );
 
-    public static final AxisAlignedBB SOUTH_CABLE_AABB = new AxisAlignedBB(
-        (double) 7 / 16,
-        (double) 7 / 16,
-        1,
-        (double) 9 / 16,
-        (double) 9 / 16,
-        (double) 7 / 16
+    private static final AxisAlignedBB SOUTH_CABLE_AABB = AxisAlignedBoundingBoxConverter.from(
+        CableAxisAlignedBoundingBox.SOUTH
     );
-    public static final AxisAlignedBB SOUTH_CABLE_CONNECTOR_AABB = new AxisAlignedBB(
-        (double) 4 / 16,
-        (double) 4 / 16,
-        (double) 15 / 16,
-        (double) 12 / 16,
-        (double) 12 / 16,
-        (double) 16 / 16
+    private static final AxisAlignedBB SOUTH_CABLE_CONNECTOR_AABB = AxisAlignedBoundingBoxConverter.from(
+        ConnectorAxisAlignedBoundingBox.SOUTH
     );
 
-    public static final AxisAlignedBB WEST_CABLE_AABB = new AxisAlignedBB(
-        0,
-        (double) 7 / 16,
-        (double) 7 / 16,
-        (double) 7 / 16,
-        (double) 9 / 16,
-        (double) 9 / 16
+    private static final AxisAlignedBB WEST_CABLE_AABB = AxisAlignedBoundingBoxConverter.from(
+        CableAxisAlignedBoundingBox.WEST
     );
-    public static final AxisAlignedBB WEST_CABLE_CONNECTOR_AABB = new AxisAlignedBB(
-        0,
-        (double) 4 / 16,
-        (double) 4 / 16,
-        (double) 1 / 16,
-        (double) 12 / 16,
-        (double) 12 / 16
+    private static final AxisAlignedBB WEST_CABLE_CONNECTOR_AABB = AxisAlignedBoundingBoxConverter.from(
+        ConnectorAxisAlignedBoundingBox.WEST
     );
 
-    public static final AxisAlignedBB UP_CABLE_AABB = new AxisAlignedBB(
-        (double) 7 / 16,
-        (double) 7 / 16,
-        (double) 7 / 16,
-        (double) 9 / 16,
-        1,
-        (double) 9 / 16
+    private static final AxisAlignedBB UP_CABLE_AABB = AxisAlignedBoundingBoxConverter.from(
+        CableAxisAlignedBoundingBox.UP
     );
-    public static final AxisAlignedBB UP_CABLE_CONNECTOR_AABB = new AxisAlignedBB(
-        (double) 4 / 16,
-        (double) 15 / 16,
-        (double) 4 / 16,
-        (double) 12 / 16,
-        (double) 16 / 16,
-        (double) 12 / 16
+    private static final AxisAlignedBB UP_CABLE_CONNECTOR_AABB = AxisAlignedBoundingBoxConverter.from(
+        ConnectorAxisAlignedBoundingBox.UP
     );
 
-    public static final AxisAlignedBB DOWN_CABLE_AABB = new AxisAlignedBB(
-        (double) 7 / 16,
-        0,
-        (double) 7 / 16,
-        (double) 9 / 16,
-        (double) 7 / 16,
-        (double) 9 / 16
+    private static final AxisAlignedBB DOWN_CABLE_AABB = AxisAlignedBoundingBoxConverter.from(
+        CableAxisAlignedBoundingBox.DOWN
     );
-    public static final AxisAlignedBB DOWN_CABLE_CONNECTOR_AABB = new AxisAlignedBB(
-        (double) 4 / 16,
-        0,
-        (double) 4 / 16,
-        (double) 12 / 16,
-        (double) 1 / 16,
-        (double) 12 / 16
+    private static final AxisAlignedBB DOWN_CABLE_CONNECTOR_AABB = AxisAlignedBoundingBoxConverter.from(
+        ConnectorAxisAlignedBoundingBox.DOWN
     );
 
-    public static final PropertyEnum<ConnectionType> NORTH = PropertyEnum.create("north", ConnectionType.class);
-    public static final PropertyEnum<ConnectionType> EAST = PropertyEnum.create("east", ConnectionType.class);
-    public static final PropertyEnum<ConnectionType> SOUTH = PropertyEnum.create("south", ConnectionType.class);
-    public static final PropertyEnum<ConnectionType> WEST = PropertyEnum.create("west", ConnectionType.class);
-    public static final PropertyEnum<ConnectionType> UP = PropertyEnum.create("up", ConnectionType.class);
-    public static final PropertyEnum<ConnectionType> DOWN = PropertyEnum.create("down", ConnectionType.class);
+    private static final PropertyEnum<ConnectionType> NORTH = PropertyEnum.create("north", ConnectionType.class);
+    private static final PropertyEnum<ConnectionType> EAST = PropertyEnum.create("east", ConnectionType.class);
+    private static final PropertyEnum<ConnectionType> SOUTH = PropertyEnum.create("south", ConnectionType.class);
+    private static final PropertyEnum<ConnectionType> WEST = PropertyEnum.create("west", ConnectionType.class);
+    private static final PropertyEnum<ConnectionType> UP = PropertyEnum.create("up", ConnectionType.class);
+    private static final PropertyEnum<ConnectionType> DOWN = PropertyEnum.create("down", ConnectionType.class);
 
     private final Map<BlockPos, Boolean> foundCablePositions = new HashMap<>();
 

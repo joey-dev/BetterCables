@@ -1,7 +1,7 @@
 package com.emorn.bettercables.init;
 
-import com.emorn.bettercables.objects.blocks.cable.BlockCable;
-import com.emorn.bettercables.objects.blocks.connector.BlockConnector;
+import com.emorn.bettercables.objects.api.forge.blocks.cable.BlockCable;
+import com.emorn.bettercables.objects.api.forge.blocks.connector.BlockConnector;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.block.Block;
 

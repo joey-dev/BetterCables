@@ -1,8 +1,10 @@
-package com.emorn.bettercables.objects.blocks.cable;
+package com.emorn.bettercables.objects.api.forge.blocks.cable;
 
 import com.emorn.bettercables.init.BlockInit;
+import com.emorn.bettercables.objects.api.forge.blocks.connector.BlockConnector;
+import com.emorn.bettercables.objects.api.forge.common.AxisAlignedBoundingBoxConverter;
+import com.emorn.bettercables.objects.application.blocks.cable.CableAxisAlignedBoundingBox;
 import com.emorn.bettercables.objects.blocks.BlockBase;
-import com.emorn.bettercables.objects.blocks.connector.BlockConnector;
 import com.emorn.bettercables.objects.blocks.connector.NetworkManager;
 import com.emorn.bettercables.utils.IHasModel;
 import mcp.MethodsReturnNonnullByDefault;
@@ -36,74 +38,33 @@ import java.util.Random;
 @ParametersAreNonnullByDefault
 public class BlockCable extends BlockBase implements IHasModel
 {
-    public static final PropertyBool NORTH = PropertyBool.create("north");
-    public static final PropertyBool EAST = PropertyBool.create("east");
-    public static final PropertyBool SOUTH = PropertyBool.create("south");
-    public static final PropertyBool WEST = PropertyBool.create("west");
-    public static final PropertyBool UP = PropertyBool.create("up");
-    public static final PropertyBool DOWN = PropertyBool.create("down");
+    private static final PropertyBool NORTH = PropertyBool.create("north");
+    private static final PropertyBool EAST = PropertyBool.create("east");
+    private static final PropertyBool SOUTH = PropertyBool.create("south");
+    private static final PropertyBool WEST = PropertyBool.create("west");
+    private static final PropertyBool UP = PropertyBool.create("up");
+    private static final PropertyBool DOWN = PropertyBool.create("down");
 
-    public static final AxisAlignedBB BASE_AABB = new AxisAlignedBB(
-        (double) 7 / 16,
-        (double) 7 / 16,
-        (double) 7 / 16,
-        1 - ((double) 7 / 16),
-        (double) 9 / 16,
-        1 - ((double) 7 / 16)
+    private static final AxisAlignedBB BASE_AABB = AxisAlignedBoundingBoxConverter.from(
+        CableAxisAlignedBoundingBox.BASE
     );
-
-    public static final AxisAlignedBB NORTH_CABLE_AABB = new AxisAlignedBB(
-        (double) 7 / 16,
-        (double) 7 / 16,
-        0,
-        (double) 9 / 16,
-        (double) 9 / 16,
-        (double) 7 / 16
+    private static final AxisAlignedBB NORTH_CABLE_AABB = AxisAlignedBoundingBoxConverter.from(
+        CableAxisAlignedBoundingBox.NORTH
     );
-
-    public static final AxisAlignedBB EAST_CABLE_AABB = new AxisAlignedBB(
-        1,
-        (double) 7 / 16,
-        (double) 7 / 16,
-        (double) 7 / 16,
-        (double) 9 / 16,
-        (double) 9 / 16
+    private static final AxisAlignedBB EAST_CABLE_AABB = AxisAlignedBoundingBoxConverter.from(
+        CableAxisAlignedBoundingBox.EAST
     );
-
-    public static final AxisAlignedBB SOUTH_CABLE_AABB = new AxisAlignedBB(
-        (double) 7 / 16,
-        (double) 7 / 16,
-        1,
-        (double) 9 / 16,
-        (double) 9 / 16,
-        (double) 7 / 16
+    private static final AxisAlignedBB SOUTH_CABLE_AABB = AxisAlignedBoundingBoxConverter.from(
+        CableAxisAlignedBoundingBox.SOUTH
     );
-
-    public static final AxisAlignedBB WEST_CABLE_AABB = new AxisAlignedBB(
-        0,
-        (double) 7 / 16,
-        (double) 7 / 16,
-        (double) 7 / 16,
-        (double) 9 / 16,
-        (double) 9 / 16
+    private static final AxisAlignedBB WEST_CABLE_AABB = AxisAlignedBoundingBoxConverter.from(
+        CableAxisAlignedBoundingBox.WEST
     );
-
-    public static final AxisAlignedBB UP_CABLE_AABB = new AxisAlignedBB(
-        (double) 7 / 16,
-        (double) 7 / 16,
-        (double) 7 / 16,
-        (double) 9 / 16,
-        1,
-        (double) 9 / 16
+    private static final AxisAlignedBB UP_CABLE_AABB = AxisAlignedBoundingBoxConverter.from(
+        CableAxisAlignedBoundingBox.UP
     );
-
-    public static final AxisAlignedBB DOWN_CABLE_AABB = new AxisAlignedBB(
-        (double) 7 / 16,
-        0,
-        (double) 7 / 16,
-        (double) 9 / 16,
-        (double) 7 / 16,
-        (double) 9 / 16
+    private static final AxisAlignedBB DOWN_CABLE_AABB = AxisAlignedBoundingBoxConverter.from(
+        CableAxisAlignedBoundingBox.DOWN
     );
 
     public BlockCable(String name)
