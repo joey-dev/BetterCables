@@ -1,8 +1,8 @@
 package com.emorn.bettercables.utils.handlers;
 
-import com.emorn.bettercables.objects.blocks.connector.ContainerConnector;
-import com.emorn.bettercables.objects.blocks.connector.Direction;
-import com.emorn.bettercables.objects.blocks.connector.GuiConnector;
+import com.emorn.bettercables.objects.api.forge.blocks.connector.ContainerConnector;
+import com.emorn.bettercables.objects.api.forge.common.Direction;
+import com.emorn.bettercables.objects.api.forge.blocks.connector.GuiConnector;
 import com.emorn.bettercables.objects.api.forge.blocks.connector.TileEntityConnector;
 import com.emorn.bettercables.utils.Reference;
 import com.google.common.collect.ImmutableMap;

@@ -1,7 +1,6 @@
 package com.emorn.bettercables.objects.api.forge.common;
 
-import com.emorn.bettercables.objects.blocks.BlockBase;
-import com.emorn.bettercables.objects.blocks.connector.NetworkManager;
+import com.emorn.bettercables.objects.api.forge.blocks.connector.NetworkManager;
 import com.emorn.bettercables.utils.IHasModel;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.block.Block;

@@ -5,7 +5,7 @@ import com.emorn.bettercables.objects.api.forge.blocks.connector.BlockConnector;
 import com.emorn.bettercables.objects.api.forge.common.AxisAlignedBoundingBoxConverter;
 import com.emorn.bettercables.objects.api.forge.common.BaseCable;
 import com.emorn.bettercables.objects.application.blocks.cable.CableAxisAlignedBoundingBox;
-import com.emorn.bettercables.objects.blocks.connector.NetworkManager;
+import com.emorn.bettercables.objects.api.forge.blocks.connector.NetworkManager;
 import com.emorn.bettercables.utils.IHasModel;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.block.Block;

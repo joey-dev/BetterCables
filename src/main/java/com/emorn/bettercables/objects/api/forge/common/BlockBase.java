@@ -1,4 +1,4 @@
-package com.emorn.bettercables.objects.blocks;
+package com.emorn.bettercables.objects.api.forge.common;
 
 import com.emorn.bettercables.Main;
 import com.emorn.bettercables.init.BlockInit;

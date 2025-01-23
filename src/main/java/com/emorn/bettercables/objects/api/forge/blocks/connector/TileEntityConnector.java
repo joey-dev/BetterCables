@@ -2,8 +2,7 @@ package com.emorn.bettercables.objects.api.forge.blocks.connector;
 
 import com.emorn.bettercables.objects.api.forge.common.Settings;
 import com.emorn.bettercables.objects.application.blocks.connector.ConnectorSide;
-import com.emorn.bettercables.objects.blocks.connector.ConnectorNetwork;
-import com.emorn.bettercables.objects.blocks.connector.Direction;
+import com.emorn.bettercables.objects.api.forge.common.Direction;
 import com.emorn.bettercables.objects.gateway.blocks.ConnectorSettings;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.entity.player.EntityPlayer;
