@@ -1,6 +1,7 @@
-package com.emorn.bettercables.objects.blocks.connector;
+package com.emorn.bettercables.objects.api.forge.blocks.connector;
 
 import com.emorn.bettercables.common.gui.GuiCheckbox;
+import com.emorn.bettercables.objects.api.forge.common.Direction;
 import com.emorn.bettercables.proxy.ModNetworkHandler;
 import com.emorn.bettercables.utils.Reference;
 import mcp.MethodsReturnNonnullByDefault;

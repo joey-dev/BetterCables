@@ -1,5 +1,8 @@
-package com.emorn.bettercables.objects.blocks.connector;
+package com.emorn.bettercables.objects.api.forge.blocks.connector;
 
+import com.emorn.bettercables.objects.api.forge.common.Logger;
+import com.emorn.bettercables.objects.application.blocks.connector.ConnectorSide;
+import com.emorn.bettercables.objects.application.blocks.connector.PossibleSlots;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.util.math.BlockPos;
 
@@ -21,6 +24,7 @@ public class ConnectorNetwork
     private final Map<BlockPos, List<BlockPos>> insertInventoryPositions = new HashMap<>();
     private final Map<BlockPos, ConnectorNetwork> mergeToNetwork = new HashMap<>();
     private boolean shouldMerge = false;
+    private boolean isDisabled = false;
 
     private ConnectorNetwork()
     {
@@ -56,8 +60,6 @@ public class ConnectorNetwork
     @Nullable
     public Integer findNextIndex(int index)
     {
-        this.cleanInsertInventoryPositions();
-
         int totalItems = this.insertInventoryPositions.size();
         if (totalItems == 0) {
             return null;
@@ -72,20 +74,17 @@ public class ConnectorNetwork
         return index;
     }
 
-    private void cleanInsertInventoryPositions() // todo this is prob a bug
-    {
-        this.insertInventoryPositions.entrySet().removeIf(entry -> entry.getValue().isEmpty());
-    }
-
     @Nullable
-    public BlockPos findInventoryPositionBy(int index)
+    public BlockPos findInventoryPositionBy(Integer index)
     {
-        this.cleanInsertInventoryPositions();
-
         int totalItems = this.insertInventoryPositions.size();
 
         if (index >= totalItems) {
             return null;
+        }
+
+        if (this.insertInventoryPositions.keySet().toArray()[index] == null) {
+            Logger.error("Tried to get empty");
         }
 
         return (BlockPos) this.insertInventoryPositions.keySet().toArray()[index];
@@ -107,12 +106,25 @@ public class ConnectorNetwork
         BlockPos connectorPosition
     )
     {
+        this.isDisabled = true;
+
         this.insertInventoryPositions.computeIfAbsent(inventoryPosition, k -> new ArrayList<>());
 
         if (this.insertInventoryPositions.get(inventoryPosition).contains(connectorPosition)) {
             return;
         }
         this.insertInventoryPositions.get(inventoryPosition).add(connectorPosition);
+
+        // List<List<Integer>> possibleSlots = PossibleSlots.calculate(); // todo
+
+        this.isDisabled = false;
+    }
+
+    public List<List<Integer>> getPossibleSlots(
+        ConnectorSide connectorSide
+    )
+    {
+        return PossibleSlots.calculate();
     }
 
     public void removeInsertInventoryPosition(
@@ -120,9 +132,24 @@ public class ConnectorNetwork
         BlockPos connectorPosition
     )
     {
+        this.isDisabled = true;
+
         this.insertInventoryPositions.computeIfAbsent(inventoryPosition, k -> new ArrayList<>());
 
         this.insertInventoryPositions.get(inventoryPosition).remove(connectorPosition);
+
+        if (this.insertInventoryPositions.get(inventoryPosition).isEmpty()) {
+            this.insertInventoryPositions.remove(inventoryPosition);
+        }
+
+        // List<List<Integer>> possibleSlots = PossibleSlots.calculate(); // todo
+
+        this.isDisabled = false;
+    }
+
+    public boolean isDisabled()
+    {
+        return isDisabled;
     }
 
     public void remove(

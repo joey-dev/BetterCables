@@ -1,5 +1,6 @@
-package com.emorn.bettercables.objects.blocks.connector;
+package com.emorn.bettercables.objects.api.forge.blocks.connector;
 
+import com.emorn.bettercables.objects.api.forge.common.Direction;
 import com.google.common.collect.ImmutableMap;
 import io.netty.buffer.ByteBuf;
 import mcp.MethodsReturnNonnullByDefault;

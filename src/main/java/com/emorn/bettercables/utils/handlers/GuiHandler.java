@@ -1,9 +1,9 @@
 package com.emorn.bettercables.utils.handlers;
 
-import com.emorn.bettercables.objects.blocks.connector.ContainerConnector;
-import com.emorn.bettercables.objects.blocks.connector.Direction;
-import com.emorn.bettercables.objects.blocks.connector.GuiConnector;
-import com.emorn.bettercables.objects.blocks.connector.TileEntityConnector;
+import com.emorn.bettercables.objects.api.forge.blocks.connector.ContainerConnector;
+import com.emorn.bettercables.objects.api.forge.common.Direction;
+import com.emorn.bettercables.objects.api.forge.blocks.connector.GuiConnector;
+import com.emorn.bettercables.objects.api.forge.blocks.connector.TileEntityConnector;
 import com.emorn.bettercables.utils.Reference;
 import com.google.common.collect.ImmutableMap;
 import mcp.MethodsReturnNonnullByDefault;
@@ -13,12 +13,14 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.IGuiHandler;
 
+import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
 public class GuiHandler implements IGuiHandler
 {
+    @Nullable
     @Override
     public Object getServerGuiElement(
         int id,
