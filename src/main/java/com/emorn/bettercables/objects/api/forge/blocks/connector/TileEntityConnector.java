@@ -52,15 +52,15 @@ public class TileEntityConnector extends TileEntity implements ITickable
             return;
         }
 
-        this.tick();
-
-        if (this.network == null) {
+        if (this.network == null || this.network.isDisabled()) {
             return;
         }
 
         if (this.network.isRemoved()) {
             this.network = this.network.mergeToNetwork(this.getPos());
         }
+
+        this.tick();
 
         if (north.canExport()) {
             this.exportItem(Direction.NORTH);
@@ -109,15 +109,13 @@ public class TileEntityConnector extends TileEntity implements ITickable
 
     private void exportItem(Direction direction)
     {
-        if (this.network == null) {
+        if (this.network == null || this.network.isDisabled()) {
             return;
         }
 
-        this.directionToIndexMap.putIfAbsent(direction, 0);
+        this.directionToIndexMap.putIfAbsent(direction, -1);
 
         int currentIndex = this.directionToIndexMap.get(direction);
-        BlockPos inventoryPosition = this.network.findInventoryPositionBy(currentIndex);
-
         Integer nextIndex = this.network.findNextIndex(currentIndex);
         if (nextIndex == null) {
             return;
@@ -125,7 +123,9 @@ public class TileEntityConnector extends TileEntity implements ITickable
 
         this.directionToIndexMap.put(direction, nextIndex);
 
-        if (inventoryPosition == null) { // bug, when turning off the insert while it tries to insert, it goes here
+        BlockPos inventoryPosition = this.network.findInventoryPositionBy(nextIndex);
+
+        if (inventoryPosition == null) {
             System.err.println("No chest found at: " + direction);
             return;
         }
@@ -147,7 +147,11 @@ public class TileEntityConnector extends TileEntity implements ITickable
             return;
         }
 
-        List<List<Integer>> possibleIndexes = connectorSide.possibleIndexes();
+        if (this.network == null || this.network.isDisabled()) {
+            return;
+        }
+
+        List<List<Integer>> possibleIndexes = this.network.getPossibleSlots(connectorSide);
 
         for (List<Integer> possibleIndex : possibleIndexes) {
             ItemStack items = this.extractItemFromChest(exportInventory, possibleIndex.get(0), 1);
@@ -315,7 +319,7 @@ public class TileEntityConnector extends TileEntity implements ITickable
     {
         ConnectorSettings connectorSettings = this.findConnectorSettingsByDirection(direction);
 
-        if (this.network == null) {
+        if (this.network == null || this.network.isDisabled()) {
             return;
         }
 
