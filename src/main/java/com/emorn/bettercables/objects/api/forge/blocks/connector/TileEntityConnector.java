@@ -1,5 +1,10 @@
-package com.emorn.bettercables.objects.blocks.connector;
+package com.emorn.bettercables.objects.api.forge.blocks.connector;
 
+import com.emorn.bettercables.objects.api.forge.common.Settings;
+import com.emorn.bettercables.objects.application.blocks.connector.ConnectorSide;
+import com.emorn.bettercables.objects.blocks.connector.ConnectorNetwork;
+import com.emorn.bettercables.objects.blocks.connector.Direction;
+import com.emorn.bettercables.objects.gateway.blocks.ConnectorSettings;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
@@ -20,31 +25,34 @@ import net.minecraftforge.items.IItemHandler;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
 public class TileEntityConnector extends TileEntity implements ITickable
 {
-    private static final int TICK_INTERVAL = 20;
     private final Map<Direction, Integer> directionToIndexMap = new HashMap<>();
     private String customName;
-    private ConnectorSettings northConnectorSettings = new ConnectorSettings(false, false);
-    private ConnectorSettings eastConnectorSettings = new ConnectorSettings(false, false);
-    private ConnectorSettings southConnectorSettings = new ConnectorSettings(false, false);
-    private ConnectorSettings westConnectorSettings = new ConnectorSettings(false, false);
-    private ConnectorSettings upConnectorSettings = new ConnectorSettings(false, false);
-    private ConnectorSettings downConnectorSettings = new ConnectorSettings(false, false);
+
+    private final ConnectorSide north = new ConnectorSide();
+    private final ConnectorSide east = new ConnectorSide();
+    private final ConnectorSide south = new ConnectorSide();
+    private final ConnectorSide west = new ConnectorSide();
+    private final ConnectorSide up = new ConnectorSide();
+    private final ConnectorSide down = new ConnectorSide();
+
     @Nullable
     private ConnectorNetwork network = null;
-    private int currentTick = 0;
 
     public void update()
     {
-        currentTick++;
-        if (currentTick >= TICK_INTERVAL) {
-            currentTick = 0;
+        // isRemote means isClient
+        if (this.world.isRemote) {
+            return;
         }
+
+        this.tick();
 
         if (this.network == null) {
             return;
@@ -54,25 +62,38 @@ public class TileEntityConnector extends TileEntity implements ITickable
             this.network = this.network.mergeToNetwork(this.getPos());
         }
 
-        this.exportItems();
+        if (north.canExport()) {
+            this.exportItem(Direction.NORTH);
+        }
+
+        if (east.canExport()) {
+            this.exportItem(Direction.EAST);
+        }
+
+        if (south.canExport()) {
+            this.exportItem(Direction.SOUTH);
+        }
+
+        if (west.canExport()) {
+            this.exportItem(Direction.WEST);
+        }
+
+        if (up.canExport()) {
+            this.exportItem(Direction.UP);
+        }
+
+        if (down.canExport()) {
+            this.exportItem(Direction.DOWN);
+        }
     }
 
-    private void exportItems()
-    {
-        if (this.currentTick % 2 != 0) {
-            return;
-        }
-
-        if (this.network == null) {
-            return;
-        }
-
-        for (Direction direction : Direction.values()) {
-            if (!this.isExtractEnabled(direction)) {
-                continue;
-            }
-            this.exportItem(direction);
-        }
+    private void tick() {
+        north.tick();
+        east.tick();
+        south.tick();
+        west.tick();
+        up.tick();
+        down.tick();
     }
 
     public boolean isExtractEnabled(Direction direction)
@@ -83,7 +104,7 @@ public class TileEntityConnector extends TileEntity implements ITickable
             return false;
         }
 
-        return connectorSettings.isExtractEnabled();
+        return connectorSettings.isExtractEnabled;
     }
 
     private void exportItem(Direction direction)
@@ -109,75 +130,131 @@ public class TileEntityConnector extends TileEntity implements ITickable
             return;
         }
 
-        ItemStack items = this.extractItemFromChest(this.world, this.findPositionByDirection(direction), 0, 1);
-        if (items == null || items.isEmpty()) {
+        TileEntityChest exportInventory = this.findInventoryEntityByPosition(this.world, this.findPositionByDirection(direction));
+        if (exportInventory == null) {
+            System.err.println("Failed to get chest inventory for export.");
             return;
         }
 
-        boolean didItemsInsert = this.insertItemIntoChest(this.world, inventoryPosition, items);
-
-        if (!didItemsInsert) {
-            this.insertItemIntoChest(this.world, this.findPositionByDirection(direction), items);
+        TileEntityChest importInventory = this.findInventoryEntityByPosition(this.world, inventoryPosition);
+        if (importInventory == null) {
+            System.err.println("Failed to get chest inventory for import.");
+            return;
         }
+
+        ConnectorSide connectorSide = this.findConnectorByDirection(direction);
+        if (connectorSide == null) {
+            return;
+        }
+
+        List<List<Integer>> possibleIndexes = connectorSide.possibleIndexes();
+
+        for (List<Integer> possibleIndex : possibleIndexes) {
+            ItemStack items = this.extractItemFromChest(exportInventory, possibleIndex.get(0), 1);
+            if (items.isEmpty()) {
+                continue;
+            }
+
+            ItemStack itemsNotInserted = this.insertItemIntoChest(importInventory, possibleIndex.get(1), items);
+            if (itemsNotInserted.isEmpty()) {
+                return;
+            }
+
+            this.insertItemIntoChest(exportInventory, possibleIndex.get(0), itemsNotInserted);
+
+            if (itemsNotInserted.getCount() != items.getCount()) {
+                return;
+            }
+        }
+    }
+
+    private ItemStack insertItemIntoChest(
+        TileEntityChest chest,
+        Integer slot,
+        ItemStack items
+    )
+    {
+        IItemHandler inventory = chest.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
+
+        if (inventory == null) {
+            System.err.println("Failed to get chest inventory.");
+            return ItemStack.EMPTY;
+        }
+
+        ItemStack itemsLeft = inventory.insertItem(slot, items, false);
+        if (itemsLeft.getCount() != items.getCount()) {
+            chest.markDirty();
+        }
+
+        return itemsLeft;
+    }
+
+    private ItemStack extractItemFromChest(
+        TileEntityChest chest,
+        Integer slot,
+        int amount
+    )
+    {
+        IItemHandler exportInventory = chest.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
+
+        if (exportInventory == null) {
+            System.err.println("Failed to get chest inventory.");
+            return ItemStack.EMPTY;
+        }
+
+        ItemStack extracted = exportInventory.extractItem(slot, amount, false);
+        if (!extracted.isEmpty()) {
+            chest.markDirty();
+        }
+
+        return extracted;
     }
 
     @Nullable
     private ConnectorSettings findConnectorSettingsByDirection(Direction direction)
     {
+        ConnectorSide connectorSide = this.findConnectorByDirection(direction);
+        if (connectorSide == null) {
+            return null;
+        }
+
+        return connectorSide.connectorSettings;
+    }
+
+    @Nullable
+    private ConnectorSide findConnectorByDirection(Direction direction)
+    {
         switch (direction) {
             case NORTH:
-                return this.northConnectorSettings;
+                return this.north;
             case EAST:
-                return this.eastConnectorSettings;
+                return this.east;
             case SOUTH:
-                return this.southConnectorSettings;
+                return this.south;
             case WEST:
-                return this.westConnectorSettings;
+                return this.west;
             case UP:
-                return this.upConnectorSettings;
+                return this.up;
             case DOWN:
-                return this.downConnectorSettings;
+                return this.down;
             default:
                 return null;
         }
     }
 
     @Nullable
-    private ItemStack extractItemFromChest(
+    private TileEntityChest  findInventoryEntityByPosition(
         World world,
-        BlockPos chestPos,
-        int slotIndex,
-        int amount
+        BlockPos chestPos
     )
     {
         TileEntity tileEntity = world.getTileEntity(chestPos);
         if (!(tileEntity instanceof TileEntityChest)) {
             System.err.println("No chest found at: " + chestPos);
-            return ItemStack.EMPTY;
+            return null;
         }
 
-        TileEntityChest chest = (TileEntityChest) tileEntity;
-
-        IItemHandler itemHandler = chest.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
-        if (itemHandler == null) {
-            System.err.println("Failed to get chest inventory.");
-            return ItemStack.EMPTY;
-        }
-
-        if (slotIndex < 0 || slotIndex >= itemHandler.getSlots()) {
-            System.err.println("Invalid slot index: " + slotIndex);
-            return ItemStack.EMPTY;
-        }
-
-        for (int slot = 0; slot < itemHandler.getSlots(); slot++) {
-            ItemStack extracted = itemHandler.extractItem(slot, amount, false);
-            if (!extracted.isEmpty()) {
-                chest.markDirty();
-                return extracted;
-            }
-        }
-
-        return null;
+        return (TileEntityChest) tileEntity;
     }
 
     private BlockPos findPositionByDirection(Direction direction)
@@ -209,37 +286,6 @@ public class TileEntityConnector extends TileEntity implements ITickable
         throw new IllegalStateException("Unknown direction: " + direction);
     }
 
-    private boolean insertItemIntoChest(
-        World world,
-        BlockPos chestPos,
-        ItemStack stackToInsert
-    )
-    {
-        TileEntity tileEntity = world.getTileEntity(chestPos);
-        if (!(tileEntity instanceof TileEntityChest)) {
-            System.err.println("No chest found at: " + chestPos);
-            return false;
-        }
-
-        TileEntityChest chest = (TileEntityChest) tileEntity;
-
-        IItemHandler inventory = chest.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
-        if (inventory == null) {
-            System.err.println("Failed to get chest inventory.");
-            return false;
-        }
-
-        for (int slot = 0; slot < inventory.getSlots(); slot++) {
-            stackToInsert = inventory.insertItem(slot, stackToInsert, false);
-            if (stackToInsert.isEmpty()) {
-                chest.markDirty();
-                return true;
-            }
-        }
-
-        return false;
-    }
-
     public boolean isUsableByPlayer(EntityPlayer player)
     {
         return
@@ -259,7 +305,7 @@ public class TileEntityConnector extends TileEntity implements ITickable
             return false;
         }
 
-        return connectorSettings.isInsertEnabled();
+        return connectorSettings.isInsertEnabled;
     }
 
     public void setInsertEnabled(
@@ -277,19 +323,19 @@ public class TileEntityConnector extends TileEntity implements ITickable
             return;
         }
 
+        connectorSettings.isInsertEnabled = checked;
+
         boolean isRemote = this.getWorld().isRemote;
-        if (checked) {
-            connectorSettings.enableInsert();
-            if (!isRemote) {
-                this.network.addInsertInventoryPosition(this.findPositionByDirection(direction), this.getPos());
-            }
-        } else {
-            connectorSettings.disableInsert();
-            if (!isRemote) {
-                this.network.removeInsertInventoryPosition(this.findPositionByDirection(direction), this.getPos());
-            }
+        if (isRemote) {
+            return;
         }
-        notifyUpdate();
+
+        if (checked) {
+            this.network.addInsertInventoryPosition(this.findPositionByDirection(direction), this.getPos());
+        } else {
+            this.network.removeInsertInventoryPosition(this.findPositionByDirection(direction), this.getPos());
+        }
+
         notifyUpdate();
     }
 
@@ -317,11 +363,8 @@ public class TileEntityConnector extends TileEntity implements ITickable
             return;
         }
 
-        if (checked) {
-            connectorSettings.enableExtract();
-        } else {
-            connectorSettings.disableExtract();
-        }
+        connectorSettings.isExtractEnabled = checked;
+
         notifyUpdate();
     }
 
@@ -365,28 +408,19 @@ public class TileEntityConnector extends TileEntity implements ITickable
     public void readFromNBT(NBTTagCompound compound)
     {
         super.readFromNBT(compound);
-        this.northConnectorSettings = this.retrieveConnectorSettingsFromNBT(Direction.NORTH, compound);
-        this.eastConnectorSettings = this.retrieveConnectorSettingsFromNBT(Direction.EAST, compound);
-        this.southConnectorSettings = this.retrieveConnectorSettingsFromNBT(Direction.SOUTH, compound);
-        this.westConnectorSettings = this.retrieveConnectorSettingsFromNBT(Direction.WEST, compound);
-        this.upConnectorSettings = this.retrieveConnectorSettingsFromNBT(Direction.UP, compound);
-        this.downConnectorSettings = this.retrieveConnectorSettingsFromNBT(Direction.DOWN, compound);
+
+        Settings.load(this.north.connectorSettings, compound, "north");
+        Settings.load(this.east.connectorSettings, compound, "east");
+        Settings.load(this.south.connectorSettings, compound, "south");
+        Settings.load(this.west.connectorSettings, compound, "west");
+        Settings.load(this.up.connectorSettings, compound, "up");
+        Settings.load(this.down.connectorSettings, compound, "down");
+
         this.network = this.retrieveNetworkFromNBT(compound);
 
         if (compound.hasKey("CustomName", 8)) {
             this.setCustomName(compound.getString("CustomName"));
         }
-    }
-
-    private ConnectorSettings retrieveConnectorSettingsFromNBT(
-        Direction direction,
-        NBTTagCompound compound
-    )
-    {
-        return new ConnectorSettings(
-            compound.getBoolean(direction + "-isInsertEnabled"),
-            compound.getBoolean(direction + "-isExtractEnabled")
-        );
     }
 
     @Nullable
@@ -408,37 +442,37 @@ public class TileEntityConnector extends TileEntity implements ITickable
 
     private void addConnectorInformationToNetwork(ConnectorNetwork network)
     {
-        if (this.northConnectorSettings.isInsertEnabled()) {
+        if (this.isInsertEnabled(Direction.NORTH)) {
             network.addInsertInventoryPosition(this.getPos().offset(EnumFacing.NORTH), this.getPos());
         } else {
             network.removeInsertInventoryPosition(this.getPos().offset(EnumFacing.NORTH), this.getPos());
         }
 
-        if (this.eastConnectorSettings.isInsertEnabled()) {
+        if (this.isInsertEnabled(Direction.EAST)) {
             network.addInsertInventoryPosition(this.getPos().offset(EnumFacing.EAST), this.getPos());
         } else {
             network.removeInsertInventoryPosition(this.getPos().offset(EnumFacing.EAST), this.getPos());
         }
 
-        if (this.southConnectorSettings.isInsertEnabled()) {
+        if (this.isInsertEnabled(Direction.SOUTH)) {
             network.addInsertInventoryPosition(this.getPos().offset(EnumFacing.SOUTH), this.getPos());
         } else {
             network.removeInsertInventoryPosition(this.getPos().offset(EnumFacing.SOUTH), this.getPos());
         }
 
-        if (this.westConnectorSettings.isInsertEnabled()) {
+        if (this.isInsertEnabled(Direction.WEST)) {
             network.addInsertInventoryPosition(this.getPos().offset(EnumFacing.WEST), this.getPos());
         } else {
             network.removeInsertInventoryPosition(this.getPos().offset(EnumFacing.WEST), this.getPos());
         }
 
-        if (this.upConnectorSettings.isInsertEnabled()) {
+        if (this.isInsertEnabled(Direction.UP)) {
             network.addInsertInventoryPosition(this.getPos().offset(EnumFacing.UP), this.getPos());
         } else {
             network.removeInsertInventoryPosition(this.getPos().offset(EnumFacing.UP), this.getPos());
         }
 
-        if (this.downConnectorSettings.isInsertEnabled()) {
+        if (this.isInsertEnabled(Direction.DOWN)) {
             network.addInsertInventoryPosition(this.getPos().offset(EnumFacing.DOWN), this.getPos());
         } else {
             network.removeInsertInventoryPosition(this.getPos().offset(EnumFacing.DOWN), this.getPos());
@@ -454,12 +488,14 @@ public class TileEntityConnector extends TileEntity implements ITickable
     public NBTTagCompound writeToNBT(NBTTagCompound compound)
     {
         super.writeToNBT(compound);
-        this.storeConnectorSettingsFromNBT(this.northConnectorSettings, Direction.NORTH, compound);
-        this.storeConnectorSettingsFromNBT(this.eastConnectorSettings, Direction.EAST, compound);
-        this.storeConnectorSettingsFromNBT(this.southConnectorSettings, Direction.SOUTH, compound);
-        this.storeConnectorSettingsFromNBT(this.westConnectorSettings, Direction.WEST, compound);
-        this.storeConnectorSettingsFromNBT(this.upConnectorSettings, Direction.UP, compound);
-        this.storeConnectorSettingsFromNBT(this.downConnectorSettings, Direction.DOWN, compound);
+
+        Settings.save(this.north.connectorSettings, compound, "north");
+        Settings.save(this.east.connectorSettings, compound, "east");
+        Settings.save(this.south.connectorSettings, compound, "south");
+        Settings.save(this.west.connectorSettings, compound, "west");
+        Settings.save(this.up.connectorSettings, compound, "up");
+        Settings.save(this.down.connectorSettings, compound, "down");
+
         this.storeNetworkFromNBT(compound);
 
         if (this.hasCustomName()) {
@@ -467,16 +503,6 @@ public class TileEntityConnector extends TileEntity implements ITickable
         }
 
         return compound;
-    }
-
-    private void storeConnectorSettingsFromNBT(
-        ConnectorSettings settings,
-        Direction direction,
-        NBTTagCompound compound
-    )
-    {
-        compound.setBoolean(direction + "-isInsertEnabled", settings.isInsertEnabled());
-        compound.setBoolean(direction + "-isExtractEnabled", settings.isExtractEnabled());
     }
 
     private void storeNetworkFromNBT(
@@ -502,6 +528,4 @@ public class TileEntityConnector extends TileEntity implements ITickable
     {
         return this.customName != null && !this.customName.isEmpty();
     }
-
-
 }

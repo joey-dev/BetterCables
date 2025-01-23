@@ -1,6 +1,6 @@
 package com.emorn.bettercables.utils.handlers;
 
-import com.emorn.bettercables.objects.blocks.connector.TileEntityConnector;
+import com.emorn.bettercables.objects.api.forge.blocks.connector.TileEntityConnector;
 import com.emorn.bettercables.utils.Reference;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.util.ResourceLocation;

@@ -2,6 +2,7 @@ package com.emorn.bettercables.objects.blocks.connector;
 
 import com.emorn.bettercables.objects.api.forge.blocks.connector.BlockConnector;
 import com.emorn.bettercables.objects.api.forge.blocks.cable.BlockCable;
+import com.emorn.bettercables.objects.api.forge.blocks.connector.TileEntityConnector;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.block.Block;
 import net.minecraft.util.math.BlockPos;
