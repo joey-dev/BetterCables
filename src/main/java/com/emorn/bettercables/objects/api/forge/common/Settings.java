@@ -5,13 +5,25 @@ import net.minecraft.nbt.NBTTagCompound;
 
 public class Settings
 {
-    public static void load(ConnectorSettings connectorSettings, NBTTagCompound compound, String key)
+    private Settings()
+    {
+    }
+
+    public static void load(
+        ConnectorSettings connectorSettings,
+        NBTTagCompound compound,
+        String key
+    )
     {
         connectorSettings.isInsertEnabled = compound.getBoolean(key + "-isInsertEnabled");
         connectorSettings.isExtractEnabled = compound.getBoolean(key + "-isExtractEnabled");
     }
 
-    public static void save(ConnectorSettings connectorSettings, NBTTagCompound compound, String key)
+    public static void save(
+        ConnectorSettings connectorSettings,
+        NBTTagCompound compound,
+        String key
+    )
     {
         compound.setBoolean(key + "-isInsertEnabled", connectorSettings.isInsertEnabled);
         compound.setBoolean(key + "-isExtractEnabled", connectorSettings.isExtractEnabled);

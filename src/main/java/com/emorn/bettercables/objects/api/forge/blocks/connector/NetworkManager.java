@@ -1,6 +1,7 @@
 package com.emorn.bettercables.objects.api.forge.blocks.connector;
 
 import com.emorn.bettercables.objects.api.forge.blocks.cable.BlockCable;
+import com.emorn.bettercables.objects.api.forge.common.BaseCable;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.block.Block;
 import net.minecraft.util.math.BlockPos;
@@ -29,7 +30,7 @@ public class NetworkManager
         boolean isRemovingANetwork = false;
 
         if (totalConnections == 0 || totalConnections == 1) {
-            return isRemovingANetwork;
+            return false;
         }
 
         foundCablePositions.put(pos, true);
@@ -40,23 +41,23 @@ public class NetworkManager
             totalConnections,
             new HashMap<>()
         );
-        if (networks.size() > 1) {
-            TreeMap<Integer, ConnectorNetwork> sortedNetworks = new TreeMap<>(networks);
-            ConnectorNetwork firstNetwork = sortedNetworks.firstEntry().getValue();
+        if (networks.size() == 1) {
+            foundCablePositions.clear();
+            return false;
+        }
 
-            for (Map.Entry<Integer, ConnectorNetwork> entry : sortedNetworks.entrySet()) {
-                ConnectorNetwork network = entry.getValue();
+        TreeMap<Integer, ConnectorNetwork> sortedNetworks = new TreeMap<>(networks);
+        ConnectorNetwork firstNetwork = sortedNetworks.firstEntry().getValue();
 
-                if (network.id() == firstNetwork.id()) {
-                    continue;
-                }
+        for (Map.Entry<Integer, ConnectorNetwork> entry : sortedNetworks.entrySet()) {
+            ConnectorNetwork network = entry.getValue();
 
-                isRemovingANetwork = true;
-                network.remove(firstNetwork);
+            if (network.id() == firstNetwork.id()) {
+                continue;
             }
 
-            foundCablePositions.clear();
-            return isRemovingANetwork;
+            isRemovingANetwork = true;
+            network.remove(firstNetwork);
         }
 
         foundCablePositions.clear();
@@ -152,7 +153,7 @@ public class NetworkManager
             foundCablePositions.put(neighborBlockPosition, true);
             Block neighborBlock = worldIn.getBlockState(neighborBlockPosition).getBlock();
 
-            if (!(neighborBlock instanceof BlockConnector) && !(neighborBlock instanceof BlockCable)) {
+            if (!(neighborBlock instanceof BaseCable)) {
                 continue;
             }
 
@@ -163,12 +164,10 @@ public class NetworkManager
                     )
                 ).getNetwork();
 
-                if (!networks.containsKey(network.id())) {
-                    networks.put(network.id(), network);
+                networks.putIfAbsent(network.id(), network);
 
-                    if (networks.size() == totalConnections) {
-                        return networks;
-                    }
+                if (networks.size() == totalConnections) {
+                    return networks;
                 }
             }
             Map<Integer, ConnectorNetwork> connectorNetworks = findNetworks(

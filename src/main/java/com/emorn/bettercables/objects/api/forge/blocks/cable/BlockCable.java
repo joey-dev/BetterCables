@@ -2,10 +2,10 @@ package com.emorn.bettercables.objects.api.forge.blocks.cable;
 
 import com.emorn.bettercables.init.BlockInit;
 import com.emorn.bettercables.objects.api.forge.blocks.connector.BlockConnector;
+import com.emorn.bettercables.objects.api.forge.blocks.connector.NetworkManager;
 import com.emorn.bettercables.objects.api.forge.common.AxisAlignedBoundingBoxConverter;
 import com.emorn.bettercables.objects.api.forge.common.BaseCable;
 import com.emorn.bettercables.objects.application.blocks.cable.CableAxisAlignedBoundingBox;
-import com.emorn.bettercables.objects.api.forge.blocks.connector.NetworkManager;
 import com.emorn.bettercables.utils.IHasModel;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.block.Block;
@@ -136,6 +136,18 @@ public class BlockCable extends BaseCable implements IHasModel
         return totalConnections;
     }
 
+    private boolean getConnectionType(
+        IBlockAccess world,
+        BlockPos pos,
+        EnumFacing facing
+    )
+    {
+        IBlockState neighborState = world.getBlockState(pos.offset(facing));
+        Block neighborBlock = neighborState.getBlock();
+
+        return neighborBlock instanceof BlockConnector || neighborBlock instanceof BlockCable;
+    }
+
     @Override
     protected BlockStateContainer createBlockState()
     {
@@ -200,18 +212,6 @@ public class BlockCable extends BaseCable implements IHasModel
     protected Block currentBlock()
     {
         return BlockInit.CABLE;
-    }
-
-    private boolean getConnectionType(
-        IBlockAccess world,
-        BlockPos pos,
-        EnumFacing facing
-    )
-    {
-        IBlockState neighborState = world.getBlockState(pos.offset(facing));
-        Block neighborBlock = neighborState.getBlock();
-
-        return neighborBlock instanceof BlockConnector || neighborBlock instanceof BlockCable;
     }
 
     private boolean hasConnection(

@@ -10,9 +10,8 @@ import javax.annotation.ParametersAreNonnullByDefault;
 public class ConnectorSide
 {
     private static final int TICK_INTERVAL = 20;
-    private int currentTick = 0;
-
     public ConnectorSettings connectorSettings;
+    private int currentTick = 0;
 
     public ConnectorSide()
     {

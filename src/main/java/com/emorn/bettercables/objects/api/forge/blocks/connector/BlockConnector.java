@@ -99,18 +99,6 @@ public class BlockConnector extends BaseCable implements IHasModel
     }
 
     @Override
-    protected AxisAlignedBB baseAABB()
-    {
-        return BASE_AABB;
-    }
-
-    @Override
-    protected Block currentBlock()
-    {
-        return BlockInit.CONNECTOR;
-    }
-
-    @Override
     public IBlockState getStateFromMeta(int meta)
     {
         return this.getDefaultState();
@@ -156,16 +144,6 @@ public class BlockConnector extends BaseCable implements IHasModel
         if (!worldIn.isRemote) {
             worldIn.setBlockState(pos, state, 2);
         }
-    }
-
-    @Override
-    public Item getItemDropped(
-        IBlockState state,
-        Random rand,
-        int fortune
-    )
-    {
-        return Item.getItemFromBlock(BlockInit.CONNECTOR);
     }
 
     @Override
@@ -243,13 +221,42 @@ public class BlockConnector extends BaseCable implements IHasModel
         World worldIn,
         BlockPos pos,
         EntityPlayer playerIn
-    ) {
+    )
+    {
         EnumFacing facing = findClickedCable(clickedBox, actualState);
         if (facing == null) {
             return false;
         }
 
         return this.openGui(facing, worldIn, pos, playerIn);
+    }
+
+    @Nullable
+    private EnumFacing findClickedCable(
+        AxisAlignedBB clickedBox,
+        IBlockState actualState
+    )
+    {
+        if (this.hasClickedOn(clickedBox, actualState, NORTH_CABLE_AABB, NORTH_CABLE_CONNECTOR_AABB, NORTH)) {
+            return EnumFacing.NORTH;
+        }
+        if (this.hasClickedOn(clickedBox, actualState, EAST_CABLE_AABB, EAST_CABLE_CONNECTOR_AABB, EAST)) {
+            return EnumFacing.EAST;
+        }
+        if (this.hasClickedOn(clickedBox, actualState, SOUTH_CABLE_AABB, SOUTH_CABLE_CONNECTOR_AABB, SOUTH)) {
+            return EnumFacing.SOUTH;
+        }
+        if (this.hasClickedOn(clickedBox, actualState, WEST_CABLE_AABB, WEST_CABLE_CONNECTOR_AABB, WEST)) {
+            return EnumFacing.WEST;
+        }
+        if (this.hasClickedOn(clickedBox, actualState, UP_CABLE_AABB, UP_CABLE_CONNECTOR_AABB, UP)) {
+            return EnumFacing.UP;
+        }
+        if (this.hasClickedOn(clickedBox, actualState, DOWN_CABLE_AABB, DOWN_CABLE_CONNECTOR_AABB, DOWN)) {
+            return EnumFacing.DOWN;
+        }
+
+        return null;
     }
 
     private boolean openGui(
@@ -318,50 +325,6 @@ public class BlockConnector extends BaseCable implements IHasModel
         return worldIn.isRemote;
     }
 
-    private void openGui(
-        int reference,
-        World worldIn,
-        BlockPos pos,
-        EntityPlayer playerIn
-    ) {
-        playerIn.openGui(
-            Main.instance,
-            reference,
-            worldIn,
-            pos.getX(),
-            pos.getY(),
-            pos.getZ()
-        );
-    }
-
-    @Nullable
-    private EnumFacing findClickedCable(
-        AxisAlignedBB clickedBox,
-        IBlockState actualState
-    )
-    {
-        if (this.hasClickedOn(clickedBox, actualState, NORTH_CABLE_AABB, NORTH_CABLE_CONNECTOR_AABB, NORTH)) {
-            return EnumFacing.NORTH;
-        }
-        if (this.hasClickedOn(clickedBox, actualState, EAST_CABLE_AABB, EAST_CABLE_CONNECTOR_AABB, EAST)) {
-            return EnumFacing.EAST;
-        }
-        if (this.hasClickedOn(clickedBox, actualState, SOUTH_CABLE_AABB, SOUTH_CABLE_CONNECTOR_AABB, SOUTH)) {
-            return EnumFacing.SOUTH;
-        }
-        if (this.hasClickedOn(clickedBox, actualState, WEST_CABLE_AABB, WEST_CABLE_CONNECTOR_AABB, WEST)) {
-            return EnumFacing.WEST;
-        }
-        if (this.hasClickedOn(clickedBox, actualState, UP_CABLE_AABB, UP_CABLE_CONNECTOR_AABB, UP)) {
-            return EnumFacing.UP;
-        }
-        if (this.hasClickedOn(clickedBox, actualState, DOWN_CABLE_AABB, DOWN_CABLE_CONNECTOR_AABB, DOWN)) {
-            return EnumFacing.DOWN;
-        }
-
-        return null;
-    }
-
     private boolean hasClickedOn(
         AxisAlignedBB clickedBox,
         IBlockState actualState,
@@ -374,14 +337,21 @@ public class BlockConnector extends BaseCable implements IHasModel
             this.hasConnectionToInventory(actualState, direction);
     }
 
-    @Override
-    public ItemStack getItem(
+    private void openGui(
+        int reference,
         World worldIn,
         BlockPos pos,
-        IBlockState state
+        EntityPlayer playerIn
     )
     {
-        return new ItemStack(BlockInit.CONNECTOR);
+        playerIn.openGui(
+            Main.instance,
+            reference,
+            worldIn,
+            pos.getX(),
+            pos.getY(),
+            pos.getZ()
+        );
     }
 
     @Override
@@ -470,27 +440,36 @@ public class BlockConnector extends BaseCable implements IHasModel
         return allBoxes;
     }
 
-    private List<AxisAlignedBB> retrieveBoxesFor(
-        PropertyEnum<ConnectionType> direction,
+    @Override
+    protected AxisAlignedBB baseAABB()
+    {
+        return BASE_AABB;
+    }
+
+    @Override
+    protected Block currentBlock()
+    {
+        return BlockInit.CONNECTOR;
+    }
+
+    @Override
+    public Item getItemDropped(
         IBlockState state,
-        AxisAlignedBB cableBox,
-        AxisAlignedBB connectorBox
+        Random rand,
+        int fortune
     )
     {
-        List<AxisAlignedBB> allBoxes = new ArrayList<>();
+        return Item.getItemFromBlock(BlockInit.CONNECTOR);
+    }
 
-        if (this.hasConnectionToInventory(state, direction)) {
-            allBoxes.add(connectorBox);
-            allBoxes.add(cableBox);
-
-            return allBoxes;
-        }
-
-        if (this.hasConnection(state, direction)) {
-            allBoxes.add(cableBox);
-        }
-
-        return allBoxes;
+    @Override
+    public ItemStack getItem(
+        World worldIn,
+        BlockPos pos,
+        IBlockState state
+    )
+    {
+        return new ItemStack(BlockInit.CONNECTOR);
     }
 
     private ConnectionType getConnectionType(
@@ -514,13 +493,27 @@ public class BlockConnector extends BaseCable implements IHasModel
         return ConnectionType.NONE;
     }
 
-    private boolean hasConnection(
+    private List<AxisAlignedBB> retrieveBoxesFor(
+        PropertyEnum<ConnectionType> direction,
         IBlockState state,
-        PropertyEnum<ConnectionType> facing
+        AxisAlignedBB cableBox,
+        AxisAlignedBB connectorBox
     )
     {
-        return this.hasConnectionToConnector(state, facing)
-            || this.hasConnectionToInventory(state, facing);
+        List<AxisAlignedBB> allBoxes = new ArrayList<>();
+
+        if (this.hasConnectionToInventory(state, direction)) {
+            allBoxes.add(connectorBox);
+            allBoxes.add(cableBox);
+
+            return allBoxes;
+        }
+
+        if (this.hasConnection(state, direction)) {
+            allBoxes.add(cableBox);
+        }
+
+        return allBoxes;
     }
 
     private boolean hasConnectionToInventory(
@@ -529,6 +522,15 @@ public class BlockConnector extends BaseCable implements IHasModel
     )
     {
         return state.getValue(facing).toString().equals(ConnectionType.INVENTORY.toString());
+    }
+
+    private boolean hasConnection(
+        IBlockState state,
+        PropertyEnum<ConnectionType> facing
+    )
+    {
+        return this.hasConnectionToConnector(state, facing)
+            || this.hasConnectionToInventory(state, facing);
     }
 
     private boolean hasConnectionToConnector(

@@ -47,10 +47,6 @@ public abstract class BaseCable extends BlockBase implements IHasModel
         return EnumBlockRenderType.MODEL;
     }
 
-    protected abstract List<AxisAlignedBB> retrieveAllBoxes(IBlockState state);
-    protected abstract AxisAlignedBB baseAABB();
-    protected abstract Block currentBlock();
-
     @Override
     public AxisAlignedBB getBoundingBox(
         IBlockState state,
@@ -92,6 +88,10 @@ public abstract class BaseCable extends BlockBase implements IHasModel
 
         return closestBox;
     }
+
+    protected abstract AxisAlignedBB baseAABB();
+
+    protected abstract List<AxisAlignedBB> retrieveAllBoxes(IBlockState state);
 
     @Override
     public void addCollisionBoxToList(
@@ -140,6 +140,8 @@ public abstract class BaseCable extends BlockBase implements IHasModel
     {
         return Item.getItemFromBlock(this.currentBlock());
     }
+
+    protected abstract Block currentBlock();
 
     @Override
     public void onBlockDestroyedByExplosion(

@@ -1,5 +1,6 @@
 package com.emorn.bettercables.objects.api.forge.blocks.connector;
 
+import com.emorn.bettercables.objects.api.forge.common.Logger;
 import com.emorn.bettercables.objects.application.blocks.connector.ConnectorSide;
 import com.emorn.bettercables.objects.application.blocks.connector.PossibleSlots;
 import mcp.MethodsReturnNonnullByDefault;
@@ -83,7 +84,7 @@ public class ConnectorNetwork
         }
 
         if (this.insertInventoryPositions.keySet().toArray()[index] == null) {
-            System.err.println("Tried to get empty");
+            Logger.error("Tried to get empty");
         }
 
         return (BlockPos) this.insertInventoryPositions.keySet().toArray()[index];
@@ -121,7 +122,8 @@ public class ConnectorNetwork
 
     public List<List<Integer>> getPossibleSlots(
         ConnectorSide connectorSide
-    ) {
+    )
+    {
         return PossibleSlots.calculate();
     }
 
