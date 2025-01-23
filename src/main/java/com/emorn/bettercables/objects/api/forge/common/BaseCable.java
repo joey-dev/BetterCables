@@ -151,7 +151,7 @@ public abstract class BaseCable extends BlockBase implements IHasModel
     )
     {
         super.onBlockDestroyedByExplosion(worldIn, pos, explosionIn);
-        if (worldIn.isRemote) {
+        if (!worldIn.isRemote) {
             NetworkManager.reCalculateNetworksAround(pos, worldIn);
         }
     }

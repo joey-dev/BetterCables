@@ -1,5 +1,6 @@
 package com.emorn.bettercables.objects.application.blocks.connector;
 
+import com.emorn.bettercables.objects.api.forge.common.Logger;
 import com.emorn.bettercables.objects.gateway.blocks.ConnectorSettings;
 import mcp.MethodsReturnNonnullByDefault;
 
@@ -28,6 +29,11 @@ public class ConnectorSide
 
     public boolean canExport()
     {
+        if (this.connectorSettings.tickRate == 0) {
+            Logger.error("Tick rate cannot be 0");
+            return false;
+        }
+
         if (currentTick % this.connectorSettings.tickRate != 0) {
             return false;
         }
