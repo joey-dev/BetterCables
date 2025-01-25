@@ -13,8 +13,9 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static junit.framework.TestCase.assertEquals;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -28,42 +29,105 @@ import static org.mockito.Mockito.when;
 public class NetworkManagerTest
 {
     private World worldMock;
-    private BlockPos posMock;
-
-    private List<Block> neighborBlockTypes;
-    private int expectedNetworkSize;
 
     @Before
     public void setUp()
     {
         worldMock = mock(World.class);
-        posMock = new BlockPos(10, 10, 10);
     }
 
     @Test
-    public void oneConnectorOneCable_test()
+    public void connector_and_cable()
     {
-        this.neighborBlockTypes = Arrays.asList(mock(BlockConnector.class), mock(BlockCable.class));
-        this.expectedNetworkSize = 2;
-        this.reCalculateNetworksAround_test();
+        BlockPos start = new BlockPos(10, 10, 10);
+        Map<BlockPos, Block> blocks = this.createEmptyBlocksAround(start);
+        blocks.putAll(this.createEmptyBlocksAround(new BlockPos(10, 10, 9)));
+        blocks.putAll(this.createEmptyBlocksAround(new BlockPos(10, 9, 10)));
+
+        blocks.put(
+            new BlockPos(10, 10, 9),
+            mock(BlockConnector.class)
+        );
+
+        blocks.put(
+            new BlockPos(10, 9, 10),
+            mock(BlockCable.class)
+        );
+
+
+        this.reCalculateNetworksAround_test(
+            start,
+            blocks,
+            2
+        );
     }
 
-    private void reCalculateNetworksAround_test()
+    @Test
+    public void nothing()
     {
-        BlockPos[] neighborPositions = new BlockPos[6];
+        BlockPos start = new BlockPos(10, 10, 10);
+        Map<BlockPos, Block> blocks = this.createEmptyBlocksAround(start);
+
+        this.reCalculateNetworksAround_test(
+            start,
+            blocks,
+            0
+        );
+    }
+
+    @Test
+    public void connectors_all_around()
+    {
+        BlockPos start = new BlockPos(10, 10, 10);
+        Map<BlockPos, Block> blocks = this.createEmptyBlocksAround(start);
+        blocks.putAll(this.createEmptyBlocksAround(new BlockPos(10, 10, 9)));
+        blocks.putAll(this.createEmptyBlocksAround(new BlockPos(10, 9, 10)));
+        blocks.putAll(this.createEmptyBlocksAround(new BlockPos(9, 10, 10)));
+        blocks.putAll(this.createEmptyBlocksAround(new BlockPos(10, 10, 11)));
+        blocks.putAll(this.createEmptyBlocksAround(new BlockPos(10, 11, 10)));
+        blocks.putAll(this.createEmptyBlocksAround(new BlockPos(11, 10, 10)));
+
+        blocks.put(
+            new BlockPos(10, 10, 9),
+            mock(BlockConnector.class)
+        );
+        blocks.put(
+            new BlockPos(10, 9, 10),
+            mock(BlockConnector.class)
+        );
+        blocks.put(
+            new BlockPos(9, 10, 10),
+            mock(BlockConnector.class)
+        );
+        blocks.put(
+            new BlockPos(10, 10, 11),
+            mock(BlockConnector.class)
+        );
+        blocks.put(
+            new BlockPos(10, 11, 10),
+            mock(BlockConnector.class)
+        );
+        blocks.put(
+            new BlockPos(11, 10, 10),
+            mock(BlockConnector.class)
+        );
+
+        this.reCalculateNetworksAround_test(
+            start,
+            blocks,
+            6
+        );
+    }
+
+    private Map<BlockPos, Block> createEmptyBlocksAround(
+        BlockPos position
+    )
+    {
+        Map<BlockPos, Block> blocksAround = new HashMap<>();
         for (int i = 0; i < 6; i++) {
-            IBlockState mockBlockState = mock(IBlockState.class);
-            Block mockBlock;
-
-            if (neighborBlockTypes.size() <= i) {
-                mockBlock = mock(Block.class);
-            } else {
-                mockBlock = neighborBlockTypes.get(i);
-            }
-
-            int x = 10;
-            int y = 10;
-            int z = 10;
+            int x = position.getX();
+            int y = position.getY();
+            int z = position.getZ();
             if (i == 0) {
                 z = z - 1;
             } else if (i == 1) {
@@ -78,18 +142,32 @@ public class NetworkManagerTest
                 y = y - 1;
             }
 
-            neighborPositions[i] = new BlockPos(x, y, z);
+            blocksAround.put(
+                new BlockPos(x, y, z),
+                mock(Block.class)
+            );
+        }
 
-            when(mockBlockState.getBlock()).thenReturn(mockBlock);
+        return blocksAround;
+    }
 
-            PowerMockito.when(worldMock.getBlockState(neighborPositions[i])).thenReturn(mockBlockState);
+    private void reCalculateNetworksAround_test(
+        BlockPos start,
+        Map<BlockPos, Block> blocks,
+        int expectedNetworkSize
+    )
+    {
+        for (Map.Entry<BlockPos, Block> block : blocks.entrySet()) {
+            IBlockState mockBlockState = mock(IBlockState.class);
+            when(mockBlockState.getBlock()).thenReturn(block.getValue());
 
-            final int finalI = i;
+            PowerMockito.when(worldMock.getBlockState(block.getKey())).thenReturn(mockBlockState);
+
             PowerMockito.when(worldMock.getBlockState(argThat(pos ->
                 pos != null &&
-                    pos.getX() == neighborPositions[finalI].getX() &&
-                    pos.getY() == neighborPositions[finalI].getY() &&
-                    pos.getZ() == neighborPositions[finalI].getZ()
+                    pos.getX() == block.getKey().getX() &&
+                    pos.getY() == block.getKey().getY() &&
+                    pos.getZ() == block.getKey().getZ()
             ))).thenReturn(mockBlockState);
         }
 
@@ -106,14 +184,8 @@ public class NetworkManagerTest
             return network;
         });
 
-        NetworkManager.reCalculateNetworksAround(posMock, worldMock);
+        NetworkManager.reCalculateNetworksAround(start, worldMock);
 
-        if (expectedNetworkSize > 0) {
-            assertEquals(expectedNetworkSize, createdNetworks.size());
-
-            // ... (rest of your assertions) ...
-        } else {
-            assertEquals(0, createdNetworks.size());
-        }
+        assertEquals(expectedNetworkSize, createdNetworks.size());
     }
 }
