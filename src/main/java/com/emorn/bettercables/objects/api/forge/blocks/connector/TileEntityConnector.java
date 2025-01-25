@@ -48,7 +48,7 @@ public class TileEntityConnector extends TileEntity implements ITickable
     public void update()
     {
         // isRemote means isClient
-        if (this.world.isRemote) {
+        if (this.getWorld().isRemote) {
             return;
         }
 
@@ -97,7 +97,7 @@ public class TileEntityConnector extends TileEntity implements ITickable
         down.tick();
     }
 
-    private void exportItem(Direction direction)
+    public void exportItem(Direction direction) // todo might want to extract this to another class?
     {
         if (this.network == null || this.network.isDisabled()) {
             return;
