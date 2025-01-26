@@ -126,17 +126,44 @@ public class GuiConnector extends GuiContainer
         if (this.isExtractSettingsOpen) {
             drawExtractSettings();
         }
+
+        drawFilters();
+    }
+
+    private void drawFilters()
+    {
+        int filtersPerRow = 9;
+        int rows = 3;
+        int iteration = 0;
+
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < filtersPerRow; j++) {
+                int x = j * 18;
+                int y = i * 18;
+
+                GuiFilter filter = new GuiFilter(
+                    20 + iteration,
+                    this.guiLeft + 7 + x,
+                    this.guiTop + 17 + y
+                );
+
+                this.buttonList.add(filter);
+                iteration++;
+            }
+        }
+
+
     }
 
     private void drawSettings()
     {
         GuiNumberInput channelInput = new GuiNumberInput(
             0,
-            this.guiLeft + 10,
-            this.guiTop + 15,
+            this.guiLeft + 180,
+            this.guiTop + 3,
             0,
             TextPosition.RIGHT,
-            "Channel Id",
+            "Channel",
             0,
             false
         );
@@ -153,8 +180,8 @@ public class GuiConnector extends GuiContainer
             1,
             2,
             3,
-            this.guiLeft + 10,
-            this.guiTop + 35,
+            this.guiLeft - 80,
+            this.guiTop + 5,
             -1,
             -1,
             "Slot range",
@@ -170,8 +197,8 @@ public class GuiConnector extends GuiContainer
 
         GuiOreDictionaryBox oreDictionaryBox = new GuiOreDictionaryBox(
             4,
-            this.guiLeft + 115,
-            this.guiTop + 15,
+            this.guiLeft - 80,
+            this.guiTop + 100,
             false
         );
 
@@ -179,8 +206,8 @@ public class GuiConnector extends GuiContainer
 
         GuiNbtDataBox nbtDataBox = new GuiNbtDataBox(
             5,
-            this.guiLeft + 135,
-            this.guiTop + 15,
+            this.guiLeft - (80 - 18),
+            this.guiTop + 100,
             false
         );
 
@@ -188,10 +215,10 @@ public class GuiConnector extends GuiContainer
 
         GuiNumberInput itemCount = new GuiNumberInput(
             6,
-            this.guiLeft + 70,
-            this.guiTop + 35,
+            this.guiLeft - 80,
+            this.guiTop + 45,
             0,
-            TextPosition.RIGHT,
+            TextPosition.TOP,
             "Min item count",
             0,
             false
@@ -203,8 +230,8 @@ public class GuiConnector extends GuiContainer
         GuiDurability durability = new GuiDurability(
             7,
             8,
-            this.guiLeft + 70,
-            this.guiTop + 55,
+            this.guiLeft - 80,
+            this.guiTop + 65,
             ComparisonOperator.EQUALS,
             -1
         );
@@ -225,7 +252,7 @@ public class GuiConnector extends GuiContainer
         GuiNumberInput tickRate = new GuiNumberInput(
             9,
             this.guiLeft + 180,
-            this.guiTop + 15,
+            this.guiTop + 20,
             1,
             TextPosition.RIGHT,
             "Tick rate",

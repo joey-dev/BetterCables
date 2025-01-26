@@ -35,7 +35,7 @@ public class GuiComparisonOperatorButton extends GuiButton
         this.numberInput = new GuiNumberInput(
             buttonId,
             x,
-            y,
+            y + 15,
             initialValue,
             TextPosition.RIGHT,
             "",
@@ -100,7 +100,7 @@ public class GuiComparisonOperatorButton extends GuiButton
             Reference.TEXT_COLOR
         );
 
-        this.numberInput.changeX(this.x + stringWidth + 9);
+        //this.numberInput.changeX(this.x + stringWidth + 9);
     }
 
     @Override
