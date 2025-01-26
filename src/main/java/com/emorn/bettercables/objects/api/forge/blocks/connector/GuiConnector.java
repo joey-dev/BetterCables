@@ -173,6 +173,18 @@ public class GuiConnector extends GuiContainer
         );
 
         this.buttonList.add(nbtDataBox);
+
+        GuiNumberInput itemCount = new GuiNumberInput(
+            0,
+            this.guiLeft + 95,
+            this.guiTop + 35,
+            0,
+            "Min items",
+            false
+        );
+
+        this.buttonList.add(itemCount);
+        this.numberInputs.add(itemCount);
     }
 
     private void drawInsertSettings()
