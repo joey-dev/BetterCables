@@ -56,21 +56,21 @@ public class GuiToggle extends GuiButton
 
         if (isChecked) {
             drawTexturedModalRect(
-                this.inactive.x,
-                this.inactive.y,
-                this.inactive.textureX,
-                this.inactive.textureY,
-                this.inactive.width,
-                this.inactive.height
-            );
-        } else {
-            drawTexturedModalRect(
                 this.active.x,
                 this.active.y,
                 this.active.textureX,
                 this.active.textureY,
                 this.active.width,
                 this.active.height
+            );
+        } else {
+            drawTexturedModalRect(
+                this.inactive.x,
+                this.inactive.y,
+                this.inactive.textureX,
+                this.inactive.textureY,
+                this.inactive.width,
+                this.inactive.height
             );
         }
 

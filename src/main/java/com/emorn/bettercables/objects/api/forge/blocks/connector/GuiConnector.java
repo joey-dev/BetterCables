@@ -4,6 +4,7 @@ import com.emorn.bettercables.common.gui.GuiGear;
 import com.emorn.bettercables.common.gui.GuiNumberInput;
 import com.emorn.bettercables.common.gui.GuiNumberRangeInput;
 import com.emorn.bettercables.common.gui.toggle.GuiCheckbox;
+import com.emorn.bettercables.common.gui.toggle.GuiOreDictionaryBox;
 import com.emorn.bettercables.objects.api.forge.common.Direction;
 import com.emorn.bettercables.proxy.ModNetworkHandler;
 import com.emorn.bettercables.utils.Reference;
@@ -153,6 +154,15 @@ public class GuiConnector extends GuiContainer
         this.buttonList.add(slotInput.maxInput());
         this.numberInputs.add(slotInput.minInput());
         this.numberInputs.add(slotInput.maxInput());
+
+        GuiOreDictionaryBox oreDictionaryBox = new GuiOreDictionaryBox(
+            4,
+            this.guiLeft + 70,
+            this.guiTop + 35,
+            false
+        );
+
+        this.buttonList.add(oreDictionaryBox);
     }
 
     private void drawInsertSettings()
