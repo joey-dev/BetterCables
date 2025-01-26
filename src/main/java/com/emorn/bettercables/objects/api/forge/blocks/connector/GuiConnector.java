@@ -1,10 +1,7 @@
 package com.emorn.bettercables.objects.api.forge.blocks.connector;
 
 import com.emorn.bettercables.common.gui.*;
-import com.emorn.bettercables.common.gui.toggle.GuiCheckbox;
-import com.emorn.bettercables.common.gui.toggle.GuiNbtDataBox;
-import com.emorn.bettercables.common.gui.toggle.GuiOreDictionaryBox;
-import com.emorn.bettercables.common.gui.toggle.GuiToggle;
+import com.emorn.bettercables.common.gui.toggle.*;
 import com.emorn.bettercables.objects.api.forge.common.Direction;
 import com.emorn.bettercables.proxy.ModNetworkHandler;
 import com.emorn.bettercables.utils.Reference;
@@ -212,6 +209,15 @@ public class GuiConnector extends GuiContainer
         );
 
         this.buttonList.add(nbtDataBox);
+
+        GuiBlackListBox blackListBox = new GuiBlackListBox(
+            18,
+            this.guiLeft - (80 - 18 - 18),
+            this.guiTop + 100,
+            false
+        );
+
+        this.buttonList.add(blackListBox);
 
         GuiNumberInput itemCount = new GuiNumberInput(
             6,
