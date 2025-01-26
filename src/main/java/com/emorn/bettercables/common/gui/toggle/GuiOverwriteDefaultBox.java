@@ -6,26 +6,22 @@ import javax.annotation.ParametersAreNonnullByDefault;
 
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
-public class GuiBlackListBox extends GuiToggle
+public class GuiOverwriteDefaultBox extends GuiCheckbox
 {
-    public GuiBlackListBox(
+    public GuiOverwriteDefaultBox(
         int buttonId,
         int x,
         int y,
-        boolean isChecked,
-        boolean disabled
+        boolean isChecked
     )
     {
         super(
             buttonId,
             x,
             y,
-            "",
+            "Overwrite",
             isChecked,
-            new ToggleImagePosition(x, y, 197, 0, 18, 18),
-            new ToggleImagePosition(x, y, 197 + 18, 0, 18, 18),
-            new ToggleImagePosition(x, y, 197 + 18 + 18, 0, 18, 18),
-            disabled
+            false
         );
     }
 }

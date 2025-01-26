@@ -6,7 +6,7 @@ import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ResourceLocation;
 
-public class GuiNumberInput extends GuiButton
+public class GuiNumberInput extends GuiButton implements AbleToChangeDisabledState
 {
     private static final ResourceLocation TEXTURES = new ResourceLocation(
         Reference.MODID + ":textures/gui/gui_elements.png"
@@ -191,6 +191,9 @@ public class GuiNumberInput extends GuiButton
 
         if (keyCode == BACK_SPACE_CODE && !this.valueString.isEmpty()) {
             this.valueString = this.valueString.substring(0, this.valueString.length() - 1);
+            if (this.valueString.equals("-")) {
+                this.valueString = "";
+            }
             this.value = this.valueString.isEmpty() ? 0 : Integer.parseInt(this.valueString);
             return;
         }

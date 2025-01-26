@@ -4,13 +4,9 @@ import com.emorn.bettercables.utils.Reference;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.util.ResourceLocation;
 
-public class GuiNumberRangeInput extends GuiButton
+public class GuiNumberRangeInput extends GuiButton implements AbleToChangeDisabledState
 {
-    private static final ResourceLocation TEXTURES = new ResourceLocation(
-        Reference.MODID + ":textures/gui/gui_elements.png"
-    );
     private static final int WIDTH_OF_IMAGE = 27;
     private static final int HEIGHT_OF_IMAGE = 13;
     private GuiNumberInput minInput;

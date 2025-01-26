@@ -12,7 +12,8 @@ public class GuiOreDictionaryBox extends GuiToggle
         int buttonId,
         int x,
         int y,
-        boolean isChecked
+        boolean isChecked,
+        boolean disabled
     )
     {
         super(
@@ -22,7 +23,9 @@ public class GuiOreDictionaryBox extends GuiToggle
             "",
             isChecked,
             new ToggleImagePosition(x, y, 197, 18, 18, 18),
-            new ToggleImagePosition(x, y, 197 + 18, 18, 18, 18)
+            new ToggleImagePosition(x, y, 197 + 18, 18, 18, 18),
+            new ToggleImagePosition(x, y, 197 + 18 + 18, 18, 18, 18),
+            disabled
         );
     }
 }

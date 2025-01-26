@@ -13,7 +13,8 @@ public class GuiCheckbox extends GuiToggle
         int x,
         int y,
         String buttonText,
-        boolean isChecked
+        boolean isChecked,
+        boolean disabled
     )
     {
         super(
@@ -23,7 +24,9 @@ public class GuiCheckbox extends GuiToggle
             buttonText,
             isChecked,
             new ToggleImagePosition(x, y, 0, 0, 18, 18),
-            new ToggleImagePosition(x, y, 18, 0, 18, 18)
+            new ToggleImagePosition(x, y, 18, 0, 18, 18),
+        new ToggleImagePosition(x, y, 18, 0, 18, 18), // no disabled state
+            disabled
         );
     }
 }

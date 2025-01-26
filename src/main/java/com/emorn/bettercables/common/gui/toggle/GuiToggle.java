@@ -1,5 +1,6 @@
 package com.emorn.bettercables.common.gui.toggle;
 
+import com.emorn.bettercables.common.gui.AbleToChangeDisabledState;
 import com.emorn.bettercables.utils.Reference;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.client.gui.GuiButton;
@@ -10,14 +11,16 @@ import javax.annotation.ParametersAreNonnullByDefault;
 
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
-public class GuiToggle extends GuiButton
+public class GuiToggle extends GuiButton implements AbleToChangeDisabledState
 {
     private static final ResourceLocation TEXTURES = new ResourceLocation(
         Reference.MODID + ":textures/gui/gui_elements.png"
     );
     private final ToggleImagePosition inactive;
     private final ToggleImagePosition active;
+    private final ToggleImagePosition disabled;
     private boolean isChecked;
+    private boolean isDisabled;
 
     public GuiToggle(
         int buttonId,
@@ -26,13 +29,17 @@ public class GuiToggle extends GuiButton
         String buttonText,
         boolean isChecked,
         ToggleImagePosition inactiveTogglePosition,
-        ToggleImagePosition activeTogglePosition
+        ToggleImagePosition activeTogglePosition,
+        ToggleImagePosition disabledTogglePosition,
+        boolean disabled
     )
     {
         super(buttonId, x, y, 18, 18, buttonText);
+        this.isDisabled = disabled;
         this.isChecked = isChecked;
         this.inactive = inactiveTogglePosition;
         this.active = activeTogglePosition;
+        this.disabled = disabledTogglePosition;
     }
 
     @Override
@@ -54,7 +61,16 @@ public class GuiToggle extends GuiButton
         mc.getTextureManager().bindTexture(TEXTURES);
         GlStateManager.color(1.0f, 1.0f, 1.0f, 1.0f);
 
-        if (isChecked) {
+        if (isDisabled) {
+            drawTexturedModalRect(
+                this.disabled.x,
+                this.disabled.y,
+                this.disabled.textureX,
+                this.disabled.textureY,
+                this.disabled.width,
+                this.disabled.height
+            );
+        } else if (isChecked) {
             drawTexturedModalRect(
                 this.active.x,
                 this.active.y,
@@ -89,7 +105,7 @@ public class GuiToggle extends GuiButton
         int mouseY
     )
     {
-        if (super.mousePressed(mc, mouseX, mouseY)) {
+        if (!isDisabled && super.mousePressed(mc, mouseX, mouseY)) {
             this.isChecked = !this.isChecked;
             return true;
         }
@@ -99,5 +115,11 @@ public class GuiToggle extends GuiButton
     public boolean isChecked()
     {
         return isChecked;
+    }
+
+    @Override
+    public void changeDisabledState(boolean disabled)
+    {
+        this.isDisabled = disabled;
     }
 }

@@ -35,6 +35,7 @@ public class GuiConnector extends GuiContainer
     // key contains changeDisabledStateBasedOnChecked, value = GuiToggle
     private final Map<GuiButton, GuiButton> dynamicEnableOnChecked = new HashMap<>();
     private final Map<GuiButton, GuiButton> dynamicDisableOnChecked = new HashMap<>();
+    private Integer filterId = null;
 
     public GuiConnector(
         InventoryPlayer player,
@@ -71,7 +72,8 @@ public class GuiConnector extends GuiContainer
             checkboxX,
             checkboxInsertY,
             "Insert",
-            tileEntity.isInsertEnabled(this.direction)
+            tileEntity.isInsertEnabled(this.direction),
+            false
         );
 
         GuiGear insertSettings = new GuiGear(
@@ -85,7 +87,8 @@ public class GuiConnector extends GuiContainer
             checkboxX,
             checkboxExtractY,
             "Extract",
-            tileEntity.isExtractEnabled(this.direction)
+            tileEntity.isExtractEnabled(this.direction),
+            false
         );
         GuiGear extractSettings = new GuiGear(
             4,
@@ -117,7 +120,6 @@ public class GuiConnector extends GuiContainer
         drawSettings();
         if (this.isInsertSettingsOpen) {
             drawInsertSettings();
-            return;
         }
 
         if (this.isExtractSettingsOpen) {
@@ -132,16 +134,19 @@ public class GuiConnector extends GuiContainer
         int filtersPerRow = 9;
         int rows = 3;
         int iteration = 0;
+        Consumer<Integer> onFilterSettingsClicked = this::onFilterSettingsClicked;
 
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < filtersPerRow; j++) {
                 int x = j * 18;
                 int y = i * 18;
 
+
                 GuiFilter filter = new GuiFilter(
                     20 + iteration,
                     this.guiLeft + 7 + x,
-                    this.guiTop + 17 + y
+                    this.guiTop + 17 + y,
+                    onFilterSettingsClicked
                 );
 
                 this.buttonList.add(filter);
@@ -150,6 +155,12 @@ public class GuiConnector extends GuiContainer
         }
 
 
+    }
+
+    private void onFilterSettingsClicked(Integer id)
+    {
+        this.filterId = id;
+        this.initGui();
     }
 
     private void drawSettings()
@@ -173,17 +184,46 @@ public class GuiConnector extends GuiContainer
 
     private void drawDynamic()
     {
+        int extraY = 0;
+        boolean disable = false;
+        GuiOverwriteDefaultBox overwriteDefaultBox = null;
+
+        if (filterId != null) {
+            Consumer<Integer> onBackClicked = this::onBackClicked;
+
+            extraY = 18 + 18;
+            disable = true;
+
+            overwriteDefaultBox = new GuiOverwriteDefaultBox(
+                18,
+                this.guiLeft - 80,
+                this.guiTop + 5 + 18,
+                false
+            );
+
+            this.buttonList.add(overwriteDefaultBox);
+
+            GuiBackButton backButton = new GuiBackButton(
+                19,
+                this.guiLeft - 80,
+                this.guiTop + 5,
+                onBackClicked
+            );
+
+            this.buttonList.add(backButton);
+        }
+
         GuiNumberRangeInput slotInput = new GuiNumberRangeInput(
             1,
             2,
             3,
             this.guiLeft - 80,
-            this.guiTop + 5,
+            this.guiTop + 5 + extraY,
             -1,
             -1,
             "Slot range",
             -1,
-            false
+            disable
         );
 
         this.buttonList.add(slotInput);
@@ -191,66 +231,106 @@ public class GuiConnector extends GuiContainer
         this.buttonList.add(slotInput.maxInput());
         this.numberInputs.add(slotInput.minInput());
         this.numberInputs.add(slotInput.maxInput());
+        if (overwriteDefaultBox != null) {
+            this.dynamicEnableOnChecked.put(slotInput, overwriteDefaultBox);
+        }
 
         GuiOreDictionaryBox oreDictionaryBox = new GuiOreDictionaryBox(
             4,
             this.guiLeft - 80,
-            this.guiTop + 100,
-            false
+            this.guiTop + 100 + extraY,
+            false,
+            disable
         );
 
         this.buttonList.add(oreDictionaryBox);
+        if (overwriteDefaultBox != null) {
+            this.dynamicEnableOnChecked.put(oreDictionaryBox, overwriteDefaultBox);
+        }
 
         GuiNbtDataBox nbtDataBox = new GuiNbtDataBox(
             5,
             this.guiLeft - (80 - 18),
-            this.guiTop + 100,
-            false
+            this.guiTop + 100 + extraY,
+            false,
+            disable
         );
 
         this.buttonList.add(nbtDataBox);
+        if (overwriteDefaultBox != null) {
+            this.dynamicEnableOnChecked.put(nbtDataBox, overwriteDefaultBox);
+        }
 
         GuiBlackListBox blackListBox = new GuiBlackListBox(
             18,
             this.guiLeft - (80 - 18 - 18),
-            this.guiTop + 100,
-            false
+            this.guiTop + 100 + extraY,
+            false,
+            disable
         );
 
         this.buttonList.add(blackListBox);
+        if (overwriteDefaultBox != null) {
+            this.dynamicEnableOnChecked.put(blackListBox, overwriteDefaultBox);
+        }
 
         GuiNumberInput itemCount = new GuiNumberInput(
             6,
             this.guiLeft - 80,
-            this.guiTop + 45,
+            this.guiTop + 45 + extraY,
             0,
             TextPosition.TOP,
             "Min item count",
             0,
-            false
+            disable
         );
 
         this.buttonList.add(itemCount);
         this.numberInputs.add(itemCount);
+        if (overwriteDefaultBox != null) {
+            this.dynamicEnableOnChecked.put(itemCount, overwriteDefaultBox);
+        }
 
         GuiDurability durability = new GuiDurability(
             7,
             8,
             this.guiLeft - 80,
-            this.guiTop + 65,
+            this.guiTop + 65 + extraY,
             ComparisonOperator.EQUALS,
-            -1
+            -1,
+            disable
         );
 
         this.buttonList.add(durability);
         this.buttonList.add(durability.numberInput());
         this.buttonList.add(durability.operatorInput());
         this.numberInputs.add(durability.numberInput());
+        if (overwriteDefaultBox != null) {
+            this.dynamicEnableOnChecked.put(durability, overwriteDefaultBox);
+        }
+    }
+
+    private void onBackClicked(Integer integer)
+    {
+        this.filterId = null;
+        this.initGui();
     }
 
     private void drawInsertSettings()
     {
+        GuiNumberInput tickRate = new GuiNumberInput(
+            9,
+            this.guiLeft + 180,
+            this.guiTop + 20,
+            0,
+            TextPosition.RIGHT,
+            "Priority",
+            -99,
+            false
+        );
 
+        this.buttonList.add(tickRate);
+        this.numberInputs.add(tickRate);
     }
 
     private void drawExtractSettings()
@@ -274,6 +354,7 @@ public class GuiConnector extends GuiContainer
             this.guiLeft + 180,
             this.guiTop + 35,
             "Dynamic",
+            false,
             false
         );
 
@@ -395,25 +476,25 @@ public class GuiConnector extends GuiContainer
     protected void actionPerformed(GuiButton button)
     {
         for (Map.Entry<GuiButton, GuiButton> entry : this.dynamicEnableOnChecked.entrySet()) {
-            if (!(entry.getKey() instanceof GuiNumberRangeInput)) {
+            if (!(entry.getKey() instanceof AbleToChangeDisabledState)) {
                 continue;
             }
             if (!(entry.getValue() instanceof GuiToggle)) {
                 continue;
             }
             GuiToggle toggle = (GuiToggle) entry.getValue();
-            ((GuiNumberRangeInput) entry.getKey()).changeDisabledState(!toggle.isChecked());
+            ((AbleToChangeDisabledState) entry.getKey()).changeDisabledState(!toggle.isChecked());
         }
 
         for (Map.Entry<GuiButton, GuiButton> entry : this.dynamicDisableOnChecked.entrySet()) {
-            if (!(entry.getKey() instanceof GuiNumberInput)) {
+            if (!(entry.getKey() instanceof AbleToChangeDisabledState)) {
                 continue;
             }
             if (!(entry.getValue() instanceof GuiToggle)) {
                 continue;
             }
             GuiToggle toggle = (GuiToggle) entry.getValue();
-            ((GuiNumberInput) entry.getKey()).changeDisabledState(toggle.isChecked());
+            ((AbleToChangeDisabledState) entry.getKey()).changeDisabledState(toggle.isChecked());
         }
 
         if (button instanceof GuiCheckbox) {

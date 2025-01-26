@@ -17,8 +17,9 @@ public class GuiComparisonOperatorButton extends GuiButton
     );
 
     private ComparisonOperator comparisonOperator;
-    private GuiNumberInput numberInput;
+    private final GuiNumberInput numberInput;
     private int stringWidth = 0;
+    private boolean disabled;
 
     public GuiComparisonOperatorButton(
         int buttonId,
@@ -26,11 +27,13 @@ public class GuiComparisonOperatorButton extends GuiButton
         int y,
         String buttonText,
         ComparisonOperator comparisonOperator,
-        int initialValue
+        int initialValue,
+        boolean disable
     )
     {
         super(buttonId, x, y, 18, 18, buttonText);
         this.comparisonOperator = comparisonOperator;
+        this.disabled = disable;
 
         this.numberInput = new GuiNumberInput(
             buttonId,
@@ -40,7 +43,7 @@ public class GuiComparisonOperatorButton extends GuiButton
             TextPosition.RIGHT,
             "",
             -1,
-            false
+            disable
         );
     }
 
@@ -99,8 +102,6 @@ public class GuiComparisonOperatorButton extends GuiButton
             this.y + ((this.height - 3) - mc.fontRenderer.FONT_HEIGHT) / 2,
             Reference.TEXT_COLOR
         );
-
-        //this.numberInput.changeX(this.x + stringWidth + 9);
     }
 
     @Override
@@ -110,7 +111,7 @@ public class GuiComparisonOperatorButton extends GuiButton
         int mouseY
     )
     {
-        if (!this.isButtonPressed(mouseX, mouseY)) {
+        if (disabled || !this.isButtonPressed(mouseX, mouseY)) {
             return false;
         }
 
@@ -145,5 +146,11 @@ public class GuiComparisonOperatorButton extends GuiButton
     public GuiNumberInput numberInput()
     {
         return this.numberInput;
+    }
+
+    public void changeDisabledState(boolean disabled)
+    {
+        this.disabled = disabled;
+        this.numberInput.changeDisabledState(disabled);
     }
 }

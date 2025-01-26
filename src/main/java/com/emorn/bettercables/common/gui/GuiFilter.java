@@ -10,6 +10,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.function.Consumer;
 
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
@@ -19,14 +20,17 @@ public class GuiFilter extends GuiButton
         Reference.MODID + ":textures/gui/gui_elements.png"
     );
     private ItemStack filteredItem = ItemStack.EMPTY;
+    private Consumer<Integer> callback;
 
     public GuiFilter(
         int buttonId,
         int x,
-        int y
+        int y,
+        Consumer<Integer> callback
     )
     {
         super(buttonId, x, y, 18, 18, "");
+        this.callback = callback;
     }
 
     @Override
@@ -58,9 +62,18 @@ public class GuiFilter extends GuiButton
         );
 
         if (!this.filteredItem.isEmpty()) {
+            drawTexturedModalRect(
+                this.x + 14,
+                this.y + 1,
+                36,
+                18,
+                3,
+                3
+            );
+
             RenderItem renderItem = mc.getRenderItem();
             GlStateManager.pushMatrix();
-            GlStateManager.translate(this.x + 1, this.y + 1, 0);
+            GlStateManager.translate(this.x + 1f, this.y + 1f, 0);
 
             RenderHelper.enableGUIStandardItemLighting();
 
@@ -84,6 +97,11 @@ public class GuiFilter extends GuiButton
             return false;
         }
 
+        if (this.clickedOnSettings(mouseX, mouseY)) {
+            this.callback.accept(this.id);
+            return true;
+        }
+
         ItemStack heldItem = mc.player.inventory.getItemStack();
 
         if (!heldItem.isEmpty()) {
@@ -92,6 +110,17 @@ public class GuiFilter extends GuiButton
             this.filteredItem = ItemStack.EMPTY;
         }
         return true;
+    }
+
+    private boolean clickedOnSettings(
+        int mouseX,
+        int mouseY
+    )
+    {
+        return
+            (mouseX > this.x + 14 && mouseX < this.x + 17) &&
+                (mouseY > this.y + 1 && mouseY < this.y + 4)
+            ;
     }
 
     public ItemStack filteredItem()
