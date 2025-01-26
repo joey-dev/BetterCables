@@ -25,7 +25,8 @@ public class GuiNumberRangeInput extends GuiButton
         int initialValueMin,
         int initialValueMax,
         String text,
-        boolean minus1Allowed
+        int minimumValue,
+        boolean disabled
     )
     {
         super(buttonId, x, y, WIDTH_OF_IMAGE, HEIGHT_OF_IMAGE, text);
@@ -36,7 +37,8 @@ public class GuiNumberRangeInput extends GuiButton
             y + 9,
             initialValueMin,
             "Min",
-            minus1Allowed
+            minimumValue,
+            disabled
         );
 
         this.maxInput = new GuiNumberInput(
@@ -45,7 +47,8 @@ public class GuiNumberRangeInput extends GuiButton
             y + 15 + 9,
             initialValueMax,
             "Max",
-            minus1Allowed
+            minimumValue,
+            disabled
         );
     }
 
@@ -88,5 +91,12 @@ public class GuiNumberRangeInput extends GuiButton
     public int maxValue()
     {
         return this.maxInput.value();
+    }
+
+
+    public void changeDisabledState(boolean disable)
+    {
+        this.minInput.changeDisabledState(disable);
+        this.maxInput.changeDisabledState(disable);
     }
 }

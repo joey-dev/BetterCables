@@ -4,6 +4,7 @@ import com.emorn.bettercables.common.gui.*;
 import com.emorn.bettercables.common.gui.toggle.GuiCheckbox;
 import com.emorn.bettercables.common.gui.toggle.GuiNbtDataBox;
 import com.emorn.bettercables.common.gui.toggle.GuiOreDictionaryBox;
+import com.emorn.bettercables.common.gui.toggle.GuiToggle;
 import com.emorn.bettercables.objects.api.forge.common.Direction;
 import com.emorn.bettercables.proxy.ModNetworkHandler;
 import com.emorn.bettercables.utils.Reference;
@@ -17,6 +18,8 @@ import net.minecraft.util.ResourceLocation;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Consumer;
 
 @MethodsReturnNonnullByDefault
@@ -32,6 +35,9 @@ public class GuiConnector extends GuiContainer
     private final ArrayList<GuiNumberInput> numberInputs = new ArrayList<>();
     private boolean isInsertSettingsOpen = false;
     private boolean isExtractSettingsOpen = false;
+    // key contains changeDisabledStateBasedOnChecked, value = GuiToggle
+    private final Map<GuiButton, GuiButton> dynamicEnableOnChecked = new HashMap<>();
+    private final Map<GuiButton, GuiButton> dynamicDisableOnChecked = new HashMap<>();
 
     public GuiConnector(
         InventoryPlayer player,
@@ -130,12 +136,18 @@ public class GuiConnector extends GuiContainer
             this.guiTop + 15,
             0,
             "Channel Id",
+            0,
             false
         );
 
         this.buttonList.add(channelInput);
         this.numberInputs.add(channelInput);
 
+        drawDynamic();
+    }
+
+    private void drawDynamic()
+    {
         GuiNumberRangeInput slotInput = new GuiNumberRangeInput(
             1,
             2,
@@ -145,7 +157,8 @@ public class GuiConnector extends GuiContainer
             -1,
             -1,
             "Slot range",
-            true
+            -1,
+            false
         );
 
         this.buttonList.add(slotInput);
@@ -164,7 +177,7 @@ public class GuiConnector extends GuiContainer
         this.buttonList.add(oreDictionaryBox);
 
         GuiNbtDataBox nbtDataBox = new GuiNbtDataBox(
-            4,
+            5,
             this.guiLeft + 135,
             this.guiTop + 15,
             false
@@ -173,11 +186,12 @@ public class GuiConnector extends GuiContainer
         this.buttonList.add(nbtDataBox);
 
         GuiNumberInput itemCount = new GuiNumberInput(
-            0,
+            6,
             this.guiLeft + 70,
             this.guiTop + 35,
             0,
             "Min item count",
+            0,
             false
         );
 
@@ -185,8 +199,8 @@ public class GuiConnector extends GuiContainer
         this.numberInputs.add(itemCount);
 
         GuiDurability durability = new GuiDurability(
-            5,
-            6,
+            7,
+            8,
             this.guiLeft + 70,
             this.guiTop + 55,
             ComparisonOperator.EQUALS,
@@ -206,7 +220,49 @@ public class GuiConnector extends GuiContainer
 
     private void drawExtractSettings()
     {
+        GuiNumberInput tickRate = new GuiNumberInput(
+            9,
+            this.guiLeft + 180,
+            this.guiTop + 15,
+            1,
+            "Tick rate",
+            1,
+            false
+        );
 
+        this.buttonList.add(tickRate);
+        this.numberInputs.add(tickRate);
+
+        GuiCheckbox dynamic = new GuiCheckbox(
+            10,
+            this.guiLeft + 180,
+            this.guiTop + 35,
+            "Dynamic",
+            false
+        );
+
+        this.buttonList.add(dynamic);
+        this.dynamicDisableOnChecked.put(tickRate, dynamic);
+
+        GuiNumberRangeInput dynamicRange = new GuiNumberRangeInput(
+            11,
+            12,
+            13,
+            this.guiLeft + 180,
+            this.guiTop + 55,
+            1,
+            999,
+            "Dynamic range",
+            1,
+            !dynamic.isChecked()
+        );
+
+        this.buttonList.add(dynamicRange);
+        this.buttonList.add(dynamicRange.minInput());
+        this.buttonList.add(dynamicRange.maxInput());
+        this.dynamicEnableOnChecked.put(dynamicRange, dynamic);
+        this.numberInputs.add(dynamicRange.minInput());
+        this.numberInputs.add(dynamicRange.maxInput());
     }
 
     @Override
@@ -278,6 +334,28 @@ public class GuiConnector extends GuiContainer
     @Override
     protected void actionPerformed(GuiButton button)
     {
+        for (Map.Entry<GuiButton, GuiButton> entry : this.dynamicEnableOnChecked.entrySet()) {
+            if (!(entry.getKey() instanceof GuiNumberRangeInput)) {
+                continue;
+            }
+            if (!(entry.getValue() instanceof GuiToggle)) {
+                continue;
+            }
+            GuiToggle toggle = (GuiToggle) entry.getValue();
+            ((GuiNumberRangeInput) entry.getKey()).changeDisabledState(!toggle.isChecked());
+        }
+
+        for (Map.Entry<GuiButton, GuiButton> entry : this.dynamicDisableOnChecked.entrySet()) {
+            if (!(entry.getKey() instanceof GuiNumberInput)) {
+                continue;
+            }
+            if (!(entry.getValue() instanceof GuiToggle)) {
+                continue;
+            }
+            GuiToggle toggle = (GuiToggle) entry.getValue();
+            ((GuiNumberInput) entry.getKey()).changeDisabledState(toggle.isChecked());
+        }
+
         if (button instanceof GuiCheckbox) {
             updateCheckboxes((GuiCheckbox) button);
         }

@@ -26,6 +26,7 @@ public class GuiNumberInput extends GuiButton
     private boolean isFocused;
     private int plusButtonY = 0;
     private int minusButtonY = 0;
+    private boolean disabled = false;
 
     public GuiNumberInput(
         int buttonId,
@@ -33,16 +34,15 @@ public class GuiNumberInput extends GuiButton
         int y,
         int initialValue,
         String text,
-        boolean minus1Allowed
+        int minimumValue,
+        boolean disabled
     )
     {
         super(buttonId, x, y, WIDTH_OF_IMAGE, HEIGHT_OF_IMAGE, text);
         this.value = initialValue;
+        this.disabled = disabled;
 
-        if (minus1Allowed) {
-            this.minimumValue = -1;
-        }
-
+        this.minimumValue = minimumValue;
         this.valueString = Integer.toString(initialValue);
         this.plusButtonY = this.y + 1;
         this.minusButtonY = this.y + 6;
@@ -72,7 +72,13 @@ public class GuiNumberInput extends GuiButton
         int stringWidth = mc.fontRenderer.getStringWidth(valueString);
         mc.getTextureManager().bindTexture(TEXTURES);
         GlStateManager.color(1.0f, 1.0f, 1.0f, 1.0f);
-        drawTexturedModalRect(this.x, this.y, 61, 0, WIDTH_OF_IMAGE, HEIGHT_OF_IMAGE); // input box
+
+        if (this.disabled) {
+            drawTexturedModalRect(this.x, this.y, 61, 13, WIDTH_OF_IMAGE, HEIGHT_OF_IMAGE); // input box
+        } else {
+            drawTexturedModalRect(this.x, this.y, 61, 0, WIDTH_OF_IMAGE, HEIGHT_OF_IMAGE); // input box
+        }
+
         drawTexturedModalRect(this.plusButtonX(), this.plusButtonY, 55, 0, 5, 5); // plus
         drawTexturedModalRect(this.minusButtonX(), this.minusButtonY, 55, 6, 5, 5); // minus
 
@@ -91,6 +97,11 @@ public class GuiNumberInput extends GuiButton
         );
     }
 
+    public void changeDisabledState(boolean disable)
+    {
+        this.disabled = disable;
+    }
+
     @Override
     public boolean mousePressed(
         Minecraft mc,
@@ -98,7 +109,7 @@ public class GuiNumberInput extends GuiButton
         int mouseY
     )
     {
-        if (!this.visible || !this.enabled) {
+        if (!this.visible || !this.enabled || this.disabled) {
             this.isFocused = false;
             return false;
         }
@@ -156,7 +167,7 @@ public class GuiNumberInput extends GuiButton
         int keyCode
     )
     {
-        if (!this.visible || !this.enabled || !this.isFocused) {
+        if (!this.visible || !this.enabled || !this.isFocused || this.disabled) {
             return;
         }
 

@@ -38,7 +38,8 @@ public class GuiComparisonOperatorButton extends GuiButton
             y,
             initialValue,
             "",
-            true
+            -1,
+            false
         );
     }
 
