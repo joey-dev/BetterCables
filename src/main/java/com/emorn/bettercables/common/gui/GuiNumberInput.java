@@ -18,7 +18,7 @@ public class GuiNumberInput extends GuiButton
     private static final int MINUS_BUTTON_WIDTH = 5;
     private static final int MINUS_BUTTON_HEIGHT = 5;
     private static final int BACK_SPACE_CODE = 14;
-    private static final int MINIMUM_VALUE = 0;
+    private int minimumValue = 0;
     private static final int MAXIMUM_VALUE = 999;
     private static final int MAXIMUM_CHARACTER_LENGTH = 3;
     private int value;
@@ -34,11 +34,16 @@ public class GuiNumberInput extends GuiButton
         int x,
         int y,
         int initialValue,
-        String text
+        String text,
+        boolean minus1Allowed
     )
     {
         super(buttonId, x, y, WIDTH_OF_IMAGE, HEIGHT_OF_IMAGE, text);
         this.value = initialValue;
+
+        if (minus1Allowed) {
+            this.minimumValue = -1;
+        }
 
         this.valueString = Integer.toString(initialValue);
         this.plusButtonX = this.x + WIDTH_OF_IMAGE - PLUS_BUTTON_WIDTH - 1;
@@ -100,7 +105,7 @@ public class GuiNumberInput extends GuiButton
         }
 
         if (this.isMinusButtonPressed(mouseX, mouseY)) {
-            this.value = Math.max(this.value - 1, MINIMUM_VALUE);
+            this.value = Math.max(this.value - 1, minimumValue);
             this.updateValue();
             this.isFocused = false;
             return true;

@@ -1,8 +1,9 @@
 package com.emorn.bettercables.objects.api.forge.blocks.connector;
 
-import com.emorn.bettercables.common.gui.toggle.GuiCheckbox;
 import com.emorn.bettercables.common.gui.GuiGear;
 import com.emorn.bettercables.common.gui.GuiNumberInput;
+import com.emorn.bettercables.common.gui.GuiNumberRangeInput;
+import com.emorn.bettercables.common.gui.toggle.GuiCheckbox;
 import com.emorn.bettercables.objects.api.forge.common.Direction;
 import com.emorn.bettercables.proxy.ModNetworkHandler;
 import com.emorn.bettercables.utils.Reference;
@@ -29,6 +30,8 @@ public class GuiConnector extends GuiContainer
     private final TileEntityConnector tileEntity;
     private final Direction direction;
     private final ArrayList<GuiNumberInput> numberInputs = new ArrayList<>();
+    private boolean isInsertSettingsOpen = false;
+    private boolean isExtractSettingsOpen = false;
 
     public GuiConnector(
         InventoryPlayer player,
@@ -55,6 +58,11 @@ public class GuiConnector extends GuiContainer
 
         Consumer<Integer> onSettingsClicked = this::onSettingsClicked;
 
+        if (this.isInsertSettingsOpen || this.isExtractSettingsOpen) {
+            this.settingsMenu();
+            return;
+        }
+
         GuiCheckbox insertCheckbox = new GuiCheckbox(
             0,
             checkboxX,
@@ -62,7 +70,6 @@ public class GuiConnector extends GuiContainer
             "Insert",
             tileEntity.isInsertEnabled(this.direction)
         );
-
 
         GuiGear insertSettings = new GuiGear(
             2,
@@ -92,11 +99,25 @@ public class GuiConnector extends GuiContainer
 
     private void onSettingsClicked(Integer buttonId)
     {
+        if (buttonId == 2) {
+            this.isInsertSettingsOpen = true;
+        } else if (buttonId == 4) {
+            this.isExtractSettingsOpen = true;
+        }
+
+        this.settingsMenu();
+    }
+
+    private void settingsMenu()
+    {
         this.buttonList.clear();
         drawSettings();
-        if (buttonId == 2) {
+        if (this.isInsertSettingsOpen) {
             drawInsertSettings();
-        } else if (buttonId == 4) {
+            return;
+        }
+
+        if (this.isExtractSettingsOpen) {
             drawExtractSettings();
         }
     }
@@ -108,11 +129,30 @@ public class GuiConnector extends GuiContainer
             this.guiLeft + 10,
             this.guiTop + 15,
             0,
-            "Channel Id"
+            "Channel Id",
+            false
         );
 
         this.buttonList.add(channelInput);
         this.numberInputs.add(channelInput);
+
+        GuiNumberRangeInput slotInput = new GuiNumberRangeInput(
+            1,
+            2,
+            3,
+            this.guiLeft + 10,
+            this.guiTop + 35,
+            -1,
+            -1,
+            "Slot range",
+            true
+        );
+
+        this.buttonList.add(slotInput);
+        this.buttonList.add(slotInput.minInput());
+        this.buttonList.add(slotInput.maxInput());
+        this.numberInputs.add(slotInput.minInput());
+        this.numberInputs.add(slotInput.maxInput());
     }
 
     private void drawInsertSettings()
@@ -160,6 +200,23 @@ public class GuiConnector extends GuiContainer
         GlStateManager.color(1.0f, 1.0f, 1.0f, 1.0f);
         this.mc.getTextureManager().bindTexture(TEXTURES);
         this.drawTexturedModalRect(this.guiLeft, this.guiTop, 0, 0, 176, 166);
+
+        if (this.isInsertSettingsOpen || this.isExtractSettingsOpen) {
+            this.drawSettingsBackground();
+        }
+    }
+
+    private void drawSettingsBackground()
+    {
+        this.drawTexturedModalRect(this.guiLeft - 88, this.guiTop, 0, 0, 88, 82);
+        this.drawTexturedModalRect(this.guiLeft - 88, this.guiTop + 82, 0, 4, 88, 78);
+        this.drawTexturedModalRect(this.guiLeft - 88, this.guiTop + 160, 0, 4, 88, 3);
+        this.drawTexturedModalRect(this.guiLeft - 88, this.guiTop + 163, 0, 163, 88, 3);
+
+        this.drawTexturedModalRect(this.guiLeft + 176, this.guiTop, 88, 0, 88, 82);
+        this.drawTexturedModalRect(this.guiLeft + 176, this.guiTop + 82, 88, 4, 88, 78);
+        this.drawTexturedModalRect(this.guiLeft + 176, this.guiTop + 160, 88, 4, 88, 3);
+        this.drawTexturedModalRect(this.guiLeft + 176, this.guiTop + 163, 88, 163, 88, 3);
     }
 
     @Override
