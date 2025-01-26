@@ -27,12 +27,15 @@ public class GuiNumberInput extends GuiButton
     private int plusButtonY = 0;
     private int minusButtonY = 0;
     private boolean disabled = false;
+    private final TextPosition textPosition;
+    private int extraY = 0;
 
     public GuiNumberInput(
         int buttonId,
         int x,
         int y,
         int initialValue,
+        TextPosition textPosition,
         String text,
         int minimumValue,
         boolean disabled
@@ -41,6 +44,7 @@ public class GuiNumberInput extends GuiButton
         super(buttonId, x, y, WIDTH_OF_IMAGE, HEIGHT_OF_IMAGE, text);
         this.value = initialValue;
         this.disabled = disabled;
+        this.textPosition = textPosition;
 
         this.minimumValue = minimumValue;
         this.valueString = Integer.toString(initialValue);
@@ -73,28 +77,42 @@ public class GuiNumberInput extends GuiButton
         mc.getTextureManager().bindTexture(TEXTURES);
         GlStateManager.color(1.0f, 1.0f, 1.0f, 1.0f);
 
-        if (this.disabled) {
-            drawTexturedModalRect(this.x, this.y, 61, 13, WIDTH_OF_IMAGE, HEIGHT_OF_IMAGE); // input box
-        } else {
-            drawTexturedModalRect(this.x, this.y, 61, 0, WIDTH_OF_IMAGE, HEIGHT_OF_IMAGE); // input box
+        if (this.textPosition.equals(TextPosition.TOP)) {
+            extraY = mc.fontRenderer.FONT_HEIGHT;
         }
 
-        drawTexturedModalRect(this.plusButtonX(), this.plusButtonY, 55, 0, 5, 5); // plus
-        drawTexturedModalRect(this.minusButtonX(), this.minusButtonY, 55, 6, 5, 5); // minus
+
+        if (this.disabled) {
+            drawTexturedModalRect(this.x, this.y + extraY, 61, 13, WIDTH_OF_IMAGE, HEIGHT_OF_IMAGE); // input box
+        } else {
+            drawTexturedModalRect(this.x, this.y + extraY, 61, 0, WIDTH_OF_IMAGE, HEIGHT_OF_IMAGE); // input box
+        }
+
+        drawTexturedModalRect(this.plusButtonX(), this.plusButtonY + extraY, 55, 0, 5, 5); // plus
+        drawTexturedModalRect(this.minusButtonX(), this.minusButtonY + extraY, 55, 6, 5, 5); // minus
 
         mc.fontRenderer.drawString(
             valueString,
             this.x + (WIDTH_OF_IMAGE - stringWidth) - 6,
-            this.y + (this.height - mc.fontRenderer.FONT_HEIGHT) / 2,
+            (this.y + (this.height - mc.fontRenderer.FONT_HEIGHT) / 2) + extraY,
             Reference.TEXT_COLOR
         );
 
-        mc.fontRenderer.drawString(
-            displayString,
-            this.x + this.width + 5,
-            this.y + (this.height - mc.fontRenderer.FONT_HEIGHT) / 2,
-            Reference.TEXT_COLOR
-        );
+        if (this.textPosition.equals(TextPosition.RIGHT)) {
+            mc.fontRenderer.drawString(
+                displayString,
+                this.x + this.width + 5,
+                this.y + (this.height - mc.fontRenderer.FONT_HEIGHT) / 2,
+                Reference.TEXT_COLOR
+            );
+        } else if (this.textPosition.equals(TextPosition.TOP)) {
+            mc.fontRenderer.drawString(
+                displayString,
+                this.x,
+                this.y,
+                Reference.TEXT_COLOR
+            );
+        }
     }
 
     public void changeDisabledState(boolean disable)
@@ -130,7 +148,7 @@ public class GuiNumberInput extends GuiButton
 
         this.isFocused =
             (mouseX >= this.x && mouseX < this.x + this.width) &&
-                (mouseY >= this.y && mouseY < this.y + this.height);
+                (mouseY >= this.y + extraY && mouseY < this.y + this.height + extraY);
 
         return false;
     }
@@ -142,7 +160,7 @@ public class GuiNumberInput extends GuiButton
     {
         return
             (mouseX > this.plusButtonX() && mouseX < this.plusButtonX() + PLUS_BUTTON_WIDTH) &&
-                (mouseY > this.plusButtonY && mouseY < this.plusButtonY + PLUS_BUTTON_HEIGHT)
+                (mouseY > this.plusButtonY + extraY && mouseY < this.plusButtonY + PLUS_BUTTON_HEIGHT + extraY)
             ;
     }
 
@@ -158,7 +176,7 @@ public class GuiNumberInput extends GuiButton
     {
         return
             (mouseX > this.minusButtonX() && mouseX < this.minusButtonX() + MINUS_BUTTON_WIDTH) &&
-                (mouseY > this.minusButtonY && mouseY < this.minusButtonY + MINUS_BUTTON_HEIGHT)
+                (mouseY > this.minusButtonY + extraY && mouseY < this.minusButtonY + MINUS_BUTTON_HEIGHT + extraY)
             ;
     }
 

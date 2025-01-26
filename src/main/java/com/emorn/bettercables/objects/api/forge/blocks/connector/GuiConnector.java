@@ -135,6 +135,7 @@ public class GuiConnector extends GuiContainer
             this.guiLeft + 10,
             this.guiTop + 15,
             0,
+            TextPosition.RIGHT,
             "Channel Id",
             0,
             false
@@ -190,6 +191,7 @@ public class GuiConnector extends GuiContainer
             this.guiLeft + 70,
             this.guiTop + 35,
             0,
+            TextPosition.RIGHT,
             "Min item count",
             0,
             false
@@ -225,6 +227,7 @@ public class GuiConnector extends GuiContainer
             this.guiLeft + 180,
             this.guiTop + 15,
             1,
+            TextPosition.RIGHT,
             "Tick rate",
             1,
             false
@@ -273,6 +276,20 @@ public class GuiConnector extends GuiContainer
         );
 
         this.buttonList.add(extractType);
+
+        GuiNumberInput itemsPerExtract = new GuiNumberInput(
+            15,
+            this.guiLeft + 180,
+            this.guiTop + 115,
+            1,
+            TextPosition.TOP,
+            "Items per action",
+            1,
+            false
+        );
+
+        this.buttonList.add(itemsPerExtract);
+        this.numberInputs.add(itemsPerExtract);
     }
 
     @Override

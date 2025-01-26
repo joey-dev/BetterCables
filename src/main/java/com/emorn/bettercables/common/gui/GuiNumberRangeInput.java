@@ -36,6 +36,7 @@ public class GuiNumberRangeInput extends GuiButton
             x,
             y + 9,
             initialValueMin,
+            TextPosition.RIGHT,
             "Min",
             minimumValue,
             disabled
@@ -46,6 +47,7 @@ public class GuiNumberRangeInput extends GuiButton
             x,
             y + 15 + 9,
             initialValueMax,
+            TextPosition.RIGHT,
             "Max",
             minimumValue,
             disabled

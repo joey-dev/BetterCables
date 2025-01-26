@@ -37,6 +37,7 @@ public class GuiComparisonOperatorButton extends GuiButton
             x,
             y,
             initialValue,
+            TextPosition.RIGHT,
             "",
             -1,
             false
