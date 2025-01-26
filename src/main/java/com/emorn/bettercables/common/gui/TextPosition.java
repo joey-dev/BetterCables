@@ -11,9 +11,7 @@ import javax.annotation.ParametersAreNonnullByDefault;
 public enum TextPosition implements IStringSerializable
 {
     TOP,
-    RIGHT,
-    BOTTOM,
-    LEFT;
+    RIGHT;
 
     @Override
     @Nonnull
