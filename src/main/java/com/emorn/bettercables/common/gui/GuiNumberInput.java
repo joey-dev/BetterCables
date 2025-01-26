@@ -24,9 +24,7 @@ public class GuiNumberInput extends GuiButton
     private int value;
     private String valueString;
     private boolean isFocused;
-    private int plusButtonX = 0;
     private int plusButtonY = 0;
-    private int minusButtonX = 0;
     private int minusButtonY = 0;
 
     public GuiNumberInput(
@@ -46,10 +44,18 @@ public class GuiNumberInput extends GuiButton
         }
 
         this.valueString = Integer.toString(initialValue);
-        this.plusButtonX = this.x + WIDTH_OF_IMAGE - PLUS_BUTTON_WIDTH - 1;
         this.plusButtonY = this.y + 1;
-        this.minusButtonX = this.x + WIDTH_OF_IMAGE - PLUS_BUTTON_WIDTH - 1;
         this.minusButtonY = this.y + 6;
+    }
+
+    private int minusButtonX()
+    {
+        return this.x + WIDTH_OF_IMAGE - PLUS_BUTTON_WIDTH - 1;
+    }
+
+    private int plusButtonX()
+    {
+        return this.x + WIDTH_OF_IMAGE - PLUS_BUTTON_WIDTH - 1;
     }
 
     @Override
@@ -67,8 +73,8 @@ public class GuiNumberInput extends GuiButton
         mc.getTextureManager().bindTexture(TEXTURES);
         GlStateManager.color(1.0f, 1.0f, 1.0f, 1.0f);
         drawTexturedModalRect(this.x, this.y, 61, 0, WIDTH_OF_IMAGE, HEIGHT_OF_IMAGE); // input box
-        drawTexturedModalRect(this.plusButtonX, this.plusButtonY, 55, 0, 5, 5); // plus
-        drawTexturedModalRect(this.minusButtonX, this.minusButtonY, 55, 6, 5, 5); // minus
+        drawTexturedModalRect(this.plusButtonX(), this.plusButtonY, 55, 0, 5, 5); // plus
+        drawTexturedModalRect(this.minusButtonX(), this.minusButtonY, 55, 6, 5, 5); // minus
 
         mc.fontRenderer.drawString(
             valueString,
@@ -124,7 +130,7 @@ public class GuiNumberInput extends GuiButton
     )
     {
         return
-            (mouseX > this.plusButtonX && mouseX < this.plusButtonX + PLUS_BUTTON_WIDTH) &&
+            (mouseX > this.plusButtonX() && mouseX < this.plusButtonX() + PLUS_BUTTON_WIDTH) &&
                 (mouseY > this.plusButtonY && mouseY < this.plusButtonY + PLUS_BUTTON_HEIGHT)
             ;
     }
@@ -140,7 +146,7 @@ public class GuiNumberInput extends GuiButton
     )
     {
         return
-            (mouseX > this.minusButtonX && mouseX < this.minusButtonX + MINUS_BUTTON_WIDTH) &&
+            (mouseX > this.minusButtonX() && mouseX < this.minusButtonX() + MINUS_BUTTON_WIDTH) &&
                 (mouseY > this.minusButtonY && mouseY < this.minusButtonY + MINUS_BUTTON_HEIGHT)
             ;
     }
@@ -175,5 +181,10 @@ public class GuiNumberInput extends GuiButton
     public int value()
     {
         return this.value;
+    }
+
+    public void changeX(int x)
+    {
+        this.x = x;
     }
 }

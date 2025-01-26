@@ -1,8 +1,6 @@
 package com.emorn.bettercables.objects.api.forge.blocks.connector;
 
-import com.emorn.bettercables.common.gui.GuiGear;
-import com.emorn.bettercables.common.gui.GuiNumberInput;
-import com.emorn.bettercables.common.gui.GuiNumberRangeInput;
+import com.emorn.bettercables.common.gui.*;
 import com.emorn.bettercables.common.gui.toggle.GuiCheckbox;
 import com.emorn.bettercables.common.gui.toggle.GuiNbtDataBox;
 import com.emorn.bettercables.common.gui.toggle.GuiOreDictionaryBox;
@@ -158,8 +156,8 @@ public class GuiConnector extends GuiContainer
 
         GuiOreDictionaryBox oreDictionaryBox = new GuiOreDictionaryBox(
             4,
-            this.guiLeft + 70,
-            this.guiTop + 35,
+            this.guiLeft + 115,
+            this.guiTop + 15,
             false
         );
 
@@ -167,8 +165,8 @@ public class GuiConnector extends GuiContainer
 
         GuiNbtDataBox nbtDataBox = new GuiNbtDataBox(
             4,
-            this.guiLeft + 70,
-            this.guiTop + 55,
+            this.guiLeft + 135,
+            this.guiTop + 15,
             false
         );
 
@@ -176,15 +174,29 @@ public class GuiConnector extends GuiContainer
 
         GuiNumberInput itemCount = new GuiNumberInput(
             0,
-            this.guiLeft + 95,
+            this.guiLeft + 70,
             this.guiTop + 35,
             0,
-            "Min items",
+            "Min item count",
             false
         );
 
         this.buttonList.add(itemCount);
         this.numberInputs.add(itemCount);
+
+        GuiDurability durability = new GuiDurability(
+            5,
+            6,
+            this.guiLeft + 70,
+            this.guiTop + 55,
+            ComparisonOperator.EQUALS,
+            -1
+        );
+
+        this.buttonList.add(durability);
+        this.buttonList.add(durability.numberInput());
+        this.buttonList.add(durability.operatorInput());
+        this.numberInputs.add(durability.numberInput());
     }
 
     private void drawInsertSettings()
