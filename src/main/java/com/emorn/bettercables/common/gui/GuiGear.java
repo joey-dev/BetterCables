@@ -2,31 +2,31 @@ package com.emorn.bettercables.common.gui;
 
 import com.emorn.bettercables.utils.Reference;
 import mcp.MethodsReturnNonnullByDefault;
-import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ResourceLocation;
 
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.function.Consumer;
 
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
-public class GuiCheckbox extends GuiButton
+public class GuiGear extends net.minecraft.client.gui.GuiButton
 {
     private static final ResourceLocation TEXTURES = new ResourceLocation(
-        Reference.MODID + ":textures/gui/checkbox_gui.png"
+        Reference.MODID + ":textures/gui/gui_elements.png"
     );
-    private boolean isChecked;
 
-    public GuiCheckbox(
+    private Consumer<Integer> callback;
+
+    public GuiGear(
         int buttonId,
         int x,
         int y,
-        String buttonText,
-        boolean isChecked
+        Consumer<Integer> callback
     )
     {
-        super(buttonId, x, y, 18, 18, buttonText);
-        this.isChecked = isChecked;
+        super(buttonId, x, y, 18, 18, "settings");
+        this.callback = callback;
     }
 
     @Override
@@ -47,18 +47,7 @@ public class GuiCheckbox extends GuiButton
     {
         mc.getTextureManager().bindTexture(TEXTURES);
         GlStateManager.color(1.0f, 1.0f, 1.0f, 1.0f);
-        drawTexturedModalRect(this.x, this.y, 0, 0, 18, 18);
-
-        if (isChecked) {
-            drawTexturedModalRect(this.x + 2, this.y + 2, 18, 0, 14, 14);
-        }
-
-        mc.fontRenderer.drawString(
-            displayString,
-            this.x + this.width + 5,
-            this.y + (this.height - mc.fontRenderer.FONT_HEIGHT) / 2,
-            Reference.TEXT_COLOR
-        );
+        drawTexturedModalRect(this.x, this.y, 0, 18, 18, 18);
     }
 
     @Override
@@ -69,19 +58,9 @@ public class GuiCheckbox extends GuiButton
     )
     {
         if (super.mousePressed(mc, mouseX, mouseY)) {
-            this.isChecked = !this.isChecked;
+            this.callback.accept(this.id);
             return true;
         }
         return false;
-    }
-
-    public boolean isChecked()
-    {
-        return isChecked;
-    }
-
-    public void setChecked(boolean checked)
-    {
-        this.isChecked = checked;
     }
 }
