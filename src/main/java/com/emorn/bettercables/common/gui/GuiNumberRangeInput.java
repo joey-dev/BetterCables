@@ -9,8 +9,8 @@ public class GuiNumberRangeInput extends GuiButton implements AbleToChangeDisabl
 {
     private static final int WIDTH_OF_IMAGE = 27;
     private static final int HEIGHT_OF_IMAGE = 13;
-    private GuiNumberInput minInput;
-    private GuiNumberInput maxInput;
+    private final GuiNumberInput minInput;
+    private final GuiNumberInput maxInput;
 
     public GuiNumberRangeInput(
         int buttonId,

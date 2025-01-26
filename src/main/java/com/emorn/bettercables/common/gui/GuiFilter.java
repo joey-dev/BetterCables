@@ -20,7 +20,7 @@ public class GuiFilter extends GuiButton
         Reference.MODID + ":textures/gui/gui_elements.png"
     );
     private ItemStack filteredItem = ItemStack.EMPTY;
-    private Consumer<Integer> callback;
+    private final Consumer<Integer> callback;
 
     public GuiFilter(
         int buttonId,

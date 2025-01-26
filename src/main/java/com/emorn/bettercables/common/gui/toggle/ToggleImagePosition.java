@@ -1,5 +1,11 @@
 package com.emorn.bettercables.common.gui.toggle;
 
+import mcp.MethodsReturnNonnullByDefault;
+
+import javax.annotation.ParametersAreNonnullByDefault;
+
+@MethodsReturnNonnullByDefault
+@ParametersAreNonnullByDefault
 public class ToggleImagePosition
 {
     public final int x;

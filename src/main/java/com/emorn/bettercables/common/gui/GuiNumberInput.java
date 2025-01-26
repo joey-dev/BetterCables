@@ -1,11 +1,16 @@
 package com.emorn.bettercables.common.gui;
 
 import com.emorn.bettercables.utils.Reference;
+import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ResourceLocation;
 
+import javax.annotation.ParametersAreNonnullByDefault;
+
+@MethodsReturnNonnullByDefault
+@ParametersAreNonnullByDefault
 public class GuiNumberInput extends GuiButton implements AbleToChangeDisabledState
 {
     private static final ResourceLocation TEXTURES = new ResourceLocation(

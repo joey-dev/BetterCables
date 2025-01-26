@@ -1,7 +1,12 @@
 package com.emorn.bettercables.common.gui;
 
+import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.client.gui.GuiButton;
 
+import javax.annotation.ParametersAreNonnullByDefault;
+
+@MethodsReturnNonnullByDefault
+@ParametersAreNonnullByDefault
 public class GuiDurability extends GuiButton implements AbleToChangeDisabledState
 {
     private static final int WIDTH_OF_IMAGE = 27;
