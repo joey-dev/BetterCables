@@ -167,7 +167,7 @@ public class GuiNumberInput extends GuiButton
         }
     }
 
-    public int getValue()
+    public int value()
     {
         return this.value;
     }

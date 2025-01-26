@@ -1,6 +1,6 @@
 package com.emorn.bettercables.objects.api.forge.blocks.connector;
 
-import com.emorn.bettercables.common.gui.GuiCheckbox;
+import com.emorn.bettercables.common.gui.toggle.GuiCheckbox;
 import com.emorn.bettercables.common.gui.GuiGear;
 import com.emorn.bettercables.common.gui.GuiNumberInput;
 import com.emorn.bettercables.objects.api.forge.common.Direction;
@@ -62,6 +62,7 @@ public class GuiConnector extends GuiContainer
             "Insert",
             tileEntity.isInsertEnabled(this.direction)
         );
+
 
         GuiGear insertSettings = new GuiGear(
             2,

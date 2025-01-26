@@ -1,4 +1,4 @@
-package com.emorn.bettercables.common.gui;
+package com.emorn.bettercables.common.gui.toggle;
 
 import com.emorn.bettercables.utils.Reference;
 import mcp.MethodsReturnNonnullByDefault;
@@ -10,23 +10,29 @@ import javax.annotation.ParametersAreNonnullByDefault;
 
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
-public class GuiCheckbox extends GuiButton
+public class GuiToggle extends GuiButton
 {
     private static final ResourceLocation TEXTURES = new ResourceLocation(
         Reference.MODID + ":textures/gui/gui_elements.png"
     );
+    private final ToggleImagePosition inactive;
+    private final ToggleImagePosition active;
     private boolean isChecked;
 
-    public GuiCheckbox(
+    public GuiToggle(
         int buttonId,
         int x,
         int y,
         String buttonText,
-        boolean isChecked
+        boolean isChecked,
+        ToggleImagePosition inactiveTogglePosition,
+        ToggleImagePosition activeTogglePosition
     )
     {
         super(buttonId, x, y, 18, 18, buttonText);
         this.isChecked = isChecked;
+        this.inactive = inactiveTogglePosition;
+        this.active = activeTogglePosition;
     }
 
     @Override
@@ -47,10 +53,25 @@ public class GuiCheckbox extends GuiButton
     {
         mc.getTextureManager().bindTexture(TEXTURES);
         GlStateManager.color(1.0f, 1.0f, 1.0f, 1.0f);
-        drawTexturedModalRect(this.x, this.y, 0, 0, 18, 18);
 
         if (isChecked) {
-            drawTexturedModalRect(this.x + 2, this.y + 2, 18, 0, 14, 14);
+            drawTexturedModalRect(
+                this.inactive.x,
+                this.inactive.y,
+                this.inactive.textureX,
+                this.inactive.textureY,
+                this.inactive.width,
+                this.inactive.height
+            );
+        } else {
+            drawTexturedModalRect(
+                this.active.x,
+                this.active.y,
+                this.active.textureX,
+                this.active.textureY,
+                this.active.width,
+                this.active.height
+            );
         }
 
         mc.fontRenderer.drawString(
@@ -78,10 +99,5 @@ public class GuiCheckbox extends GuiButton
     public boolean isChecked()
     {
         return isChecked;
-    }
-
-    public void setChecked(boolean checked)
-    {
-        this.isChecked = checked;
     }
 }
