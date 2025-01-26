@@ -263,6 +263,16 @@ public class GuiConnector extends GuiContainer
         this.dynamicEnableOnChecked.put(dynamicRange, dynamic);
         this.numberInputs.add(dynamicRange.minInput());
         this.numberInputs.add(dynamicRange.maxInput());
+
+        GuiExtractTypeButton extractType = new GuiExtractTypeButton(
+            14,
+            this.guiLeft + 180,
+            this.guiTop + 95,
+            "Dynamic",
+            ExtractType.ROUND_ROBIN
+        );
+
+        this.buttonList.add(extractType);
     }
 
     @Override
