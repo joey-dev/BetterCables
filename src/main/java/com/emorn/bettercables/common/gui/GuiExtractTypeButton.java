@@ -21,11 +21,10 @@ public class GuiExtractTypeButton extends GuiButton
         int buttonId,
         int x,
         int y,
-        String buttonText,
         ExtractType extractType
     )
     {
-        super(buttonId, x, y, 18, 18, buttonText);
+        super(buttonId, x, y, 18, 18, "");
         this.extractType = extractType;
     }
 

@@ -34,7 +34,7 @@ public class TileEntityConnector extends TileEntity implements ITickable
 {
     public static final String NETWORK_ID = "NetworkId";
     public static final String CUSTOM_NAME = "CustomName";
-    private final Map<Direction, Integer> directionToIndexMap = new HashMap<>();
+    private final Map<Direction, Integer> directionToIndexMap = new HashMap<>(); // todo maybe something else
     private final ConnectorSide north = new ConnectorSide();
     private final ConnectorSide east = new ConnectorSide();
     private final ConnectorSide south = new ConnectorSide();
@@ -289,7 +289,7 @@ public class TileEntityConnector extends TileEntity implements ITickable
             return false;
         }
 
-        return connectorSettings.isExtractEnabled;
+        return connectorSettings.isExtractEnabled();
     }
 
     @Nullable
@@ -329,7 +329,7 @@ public class TileEntityConnector extends TileEntity implements ITickable
             return;
         }
 
-        connectorSettings.isInsertEnabled = checked;
+        connectorSettings.changeInsertEnabled(checked);
 
         boolean isRemote = this.getWorld().isRemote;
         if (isRemote) {
@@ -343,7 +343,9 @@ public class TileEntityConnector extends TileEntity implements ITickable
         }
 
         notifyUpdate();
-    }    public boolean isInsertEnabled(Direction direction)
+    }
+
+    public boolean isInsertEnabled(Direction direction)
     {
         ConnectorSettings connectorSettings = this.findConnectorSettingsByDirection(direction);
 
@@ -351,7 +353,7 @@ public class TileEntityConnector extends TileEntity implements ITickable
             return false;
         }
 
-        return connectorSettings.isInsertEnabled;
+        return connectorSettings.isInsertEnabled();
     }
 
     private void notifyUpdate()
@@ -378,7 +380,7 @@ public class TileEntityConnector extends TileEntity implements ITickable
             return;
         }
 
-        connectorSettings.isExtractEnabled = checked;
+        connectorSettings.changeExtractEnabled(checked);
 
         notifyUpdate();
     }
@@ -544,5 +546,11 @@ public class TileEntityConnector extends TileEntity implements ITickable
     public boolean hasCustomName()
     {
         return this.customName != null && !this.customName.isEmpty();
+    }
+
+    @Nullable
+    public ConnectorSettings settings(Direction direction)
+    {
+        return this.findConnectorSettingsByDirection(direction);
     }
 }

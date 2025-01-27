@@ -15,8 +15,8 @@ public class Settings
         String key
     )
     {
-        connectorSettings.isInsertEnabled = compound.getBoolean(key + "-isInsertEnabled");
-        connectorSettings.isExtractEnabled = compound.getBoolean(key + "-isExtractEnabled");
+        connectorSettings.changeInsertEnabled(compound.getBoolean(key + "-isInsertEnabled"));
+        connectorSettings.changeExtractEnabled(compound.getBoolean(key + "-isExtractEnabled"));
     }
 
     public static void save(
@@ -25,7 +25,7 @@ public class Settings
         String key
     )
     {
-        compound.setBoolean(key + "-isInsertEnabled", connectorSettings.isInsertEnabled);
-        compound.setBoolean(key + "-isExtractEnabled", connectorSettings.isExtractEnabled);
+        compound.setBoolean(key + "-isInsertEnabled", connectorSettings.isInsertEnabled());
+        compound.setBoolean(key + "-isExtractEnabled", connectorSettings.isExtractEnabled());
     }
 }
