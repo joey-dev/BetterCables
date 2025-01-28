@@ -15,8 +15,7 @@ public class Settings
         String key
     )
     {
-        connectorSettings.changeInsertEnabled(compound.getBoolean(key + "-isInsertEnabled"));
-        connectorSettings.changeExtractEnabled(compound.getBoolean(key + "-isExtractEnabled"));
+        connectorSettings.deserializeNBT(compound, key);
     }
 
     public static void save(
@@ -25,7 +24,6 @@ public class Settings
         String key
     )
     {
-        compound.setBoolean(key + "-isInsertEnabled", connectorSettings.isInsertEnabled());
-        compound.setBoolean(key + "-isExtractEnabled", connectorSettings.isExtractEnabled());
+        compound.merge(connectorSettings.serializeNBT(key));
     }
 }

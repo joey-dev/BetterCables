@@ -2,6 +2,8 @@ package com.emorn.bettercables.objects.gateway.blocks;
 
 import com.emorn.bettercables.common.gui.ComparisonOperator;
 import mcp.MethodsReturnNonnullByDefault;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraftforge.common.util.Constants;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 
@@ -107,5 +109,54 @@ public class ConnectorSettingsFilter
     public void changeDurabilityPercentage(int durabilityPercentage)
     {
         this.durabilityPercentage = durabilityPercentage;
+    }
+
+
+    public NBTTagCompound serializeNBT(String key)
+    {
+        NBTTagCompound nbt = new NBTTagCompound();
+
+        nbt.setBoolean(key + "-" + "isOverwriteEnabled", isOverwriteEnabled);
+        nbt.setInteger(key + "-" + "slotMinimumRange", slotMinimumRange);
+        nbt.setInteger(key + "-" + "slotMaximumRange", slotMaximumRange);
+        nbt.setBoolean(key + "-" + "isOreDictEnabled", isOreDictEnabled);
+        nbt.setBoolean(key + "-" + "isNbtDataEnabled", isNbtDataEnabled);
+        nbt.setBoolean(key + "-" + "isBlackListEnabled", isBlackListEnabled);
+        nbt.setInteger(key + "-" + "itemCount", itemCount);
+        nbt.setString(key + "-" + "durabilityType", durabilityType.toString());
+        nbt.setInteger(key + "-" + "durabilityPercentage", durabilityPercentage);
+
+        return nbt;
+    }
+
+    public void deserializeNBT(NBTTagCompound defaultInsertFilter)
+    {
+        if (defaultInsertFilter.hasKey("isOverwriteEnabled", Constants.NBT.TAG_BYTE)) {
+            isOverwriteEnabled = defaultInsertFilter.getBoolean("isOverwriteEnabled");
+        }
+        if (defaultInsertFilter.hasKey("slotMinimumRange", Constants.NBT.TAG_INT)) {
+            slotMinimumRange = defaultInsertFilter.getInteger("slotMinimumRange");
+        }
+        if (defaultInsertFilter.hasKey("slotMaximumRange", Constants.NBT.TAG_INT)) {
+            slotMaximumRange = defaultInsertFilter.getInteger("slotMaximumRange");
+        }
+        if (defaultInsertFilter.hasKey("isOreDictEnabled", Constants.NBT.TAG_BYTE)) {
+            isOreDictEnabled = defaultInsertFilter.getBoolean("isOreDictEnabled");
+        }
+        if (defaultInsertFilter.hasKey("isNbtDataEnabled", Constants.NBT.TAG_BYTE)) {
+            isNbtDataEnabled = defaultInsertFilter.getBoolean("isNbtDataEnabled");
+        }
+        if (defaultInsertFilter.hasKey("isBlackListEnabled", Constants.NBT.TAG_BYTE)) {
+            isBlackListEnabled = defaultInsertFilter.getBoolean("isBlackListEnabled");
+        }
+        if (defaultInsertFilter.hasKey("itemCount", Constants.NBT.TAG_INT)) {
+            itemCount = defaultInsertFilter.getInteger("itemCount");
+        }
+        if (defaultInsertFilter.hasKey("durabilityType", Constants.NBT.TAG_STRING)) {
+            durabilityType = ComparisonOperator.valueOf(defaultInsertFilter.getString("durabilityType"));
+        }
+        if (defaultInsertFilter.hasKey("durabilityPercentage", Constants.NBT.TAG_INT)) {
+            durabilityPercentage = defaultInsertFilter.getInteger("durabilityPercentage");
+        }
     }
 }
