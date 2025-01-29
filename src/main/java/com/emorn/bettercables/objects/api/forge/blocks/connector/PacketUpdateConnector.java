@@ -1,11 +1,15 @@
 package com.emorn.bettercables.objects.api.forge.blocks.connector;
 
 import com.emorn.bettercables.objects.api.forge.common.Direction;
+import com.emorn.bettercables.objects.api.forge.common.Logger;
+import com.emorn.bettercables.objects.gateway.blocks.ConnectorSettings;
 import com.google.common.collect.ImmutableMap;
 import io.netty.buffer.ByteBuf;
 import mcp.MethodsReturnNonnullByDefault;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
+import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
@@ -18,9 +22,8 @@ import javax.annotation.ParametersAreNonnullByDefault;
 public class PacketUpdateConnector implements IMessage
 {
     private BlockPos pos;
-    private boolean isInsertEnabled;
-    private boolean isExtractEnabled;
     private Direction direction;
+    private NBTTagCompound settingsNBT;
 
     public PacketUpdateConnector()
     {
@@ -28,14 +31,12 @@ public class PacketUpdateConnector implements IMessage
 
     public PacketUpdateConnector(
         BlockPos pos,
-        boolean isInsertEnabled,
-        boolean isExtractEnabled,
-        Direction direction
+        Direction direction,
+        ConnectorSettings settings
     )
     {
         this.pos = pos;
-        this.isInsertEnabled = isInsertEnabled;
-        this.isExtractEnabled = isExtractEnabled;
+        this.settingsNBT = settings.serializeNBT();
         this.direction = direction;
     }
 
@@ -43,8 +44,7 @@ public class PacketUpdateConnector implements IMessage
     public void fromBytes(ByteBuf buf)
     {
         this.pos = new BlockPos(buf.readInt(), buf.readInt(), buf.readInt());
-        this.isInsertEnabled = buf.readBoolean();
-        this.isExtractEnabled = buf.readBoolean();
+        this.settingsNBT = ByteBufUtils.readTag(buf);
 
         ImmutableMap<Character, Direction> directions = ImmutableMap.<Character, Direction>builder()
             .put(Direction.NORTH.name().charAt(0), Direction.NORTH)
@@ -64,8 +64,7 @@ public class PacketUpdateConnector implements IMessage
         buf.writeInt(pos.getX());
         buf.writeInt(pos.getY());
         buf.writeInt(pos.getZ());
-        buf.writeBoolean(isInsertEnabled);
-        buf.writeBoolean(isExtractEnabled);
+        ByteBufUtils.writeTag(buf, settingsNBT);
 
         buf.writeChar(direction.name().charAt(0));
     }
@@ -83,8 +82,12 @@ public class PacketUpdateConnector implements IMessage
                 TileEntity tileEntity = ctx.getServerHandler().player.world.getTileEntity(message.pos);
                 if (tileEntity instanceof TileEntityConnector) {
                     TileEntityConnector connector = (TileEntityConnector) tileEntity;
-                    connector.setInsertEnabled(message.isInsertEnabled, message.direction);
-                    connector.setExtractEnabled(message.isExtractEnabled, message.direction);
+                    ConnectorSettings settings = connector.settings(message.direction);
+                    if (settings == null) {
+                        Logger.error("Could not find settings for direction " + message.direction);
+                        return;
+                    }
+                    settings.deserializeNBT(message.settingsNBT);
                     connector.markDirty();
                 }
             });

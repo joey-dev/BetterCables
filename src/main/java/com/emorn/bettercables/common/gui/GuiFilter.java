@@ -26,10 +26,12 @@ public class GuiFilter extends GuiButton
         int buttonId,
         int x,
         int y,
+        ItemStack filteredItem,
         Consumer<Integer> callback
     )
     {
         super(buttonId, x, y, 18, 18, "");
+        this.filteredItem = filteredItem;
         this.callback = callback;
     }
 

@@ -29,15 +29,15 @@ public class ConnectorSide
 
     public boolean canExport()
     {
-        if (this.connectorSettings.tickRate == 0) {
+        if (this.connectorSettings.tickRate() == 0) {
             Logger.error("Tick rate cannot be 0");
             return false;
         }
 
-        if (currentTick % this.connectorSettings.tickRate != 0) {
+        if (currentTick % this.connectorSettings.tickRate() != 0) {
             return false;
         }
 
-        return this.connectorSettings.isExtractEnabled;
+        return this.connectorSettings.isExtractEnabled();
     }
 }
