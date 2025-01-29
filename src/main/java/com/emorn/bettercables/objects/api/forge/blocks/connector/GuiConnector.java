@@ -5,7 +5,6 @@ import com.emorn.bettercables.common.gui.toggle.*;
 import com.emorn.bettercables.objects.api.forge.common.Direction;
 import com.emorn.bettercables.objects.api.forge.common.Logger;
 import com.emorn.bettercables.objects.gateway.blocks.ConnectorSettings;
-import com.emorn.bettercables.objects.gateway.blocks.ConnectorSettingsDefaultFilter;
 import com.emorn.bettercables.objects.gateway.blocks.ConnectorSettingsFilter;
 import com.emorn.bettercables.proxy.ModNetworkHandler;
 import com.emorn.bettercables.utils.Reference;
@@ -14,6 +13,7 @@ import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -67,6 +67,7 @@ public class GuiConnector extends GuiContainer
     private static final int ITEMS_PER_EXTRACT_INPUT_ID = 23;
 
     private static final int FILTER_START_ID = 24;
+    private ConnectorSettingsFilter filter;
 
     public GuiConnector(
         InventoryPlayer player,
@@ -93,8 +94,14 @@ public class GuiConnector extends GuiContainer
 
         Consumer<Integer> onSettingsClicked = this::onSettingsClicked;
 
+        ConnectorSettings tileSettings = this.tileEntity.settings(this.direction);
+        if (tileSettings == null) {
+            Logger.error("ConnectorSettings is null");
+            return;
+        }
+
         if (this.isInsertSettingsOpen || this.isExtractSettingsOpen) {
-            this.settingsMenu();
+            this.settingsMenu(tileSettings);
             return;
         }
 
@@ -136,23 +143,25 @@ public class GuiConnector extends GuiContainer
 
     private void onSettingsClicked(Integer buttonId)
     {
-        if (buttonId == INSERT_SETTINGS_ID) {
-            this.isInsertSettingsOpen = true;
-        } else if (buttonId == EXTRACT_SETTINGS_ID) {
-            this.isExtractSettingsOpen = true;
-        }
-
-        this.settingsMenu();
-    }
-
-    private void settingsMenu()
-    {
         ConnectorSettings tileSettings = this.tileEntity.settings(this.direction);
         if (tileSettings == null) {
             Logger.error("ConnectorSettings is null");
             return;
         }
 
+        if (buttonId == INSERT_SETTINGS_ID) {
+            this.isInsertSettingsOpen = true;
+            this.filter = tileSettings.defaultInsertFilter();
+        } else if (buttonId == EXTRACT_SETTINGS_ID) {
+            this.isExtractSettingsOpen = true;
+            this.filter = tileSettings.defaultExtractFilter();
+        }
+
+        this.settingsMenu(tileSettings);
+    }
+
+    private void settingsMenu(ConnectorSettings tileSettings)
+    {
         this.buttonList.clear();
         drawSettings(tileSettings);
         if (this.isInsertSettingsOpen) {
@@ -178,15 +187,22 @@ public class GuiConnector extends GuiContainer
                 int x = j * 18;
                 int y = i * 18;
 
+                ItemStack item;
+                if (this.isInsertSettingsOpen) {
+                    item = tileSettings.insertFilter(iteration).itemStack();
+                } else {
+                    item = tileSettings.extractFilter(iteration).itemStack();
+                }
 
-                GuiFilter filter = new GuiFilter(
+                GuiFilter guiFilter = new GuiFilter(
                     FILTER_START_ID + iteration,
                     this.guiLeft + 7 + x,
                     this.guiTop + 17 + y,
+                    item,
                     onFilterSettingsClicked
                 );
 
-                this.buttonList.add(filter);
+                this.buttonList.add(guiFilter);
                 iteration++;
             }
         }
@@ -196,7 +212,19 @@ public class GuiConnector extends GuiContainer
 
     private void onFilterSettingsClicked(Integer id)
     {
+        ConnectorSettings tileSettings = this.tileEntity.settings(this.direction);
+        if (tileSettings == null) {
+            Logger.error("ConnectorSettings is null");
+            return;
+        }
+
         this.filterId = id;
+
+        if (this.isExtractSettingsOpen) {
+            this.filter = tileSettings.extractFilter(this.filterId - FILTER_START_ID);
+        } else {
+            this.filter = tileSettings.insertFilter(this.filterId - FILTER_START_ID);
+        }
         this.initGui();
     }
 
@@ -223,16 +251,16 @@ public class GuiConnector extends GuiContainer
         this.buttonList.add(channelInput);
         this.numberInputs.add(channelInput);
 
-        drawDynamic(tileSettings);
+        drawDynamic();
     }
 
-    private void drawDynamic(ConnectorSettings tileSettings)
+    private void drawDynamic()
     {
         int extraY = 0;
         boolean disable = false;
         GuiOverwriteDefaultBox overwriteDefaultBox = null;
 
-        if (filterId != null) { // todo
+        if (filterId != null) {
             Consumer<Integer> onBackClicked = this::onBackClicked;
 
             extraY = 18 + 18;
@@ -242,7 +270,7 @@ public class GuiConnector extends GuiContainer
                 OVERWRITE_CHECKBOX_ID,
                 this.guiLeft - 80,
                 this.guiTop + 5 + 18,
-                false
+                this.filter.isOverwriteEnabled()
             );
 
             this.buttonList.add(overwriteDefaultBox);
@@ -263,8 +291,8 @@ public class GuiConnector extends GuiContainer
             MAX_SLOT_RANGE_INPUT_ID,
             this.guiLeft - 80,
             this.guiTop + 5 + extraY,
-            tileSettings.minSlotRange(),
-            tileSettings.maxSlotRange(),
+            this.filter.minSlotRange(),
+            this.filter.maxSlotRange(),
             "Slot range",
             -1,
             disable
@@ -279,18 +307,11 @@ public class GuiConnector extends GuiContainer
             this.dynamicEnableOnChecked.put(slotInput, overwriteDefaultBox);
         }
 
-        ConnectorSettingsDefaultFilter defaultFilter;
-        if (this.isInsertSettingsOpen) {
-            defaultFilter = tileSettings.defaultInsertFilter();
-        } else {
-            defaultFilter = tileSettings.defaultExtractFilter();
-        }
-
         GuiOreDictionaryBox oreDictionaryBox = new GuiOreDictionaryBox(
             ORE_DICTIONARY_BUTTON_ID,
             this.guiLeft - 80,
             this.guiTop + 100 + extraY,
-            defaultFilter.isOreDictEnabled(),
+            this.filter.isOreDictEnabled(),
             disable
         );
 
@@ -303,7 +324,7 @@ public class GuiConnector extends GuiContainer
             NBT_DATA_BUTTON_ID,
             this.guiLeft - (80 - 18),
             this.guiTop + 100 + extraY,
-            defaultFilter.isNbtDataEnabled(),
+            this.filter.isNbtDataEnabled(),
             disable
         );
 
@@ -316,7 +337,7 @@ public class GuiConnector extends GuiContainer
             BLACK_LIST_BUTTON_ID,
             this.guiLeft - (80 - 18 - 18),
             this.guiTop + 100 + extraY,
-            defaultFilter.isBlackListEnabled(),
+            this.filter.isBlackListEnabled(),
             disable
         );
 
@@ -329,7 +350,7 @@ public class GuiConnector extends GuiContainer
             ITEM_COUNT_INPUT_ID,
             this.guiLeft - 80,
             this.guiTop + 45 + extraY,
-            defaultFilter.itemCount(),
+            this.filter.itemCount(),
             TextPosition.TOP,
             this.isExtractSettingsOpen ? "Min item count" : "Max item count",
             0,
@@ -347,8 +368,8 @@ public class GuiConnector extends GuiContainer
             DURABILITY_INPUT_ID,
             this.guiLeft - 80,
             this.guiTop + 65 + extraY,
-            defaultFilter.durabilityType(),
-            defaultFilter.durabilityPercentage(),
+            this.filter.durabilityType(),
+            this.filter.durabilityPercentage(),
             disable
         );
 
@@ -462,7 +483,7 @@ public class GuiConnector extends GuiContainer
         int mouseY
     )
     {
-        super.drawGuiContainerForegroundLayer(mouseX, mouseY); // Ensure default behavior
+        super.drawGuiContainerForegroundLayer(mouseX, mouseY);
 
         String tileName = this.tileEntity.getDisplayName().getUnformattedText();
         this.fontRenderer.drawString(
@@ -558,10 +579,30 @@ public class GuiConnector extends GuiContainer
         } else if (button instanceof GuiNumberInput) {
             updateNumberInput((GuiNumberInput) button, tileSettings);
         } else if (button instanceof GuiComparisonOperatorButton) {
-            updateDurability((GuiComparisonOperatorButton) button, tileSettings);
+            updateDurability((GuiComparisonOperatorButton) button);
         } else if (button instanceof GuiExtractTypeButton) {
             updateExtractType((GuiExtractTypeButton) button, tileSettings);
+        } else if (button instanceof GuiFilter) {
+            updateFilters((GuiFilter) button, tileSettings);
         }
+    }
+
+    private void updateFilters(
+        GuiFilter guiFilter,
+        ConnectorSettings tileSettings
+    )
+    {
+        tileSettings.changeFilterItem(
+            guiFilter.id - FILTER_START_ID,
+            this.isInsertSettingsOpen,
+            guiFilter.filteredItem()
+        );
+
+        ModNetworkHandler.INSTANCE.sendToServer(new PacketUpdateConnector(
+            tileEntity.getPos(),
+            this.direction,
+            tileSettings
+        ));
     }
 
     private void updateExtractType(
@@ -573,26 +614,10 @@ public class GuiConnector extends GuiContainer
     }
 
     private void updateDurability(
-        GuiComparisonOperatorButton guiDurability ,
-        ConnectorSettings tileSettings
+        GuiComparisonOperatorButton guiDurability
     )
     {
-        ConnectorSettingsFilter filter;
-        if (this.isExtractSettingsOpen) {
-            if (this.filterId == null) {
-                filter = tileSettings.defaultExtractFilter();
-            } else {
-                filter = tileSettings.extractFilter(FILTER_START_ID - this.filterId);
-            }
-        } else {
-            if (this.filterId == null) {
-                filter = tileSettings.defaultInsertFilter();
-            } else {
-                filter = tileSettings.insertFilter(FILTER_START_ID - this.filterId);
-            }
-        }
-
-        filter.changeDurabilityType(guiDurability.comparisonOperator());
+        this.filter.changeDurabilityType(guiDurability.comparisonOperator());
     }
 
     private void updateNumberInput(
@@ -609,13 +634,13 @@ public class GuiConnector extends GuiContainer
                 }
                 break;
             case MIN_SLOT_RANGE_INPUT_ID:
-                tileSettings.changeMinSlotRange(numberInput.value());
+                this.filter.changeMinSlotRange(numberInput.value());
                 break;
             case MAX_SLOT_RANGE_INPUT_ID:
-                tileSettings.changeMaxSlotRange(numberInput.value());
+                this.filter.changeMaxSlotRange(numberInput.value());
                 break;
             case PRIORITY_INPUT_ID:
-                tileSettings.changePriority(numberInput.value()); // here
+                tileSettings.changePriority(numberInput.value());
                 break;
             case TICK_RATE_INPUT_ID:
                 tileSettings.changeTickRate(numberInput.value());
@@ -631,7 +656,7 @@ public class GuiConnector extends GuiContainer
                 break;
             case DURABILITY_INPUT_ID:
             case ITEM_COUNT_INPUT_ID:
-                this.changeFilter(numberInput, tileSettings);
+                this.changeFilter(numberInput);
                 break;
         }
 
@@ -643,77 +668,35 @@ public class GuiConnector extends GuiContainer
     }
 
     private void changeFilter(
-        GuiNumberInput numberInput,
-        ConnectorSettings tileSettings
+        GuiNumberInput numberInput
     )
     {
-        ConnectorSettingsFilter filter;
-        if (this.isExtractSettingsOpen) {
-            if (this.filterId == null) {
-                filter = tileSettings.defaultExtractFilter();
-            } else {
-                filter = tileSettings.extractFilter(FILTER_START_ID - this.filterId);
-            }
-        } else {
-            if (this.filterId == null) {
-                filter = tileSettings.defaultInsertFilter();
-            } else {
-                filter = tileSettings.insertFilter(FILTER_START_ID - this.filterId);
-            }
-        }
-
-        if (filter == null) {
-            Logger.error("filter cannot be null");
-            return;
-        }
-
         switch (numberInput.id) {
             case DURABILITY_INPUT_ID:
-                filter.changeDurabilityPercentage(numberInput.value());
+                this.filter.changeDurabilityPercentage(numberInput.value());
                 break;
             case ITEM_COUNT_INPUT_ID:
-                filter.changeItemCount(numberInput.value());
+                this.filter.changeItemCount(numberInput.value());
                 break;
         }
     }
 
     private void changeFilter(
-        GuiToggle checkbox,
-        ConnectorSettings tileSettings
+        GuiToggle checkbox
     )
     {
-        ConnectorSettingsFilter filter;
-        if (this.isExtractSettingsOpen) {
-            if (this.filterId == null) {
-                filter = tileSettings.defaultExtractFilter();
-            } else {
-                filter = tileSettings.extractFilter(FILTER_START_ID - this.filterId);
-            }
-        } else {
-            if (this.filterId == null) {
-                filter = tileSettings.defaultInsertFilter();
-            } else {
-                filter = tileSettings.insertFilter(FILTER_START_ID - this.filterId);
-            }
-        }
-
-        if (filter == null) {
-            Logger.error("filter cannot be null");
-            return;
-        }
-
         switch (checkbox.id) {
             case OVERWRITE_CHECKBOX_ID:
-                filter.changeOverwriteEnabled(checkbox.isChecked());
+                this.filter.changeOverwriteEnabled(checkbox.isChecked());
                 break;
             case ORE_DICTIONARY_BUTTON_ID:
-                filter.changeOreDictEnabled(checkbox.isChecked());
+                this.filter.changeOreDictEnabled(checkbox.isChecked());
                 break;
             case NBT_DATA_BUTTON_ID:
-                filter.changeNbtDataEnabled(checkbox.isChecked());
+                this.filter.changeNbtDataEnabled(checkbox.isChecked());
                 break;
             case BLACK_LIST_BUTTON_ID:
-                filter.changeBlackListEnabled(checkbox.isChecked());
+                this.filter.changeBlackListEnabled(checkbox.isChecked());
                 break;
         }
     }
@@ -738,7 +721,7 @@ public class GuiConnector extends GuiContainer
             case ORE_DICTIONARY_BUTTON_ID:
             case NBT_DATA_BUTTON_ID:
             case BLACK_LIST_BUTTON_ID:
-                this.changeFilter(checkbox, tileSettings);
+                this.changeFilter(checkbox);
                 break;
         }
 

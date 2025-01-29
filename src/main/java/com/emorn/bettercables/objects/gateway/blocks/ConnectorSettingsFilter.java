@@ -2,6 +2,7 @@ package com.emorn.bettercables.objects.gateway.blocks;
 
 import com.emorn.bettercables.common.gui.ComparisonOperator;
 import mcp.MethodsReturnNonnullByDefault;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.common.util.Constants;
 
@@ -12,14 +13,15 @@ import javax.annotation.ParametersAreNonnullByDefault;
 public class ConnectorSettingsFilter
 {
     private boolean isOverwriteEnabled = false;
-    private int slotMinimumRange = -1;
-    private int slotMaximumRange = -1;
     private boolean isOreDictEnabled = false;
     private boolean isNbtDataEnabled = false;
     private boolean isBlackListEnabled = false;
     private int itemCount = -1;
     private ComparisonOperator durabilityType = ComparisonOperator.EQUALS;
     private int durabilityPercentage = -1;
+    private int minSlotRange = -1;
+    private int maxSlotRange = -1;
+    private ItemStack itemStack = ItemStack.EMPTY;
 
     public boolean isOverwriteEnabled()
     {
@@ -29,26 +31,6 @@ public class ConnectorSettingsFilter
     public void changeOverwriteEnabled(boolean overwriteEnabled)
     {
         isOverwriteEnabled = overwriteEnabled;
-    }
-
-    public int slotMinimumRange()
-    {
-        return slotMinimumRange;
-    }
-
-    public void changeSlotMinimumRange(int slotMinimumRange)
-    {
-        this.slotMinimumRange = slotMinimumRange;
-    }
-
-    public int slotMaximumRange()
-    {
-        return slotMaximumRange;
-    }
-
-    public void changeSlotMaximumRange(int slotMaximumRange)
-    {
-        this.slotMaximumRange = slotMaximumRange;
     }
 
     public boolean isOreDictEnabled()
@@ -111,52 +93,88 @@ public class ConnectorSettingsFilter
         this.durabilityPercentage = durabilityPercentage;
     }
 
+    public int minSlotRange()
+    {
+        return this.minSlotRange;
+    }
 
-    public NBTTagCompound serializeNBT(String key)
+    public void changeMinSlotRange(int minSlotRange)
+    {
+        this.minSlotRange = minSlotRange;
+    }
+
+    public int maxSlotRange()
+    {
+        return this.maxSlotRange;
+    }
+
+    public void changeMaxSlotRange(int maxSlotRange)
+    {
+        this.maxSlotRange = maxSlotRange;
+    }
+
+    public NBTTagCompound serializeNBT()
     {
         NBTTagCompound nbt = new NBTTagCompound();
 
-        nbt.setBoolean(key + "-" + "isOverwriteEnabled", isOverwriteEnabled);
-        nbt.setInteger(key + "-" + "slotMinimumRange", slotMinimumRange);
-        nbt.setInteger(key + "-" + "slotMaximumRange", slotMaximumRange);
-        nbt.setBoolean(key + "-" + "isOreDictEnabled", isOreDictEnabled);
-        nbt.setBoolean(key + "-" + "isNbtDataEnabled", isNbtDataEnabled);
-        nbt.setBoolean(key + "-" + "isBlackListEnabled", isBlackListEnabled);
-        nbt.setInteger(key + "-" + "itemCount", itemCount);
-        nbt.setString(key + "-" + "durabilityType", durabilityType.toString());
-        nbt.setInteger(key + "-" + "durabilityPercentage", durabilityPercentage);
+        nbt.setBoolean("isOverwriteEnabled", isOverwriteEnabled);
+        nbt.setInteger("minSlotRange", minSlotRange);
+        nbt.setInteger("maxSlotRange", maxSlotRange);
+        nbt.setBoolean("isOreDictEnabled", isOreDictEnabled);
+        nbt.setBoolean("isNbtDataEnabled", isNbtDataEnabled);
+        nbt.setBoolean("isBlackListEnabled", isBlackListEnabled);
+        nbt.setInteger("itemCount", itemCount);
+        nbt.setString("durabilityType", durabilityType.toString());
+        nbt.setInteger("durabilityPercentage", durabilityPercentage);
+        nbt.setTag("itemStack", itemStack.serializeNBT());
 
         return nbt;
     }
 
-    public void deserializeNBT(NBTTagCompound defaultInsertFilter)
+    public void deserializeNBT(NBTTagCompound filterNbt)
     {
-        if (defaultInsertFilter.hasKey("isOverwriteEnabled", Constants.NBT.TAG_BYTE)) {
-            isOverwriteEnabled = defaultInsertFilter.getBoolean("isOverwriteEnabled");
+        if (filterNbt.hasKey("isOverwriteEnabled", Constants.NBT.TAG_BYTE)) {
+            isOverwriteEnabled = filterNbt.getBoolean("isOverwriteEnabled");
         }
-        if (defaultInsertFilter.hasKey("slotMinimumRange", Constants.NBT.TAG_INT)) {
-            slotMinimumRange = defaultInsertFilter.getInteger("slotMinimumRange");
+        if (filterNbt.hasKey("minSlotRange", Constants.NBT.TAG_INT)) {
+            minSlotRange = filterNbt.getInteger("minSlotRange");
         }
-        if (defaultInsertFilter.hasKey("slotMaximumRange", Constants.NBT.TAG_INT)) {
-            slotMaximumRange = defaultInsertFilter.getInteger("slotMaximumRange");
+        if (filterNbt.hasKey("maxSlotRange", Constants.NBT.TAG_INT)) {
+            maxSlotRange  = filterNbt.getInteger("maxSlotRange");
         }
-        if (defaultInsertFilter.hasKey("isOreDictEnabled", Constants.NBT.TAG_BYTE)) {
-            isOreDictEnabled = defaultInsertFilter.getBoolean("isOreDictEnabled");
+        if (filterNbt.hasKey("isOreDictEnabled", Constants.NBT.TAG_BYTE)) {
+            isOreDictEnabled = filterNbt.getBoolean("isOreDictEnabled");
         }
-        if (defaultInsertFilter.hasKey("isNbtDataEnabled", Constants.NBT.TAG_BYTE)) {
-            isNbtDataEnabled = defaultInsertFilter.getBoolean("isNbtDataEnabled");
+        if (filterNbt.hasKey("isNbtDataEnabled", Constants.NBT.TAG_BYTE)) {
+            isNbtDataEnabled = filterNbt.getBoolean("isNbtDataEnabled");
         }
-        if (defaultInsertFilter.hasKey("isBlackListEnabled", Constants.NBT.TAG_BYTE)) {
-            isBlackListEnabled = defaultInsertFilter.getBoolean("isBlackListEnabled");
+        if (filterNbt.hasKey("isBlackListEnabled", Constants.NBT.TAG_BYTE)) {
+            isBlackListEnabled = filterNbt.getBoolean("isBlackListEnabled");
         }
-        if (defaultInsertFilter.hasKey("itemCount", Constants.NBT.TAG_INT)) {
-            itemCount = defaultInsertFilter.getInteger("itemCount");
+        if (filterNbt.hasKey("itemCount", Constants.NBT.TAG_INT)) {
+            itemCount = filterNbt.getInteger("itemCount");
         }
-        if (defaultInsertFilter.hasKey("durabilityType", Constants.NBT.TAG_STRING)) {
-            durabilityType = ComparisonOperator.valueOf(defaultInsertFilter.getString("durabilityType"));
+        if (filterNbt.hasKey("durabilityType", Constants.NBT.TAG_STRING)) {
+            durabilityType = ComparisonOperator.valueOf(filterNbt.getString("durabilityType"));
         }
-        if (defaultInsertFilter.hasKey("durabilityPercentage", Constants.NBT.TAG_INT)) {
-            durabilityPercentage = defaultInsertFilter.getInteger("durabilityPercentage");
+        if (filterNbt.hasKey("durabilityPercentage", Constants.NBT.TAG_INT)) {
+            durabilityPercentage = filterNbt.getInteger("durabilityPercentage");
         }
+
+        if (filterNbt.hasKey("itemStack", Constants.NBT.TAG_COMPOUND)) {
+            this.itemStack = new ItemStack(filterNbt.getCompoundTag("itemStack"));
+        } else {
+            this.itemStack = ItemStack.EMPTY;
+        }
+    }
+
+    public void changeItemStack(ItemStack itemStack)
+    {
+        this.itemStack = itemStack;
+    }
+
+    public ItemStack itemStack()
+    {
+        return itemStack;
     }
 }

@@ -2,7 +2,7 @@ package com.emorn.bettercables.objects.gateway.blocks;
 
 import com.emorn.bettercables.common.gui.ExtractType;
 import mcp.MethodsReturnNonnullByDefault;
-import net.minecraft.nbt.NBTBase;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraftforge.common.util.Constants;
@@ -28,16 +28,13 @@ public class ConnectorSettings
     private int dynamicTickRateMaximum = 999;
     private ExtractType extractType = ExtractType.ROUND_ROBIN;
     private int itemsPerExtract = 1;
-    private int itemCount = 1; // todo to filter
-    private int minSlotRange = -1; // todo to filter
-    private int maxSlotRange = -1; // todo to filter
 
     // filters
-    private ConnectorSettingsDefaultFilter defaultInsertFilter = new ConnectorSettingsDefaultFilter();
-    private ConnectorSettingsDefaultFilter defaultExtractFilter = new ConnectorSettingsDefaultFilter();
+    private final ConnectorSettingsDefaultFilter defaultInsertFilter = new ConnectorSettingsDefaultFilter();
+    private final ConnectorSettingsDefaultFilter defaultExtractFilter = new ConnectorSettingsDefaultFilter();
 
-    private Map<Integer, ConnectorSettingsFilter> insertFilters = new HashMap<>();
-    private Map<Integer, ConnectorSettingsFilter> extractFilters = new HashMap<>();
+    private final Map<Integer, ConnectorSettingsFilter> insertFilters = new HashMap<>();
+    private final Map<Integer, ConnectorSettingsFilter> extractFilters = new HashMap<>();
 
     // insert
     private int insertChannelId = 0;
@@ -168,21 +165,9 @@ public class ConnectorSettings
         return defaultInsertFilter;
     }
 
-    // todo not sure if needed
-    public void changeDefaultInsertFilter(ConnectorSettingsDefaultFilter defaultInsertFilter)
-    {
-        this.defaultInsertFilter = defaultInsertFilter;
-    }
-
     public ConnectorSettingsDefaultFilter defaultExtractFilter()
     {
         return defaultExtractFilter;
-    }
-
-    // todo not sure if needed
-    public void changeDefaultExtractFilter(ConnectorSettingsDefaultFilter defaultExtractFilter)
-    {
-        this.defaultExtractFilter = defaultExtractFilter;
     }
 
     public ConnectorSettingsFilter insertFilter(Integer id)
@@ -191,26 +176,10 @@ public class ConnectorSettings
         return insertFilters.get(id);
     }
 
-    public void changeInsertFilters(
-        Integer id,
-        ConnectorSettingsFilter insertFilter
-    )
-    {
-        this.insertFilters.put(id, insertFilter);
-    }
-
     public ConnectorSettingsFilter extractFilter(Integer id)
     {
         extractFilters.putIfAbsent(id, new ConnectorSettingsFilter());
         return extractFilters.get(id);
-    }
-
-    public void changeExtractFilter(
-        Integer id,
-        ConnectorSettingsFilter extractFilter
-    )
-    {
-        this.extractFilters.put(id, extractFilter);
     }
 
     public int priority()
@@ -221,36 +190,6 @@ public class ConnectorSettings
     public void changePriority(int priority)
     {
         this.priority = priority;
-    }
-
-    public int minSlotRange()
-    {
-        return minSlotRange;
-    }
-
-    public void changeMinSlotRange(int minSlotRangeInput)
-    {
-        this.minSlotRange = minSlotRangeInput;
-    }
-
-    public int maxSlotRange()
-    {
-        return maxSlotRange;
-    }
-
-    public void changeMaxSlotRange(int maxSlotRangeInput)
-    {
-        this.maxSlotRange = maxSlotRangeInput;
-    }
-
-    public int itemCount()
-    {
-        return itemCount;
-    }
-
-    public void changeItemCount(int itemCount)
-    {
-        this.itemCount = itemCount;
     }
 
     public NBTTagCompound serializeNBT()
@@ -274,15 +213,12 @@ public class ConnectorSettings
         nbt.setInteger(key + "-" + "dynamicTickRateMaximum", dynamicTickRateMaximum);
         nbt.setString(key + "-" + "extractType", extractType.name());
         nbt.setInteger(key + "-" + "itemsPerExtract", itemsPerExtract);
-        nbt.setInteger(key + "-" + "itemCount", itemCount);
-        nbt.setInteger(key + "-" + "minSlotRange", minSlotRange);
-        nbt.setInteger(key + "-" + "maxSlotRange", maxSlotRange);
 
         // filters
-        nbt.setTag(key + "-" + "defaultInsertFilter", defaultInsertFilter.serializeNBT(key));
-        nbt.setTag(key + "-" + "defaultExtractFilter", defaultExtractFilter.serializeNBT(key));
-        nbt.setTag(key + "-" + "insertFilters", serializeFilters(insertFilters, key));
-        nbt.setTag(key + "-" + "extractFilters", serializeFilters(extractFilters, key));
+        nbt.setTag(key + "-" + "defaultInsertFilter", defaultInsertFilter.serializeNBT());
+        nbt.setTag(key + "-" + "defaultExtractFilter", defaultExtractFilter.serializeNBT());
+        nbt.setTag(key + "-" + "insertFilters", serializeFilters(insertFilters));
+        nbt.setTag(key + "-" + "extractFilters", serializeFilters(extractFilters));
 
         // insert
         nbt.setInteger(key + "-" + "insertChannelId", insertChannelId);
@@ -291,18 +227,18 @@ public class ConnectorSettings
         return nbt;
     }
 
-    private NBTBase serializeFilters(
-        Map<Integer, ConnectorSettingsFilter> insertFilters,
-        String key
+    private NBTTagList serializeFilters(
+        Map<Integer, ConnectorSettingsFilter> filters
     )
-    { // todo might be broken
-        NBTTagCompound nbt = new NBTTagCompound();
-        // loop over filters and call .serializeNBT
-        for (Map.Entry<Integer, ConnectorSettingsFilter> entry : insertFilters.entrySet()) {
-            nbt.setTag(key + "-" + "filter_" + entry.getKey(), entry.getValue().serializeNBT(key));
+    {
+        NBTTagList list = new NBTTagList();
+        for (Map.Entry<Integer, ConnectorSettingsFilter> entry : filters.entrySet()) {
+            NBTTagCompound filterTag = new NBTTagCompound();
+            filterTag.setInteger("id", entry.getKey()); // Store filter ID
+            filterTag.setTag("data", entry.getValue().serializeNBT()); // Store filter data
+            list.appendTag(filterTag);
         }
-
-        return nbt;
+        return list;
     }
 
     public void deserializeNBT(NBTTagCompound nbt)
@@ -350,15 +286,6 @@ public class ConnectorSettings
         if (nbt.hasKey(key + "-" + "itemsPerExtract", Constants.NBT.TAG_INT)) {
             itemsPerExtract = nbt.getInteger(key + "-" + "itemsPerExtract");
         }
-        if (nbt.hasKey(key + "-" + "itemCount", Constants.NBT.TAG_INT)) {
-            itemCount = nbt.getInteger(key + "-" + "itemCount");
-        }
-        if (nbt.hasKey(key + "-" + "minSlotRange", Constants.NBT.TAG_INT)) {
-            minSlotRange = nbt.getInteger(key + "-" + "minSlotRange");
-        }
-        if (nbt.hasKey(key + "-" + "maxSlotRange", Constants.NBT.TAG_INT)) {
-            maxSlotRange = nbt.getInteger(key + "-" + "maxSlotRange");
-        }
 
         // filters
         if (nbt.hasKey(key + "-" + "defaultInsertFilter", Constants.NBT.TAG_COMPOUND)) {
@@ -368,8 +295,12 @@ public class ConnectorSettings
             defaultExtractFilter.deserializeNBT(nbt.getCompoundTag(key + "-" + "defaultExtractFilter"));
         }
 
-        deserializeFilters(nbt.getTagList(key + "-" + "insertFilters", Constants.NBT.TAG_COMPOUND), insertFilters);
-        deserializeFilters(nbt.getTagList(key + "-" + "extractFilters", Constants.NBT.TAG_COMPOUND), extractFilters);
+        if (nbt.hasKey(key + "-" + "insertFilters", Constants.NBT.TAG_LIST)) {
+            deserializeFilters(nbt.getTagList(key + "-" + "insertFilters", Constants.NBT.TAG_COMPOUND), insertFilters);
+        }
+        if (nbt.hasKey(key + "-" + "extractFilters", Constants.NBT.TAG_LIST)) {
+            deserializeFilters(nbt.getTagList(key + "-" + "extractFilters", Constants.NBT.TAG_COMPOUND), extractFilters);
+        }
 
         // insert
         if (nbt.hasKey(key + "-" + "insertChannelId", Constants.NBT.TAG_INT)) {
@@ -385,13 +316,29 @@ public class ConnectorSettings
         Map<Integer, ConnectorSettingsFilter> filters
     )
     {
+        filters.clear();
         for (int i = 0; i < nbtFilters.tagCount(); i++) {
             NBTTagCompound filterTag = nbtFilters.getCompoundTagAt(i);
             int id = filterTag.getInteger("id");
             ConnectorSettingsFilter filter = new ConnectorSettingsFilter();
-            filter.deserializeNBT(filterTag);
+            filter.deserializeNBT(filterTag.getCompoundTag("data"));
             filters.put(id, filter);
         }
     }
 
+    public void changeFilterItem(
+        int index,
+        boolean isInsert,
+        ItemStack itemStack
+    )
+    {
+        if (isInsert) {
+            this.insertFilters.putIfAbsent(index, new ConnectorSettingsFilter());
+            this.insertFilters.get(index).changeItemStack(itemStack);
+            return;
+        }
+
+        this.extractFilters.putIfAbsent(index, new ConnectorSettingsFilter());
+        this.extractFilters.get(index).changeItemStack(itemStack);
+    }
 }
