@@ -24,6 +24,8 @@ public class PacketUpdateConnector implements IMessage
     private BlockPos pos;
     private Direction direction;
     private NBTTagCompound settingsNBT;
+    private boolean didInsertChange;
+    private boolean didExtractChange;
 
     public PacketUpdateConnector()
     {
@@ -32,12 +34,16 @@ public class PacketUpdateConnector implements IMessage
     public PacketUpdateConnector(
         BlockPos pos,
         Direction direction,
-        ConnectorSettings settings
+        ConnectorSettings settings,
+        boolean didInsertChange,
+        boolean didExtractChange
     )
     {
         this.pos = pos;
         this.settingsNBT = settings.serializeNBT();
         this.direction = direction;
+        this.didInsertChange = didInsertChange;
+        this.didExtractChange = didExtractChange;
     }
 
     @Override
@@ -56,6 +62,9 @@ public class PacketUpdateConnector implements IMessage
             .build();
 
         this.direction = directions.getOrDefault(buf.readChar(), Direction.NORTH);
+
+        this.didInsertChange = buf.readBoolean();
+        this.didExtractChange = buf.readBoolean();
     }
 
     @Override
@@ -67,6 +76,9 @@ public class PacketUpdateConnector implements IMessage
         ByteBufUtils.writeTag(buf, settingsNBT);
 
         buf.writeChar(direction.name().charAt(0));
+
+        buf.writeBoolean(didInsertChange);
+        buf.writeBoolean(didExtractChange);
     }
 
     public static class Handler implements IMessageHandler<PacketUpdateConnector, IMessage>
@@ -88,6 +100,12 @@ public class PacketUpdateConnector implements IMessage
                         return;
                     }
                     settings.deserializeNBT(message.settingsNBT);
+                    if (message.didInsertChange) {
+                        ((TileEntityConnector) tileEntity).setInsertEnabled(settings.isInsertEnabled(), message.direction);
+                    }
+                    if (message.didExtractChange) {
+                        ((TileEntityConnector) tileEntity).setExtractEnabled(settings.isInsertEnabled(), message.direction);
+                    }
                     connector.markDirty();
                 }
             });

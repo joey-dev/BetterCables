@@ -7,6 +7,7 @@ import com.emorn.bettercables.objects.application.blocks.connector.ConnectorSide
 import com.emorn.bettercables.objects.gateway.blocks.ConnectorSettings;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
@@ -120,15 +121,25 @@ public class TileEntityConnector extends TileEntity implements ITickable
             return;
         }
 
+        ConnectorSettings inventorySettings = this.network.findInsertSettingsBy(nextIndex);
+
+        if (inventorySettings == null) {
+            Logger.error("No settings found at: " + direction);
+            return;
+        }
+
+        BlockPos exportInventoryPosition = this.findPositionByDirection(direction);
+
         TileEntityChest exportInventory = this.findInventoryEntityByPosition(
             this.world,
-            this.findPositionByDirection(direction)
+            exportInventoryPosition
         );
         if (exportInventory == null) {
             Logger.error("Failed to get chest inventory for export.");
             return;
         }
 
+        // todo this does not work for IInventory
         TileEntityChest importInventory = this.findInventoryEntityByPosition(this.world, inventoryPosition);
         if (importInventory == null) {
             Logger.error("Failed to get chest inventory for import.");
@@ -144,9 +155,45 @@ public class TileEntityConnector extends TileEntity implements ITickable
             return;
         }
 
-        List<List<Integer>> possibleIndexes = this.network.getPossibleSlots(connectorSide);
+        int inventorySlotCount = this.getInventorySlotCount(importInventory, inventoryPosition);
+        if (inventorySettings.inventorySlotCount() != inventorySlotCount) {
+            this.network.updateSlotCount(inventorySlotCount, inventorySettings);
+        }
+
+        ConnectorSettings exportConnectorSettings = settings(direction);
+
+        if (exportConnectorSettings == null) {
+            return;
+        }
+
+        int exportInventorySlotCount = this.getInventorySlotCount(exportInventory, exportInventoryPosition);
+        if (exportConnectorSettings.inventorySlotCount() != exportInventorySlotCount) {
+            this.network.updateSlotCount(exportInventorySlotCount, exportConnectorSettings);
+        }
+
+        List<List<Integer>> possibleIndexes = this.network.getPossibleSlots(
+            connectorSide.connectorSettings,
+            inventorySettings
+        );
 
         exportItemFromSlots(possibleIndexes, exportInventory, importInventory);
+    }
+
+    private int getInventorySlotCount(IInventory inventory, BlockPos inventoryPosition)
+    {
+        int slotCount = inventory.getSizeInventory();
+
+        if (inventory instanceof TileEntityChest) {
+            for (EnumFacing facing : EnumFacing.HORIZONTALS) {
+                TileEntity chestNeighbor = world.getTileEntity(inventoryPosition.offset(facing));
+                if (chestNeighbor  instanceof TileEntityChest) {
+                    slotCount += ((TileEntityChest) chestNeighbor).getSizeInventory();
+                    break;
+                }
+            }
+        }
+
+        return slotCount;
     }
 
     @Nullable
@@ -220,18 +267,19 @@ public class TileEntityConnector extends TileEntity implements ITickable
         TileEntityChest importInventory
     )
     {
+        // todo, slow when there are many stacks with only 1 item
         for (List<Integer> possibleIndex : possibleIndexes) {
-            ItemStack items = this.extractItemFromChest(exportInventory, possibleIndex.get(0), 1);
+            ItemStack items = this.extractItemFromChest(exportInventory, possibleIndex.get(1), 1);
             if (items.isEmpty()) {
                 continue;
             }
 
-            ItemStack itemsNotInserted = this.insertItemIntoChest(importInventory, possibleIndex.get(1), items);
+            ItemStack itemsNotInserted = this.insertItemIntoChest(importInventory, possibleIndex.get(0), items);
             if (itemsNotInserted.isEmpty()) {
                 return;
             }
 
-            this.insertItemIntoChest(exportInventory, possibleIndex.get(0), itemsNotInserted);
+            this.insertItemIntoChest(exportInventory, possibleIndex.get(1), itemsNotInserted);
 
             if (itemsNotInserted.getCount() != items.getCount()) {
                 return;
@@ -337,9 +385,12 @@ public class TileEntityConnector extends TileEntity implements ITickable
         }
 
         if (checked) {
-            this.network.addInsertInventoryPosition(this.findPositionByDirection(direction), this.getPos());
+            this.network.addInsert(
+                this.findPositionByDirection(direction),
+                this.settings(direction)
+            );
         } else {
-            this.network.removeInsertInventoryPosition(this.findPositionByDirection(direction), this.getPos());
+            this.network.removeInsert(this.settings(direction));
         }
 
         notifyUpdate();
@@ -376,11 +427,29 @@ public class TileEntityConnector extends TileEntity implements ITickable
     {
         ConnectorSettings connectorSettings = this.findConnectorSettingsByDirection(direction);
 
+        if (this.network == null || this.network.isDisabled()) {
+            return;
+        }
+
         if (connectorSettings == null) {
             return;
         }
 
         connectorSettings.changeExtractEnabled(checked);
+
+        boolean isRemote = this.getWorld().isRemote;
+        if (isRemote) {
+            return;
+        }
+
+        if (checked) {
+            this.network.addExtract(
+                this.findPositionByDirection(direction),
+                this.settings(direction)
+            );
+        } else {
+            this.network.removeExtract(this.settings(direction));
+        }
 
         notifyUpdate();
     }
@@ -454,47 +523,87 @@ public class TileEntityConnector extends TileEntity implements ITickable
 
         ConnectorNetwork foundNetwork = ConnectorNetwork.create(compound.getInteger(NETWORK_ID));
 
-        this.addConnectorInformationToNetwork(foundNetwork);
+        this.addInsertConnectorInformationToNetwork(foundNetwork);
+        this.addExtractConnectorInformationToNetwork(foundNetwork);
 
         return foundNetwork;
     }
 
-    private void addConnectorInformationToNetwork(ConnectorNetwork network)
+    private void addInsertConnectorInformationToNetwork(ConnectorNetwork network)
     {
         if (this.isInsertEnabled(Direction.NORTH)) {
-            network.addInsertInventoryPosition(this.getPos().offset(EnumFacing.NORTH), this.getPos());
+            network.addInsert(this.getPos().offset(EnumFacing.NORTH), this.settings(Direction.NORTH));
         } else {
-            network.removeInsertInventoryPosition(this.getPos().offset(EnumFacing.NORTH), this.getPos());
+            network.removeInsert(this.settings(Direction.NORTH));
         }
 
         if (this.isInsertEnabled(Direction.EAST)) {
-            network.addInsertInventoryPosition(this.getPos().offset(EnumFacing.EAST), this.getPos());
+            network.addInsert(this.getPos().offset(EnumFacing.EAST), this.settings(Direction.EAST));
         } else {
-            network.removeInsertInventoryPosition(this.getPos().offset(EnumFacing.EAST), this.getPos());
+            network.removeInsert(this.settings(Direction.EAST));
         }
 
         if (this.isInsertEnabled(Direction.SOUTH)) {
-            network.addInsertInventoryPosition(this.getPos().offset(EnumFacing.SOUTH), this.getPos());
+            network.addInsert(this.getPos().offset(EnumFacing.SOUTH), this.settings(Direction.SOUTH));
         } else {
-            network.removeInsertInventoryPosition(this.getPos().offset(EnumFacing.SOUTH), this.getPos());
+            network.removeInsert(this.settings(Direction.SOUTH));
         }
 
         if (this.isInsertEnabled(Direction.WEST)) {
-            network.addInsertInventoryPosition(this.getPos().offset(EnumFacing.WEST), this.getPos());
+            network.addInsert(this.getPos().offset(EnumFacing.WEST), this.settings(Direction.WEST));
         } else {
-            network.removeInsertInventoryPosition(this.getPos().offset(EnumFacing.WEST), this.getPos());
+            network.removeInsert(this.settings(Direction.WEST));
         }
 
         if (this.isInsertEnabled(Direction.UP)) {
-            network.addInsertInventoryPosition(this.getPos().offset(EnumFacing.UP), this.getPos());
+            network.addInsert(this.getPos().offset(EnumFacing.UP), this.settings(Direction.UP));
         } else {
-            network.removeInsertInventoryPosition(this.getPos().offset(EnumFacing.UP), this.getPos());
+            network.removeInsert(this.settings(Direction.UP));
         }
 
         if (this.isInsertEnabled(Direction.DOWN)) {
-            network.addInsertInventoryPosition(this.getPos().offset(EnumFacing.DOWN), this.getPos());
+            network.addInsert(this.getPos().offset(EnumFacing.DOWN), this.settings(Direction.DOWN));
         } else {
-            network.removeInsertInventoryPosition(this.getPos().offset(EnumFacing.DOWN), this.getPos());
+            network.removeInsert(this.settings(Direction.DOWN));
+        }
+    }
+
+    private void addExtractConnectorInformationToNetwork(ConnectorNetwork network)
+    {
+        if (this.isExtractEnabled(Direction.NORTH)) {
+            network.addExtract(this.getPos().offset(EnumFacing.NORTH), this.settings(Direction.NORTH));
+        } else {
+            network.removeExtract(this.settings(Direction.NORTH));
+        }
+
+        if (this.isExtractEnabled(Direction.EAST)) {
+            network.addExtract(this.getPos().offset(EnumFacing.EAST), this.settings(Direction.EAST));
+        } else {
+            network.removeExtract(this.settings(Direction.EAST));
+        }
+
+        if (this.isExtractEnabled(Direction.SOUTH)) {
+            network.addExtract(this.getPos().offset(EnumFacing.SOUTH), this.settings(Direction.SOUTH));
+        } else {
+            network.removeExtract(this.settings(Direction.SOUTH));
+        }
+
+        if (this.isExtractEnabled(Direction.WEST)) {
+            network.addExtract(this.getPos().offset(EnumFacing.WEST), this.settings(Direction.WEST));
+        } else {
+            network.removeExtract(this.settings(Direction.WEST));
+        }
+
+        if (this.isExtractEnabled(Direction.UP)) {
+            network.addExtract(this.getPos().offset(EnumFacing.UP), this.settings(Direction.UP));
+        } else {
+            network.removeExtract(this.settings(Direction.UP));
+        }
+
+        if (this.isExtractEnabled(Direction.DOWN)) {
+            network.addExtract(this.getPos().offset(EnumFacing.DOWN), this.settings(Direction.DOWN));
+        } else {
+            network.removeExtract(this.settings(Direction.DOWN));
         }
     }
 

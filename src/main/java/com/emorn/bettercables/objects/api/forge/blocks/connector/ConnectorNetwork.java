@@ -1,8 +1,8 @@
 package com.emorn.bettercables.objects.api.forge.blocks.connector;
 
 import com.emorn.bettercables.objects.api.forge.common.Logger;
-import com.emorn.bettercables.objects.application.blocks.connector.ConnectorSide;
 import com.emorn.bettercables.objects.application.blocks.connector.PossibleSlots;
+import com.emorn.bettercables.objects.gateway.blocks.ConnectorSettings;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.util.math.BlockPos;
 
@@ -20,11 +20,15 @@ public class ConnectorNetwork
     private static final Map<Integer, ConnectorNetwork> createdNetworksById = new HashMap<>();
     private static int lastId = 1;
     private final int id;
-    // key = inventory, value = list of connectors
-    private final Map<BlockPos, List<BlockPos>> insertInventoryPositions = new HashMap<>();
     private final Map<BlockPos, ConnectorNetwork> mergeToNetwork = new HashMap<>();
     private boolean shouldMerge = false;
     private boolean isDisabled = false;
+    // 1: extract settings, 2: insert settings, 3: insertIndex, 4: extractIndex
+    private final Map<ConnectorSettings, Map<ConnectorSettings, List<List<Integer>>>> possibleSlotsToExtract = new HashMap<>();
+    // key = settings, value = inventory
+    private final Map<ConnectorSettings, BlockPos> insertConnectorSettings = new HashMap<>();
+    // key = settings, value = inventory
+    private final Map<ConnectorSettings, BlockPos> extractConnectorSettings = new HashMap<>();
 
     private ConnectorNetwork()
     {
@@ -60,7 +64,7 @@ public class ConnectorNetwork
     @Nullable
     public Integer findNextIndex(int index)
     {
-        int totalItems = this.insertInventoryPositions.size();
+        int totalItems = this.insertConnectorSettings.size();
         if (totalItems == 0) {
             return null;
         }
@@ -77,17 +81,35 @@ public class ConnectorNetwork
     @Nullable
     public BlockPos findInventoryPositionBy(Integer index)
     {
-        int totalItems = this.insertInventoryPositions.size();
+        int totalItems = this.insertConnectorSettings.size();
 
         if (index >= totalItems) {
             return null;
         }
 
-        if (this.insertInventoryPositions.keySet().toArray()[index] == null) {
+        if (this.insertConnectorSettings.keySet().toArray()[index] == null) {
             Logger.error("Tried to get empty");
         }
 
-        return (BlockPos) this.insertInventoryPositions.keySet().toArray()[index];
+        return (BlockPos) this.insertConnectorSettings.values().toArray()[index];
+    }
+
+    @Nullable
+    public ConnectorSettings findInsertSettingsBy(Integer index)
+    {
+        int totalItems = this.insertConnectorSettings.size();
+
+        if (index >= totalItems) {
+            return null;
+        }
+
+        ConnectorSettings settings = (ConnectorSettings) this.insertConnectorSettings.keySet().toArray()[index];
+
+        if (settings == null) {
+            Logger.error("Tried to get empty");
+        }
+
+        return settings;
     }
 
     public int id()
@@ -101,48 +123,98 @@ public class ConnectorNetwork
         this.mergeToNetwork.put(new BlockPos(0, 0, 0), newNetwork);
     }
 
-    public void addInsertInventoryPosition(
+    public void addInsert(
         BlockPos inventoryPosition,
-        BlockPos connectorPosition
+        ConnectorSettings settings
     )
     {
-        this.isDisabled = true;
-
-        this.insertInventoryPositions.computeIfAbsent(inventoryPosition, k -> new ArrayList<>());
-
-        if (this.insertInventoryPositions.get(inventoryPosition).contains(connectorPosition)) {
+        if (this.insertConnectorSettings.containsKey(settings) && this.insertConnectorSettings.get(settings).equals(inventoryPosition)) {
             return;
         }
-        this.insertInventoryPositions.get(inventoryPosition).add(connectorPosition);
 
-        // List<List<Integer>> possibleSlots = PossibleSlots.calculate(); // todo
+        this.isDisabled = true;
+
+        this.insertConnectorSettings.put(settings, inventoryPosition);
+        this.recalculateInsertsFromPossibleSlots(settings);
+
+        this.isDisabled = false;
+    }
+
+    public void addExtract(
+        BlockPos inventoryPosition,
+        ConnectorSettings settings
+    )
+    {
+        if (this.extractConnectorSettings.containsKey(settings) && this.extractConnectorSettings.get(settings).equals(inventoryPosition)) {
+            return;
+        }
+
+        this.isDisabled = true;
+
+        this.extractConnectorSettings.put(settings, inventoryPosition);
+        this.recalculateExtractsFromPossibleSlots(settings);
 
         this.isDisabled = false;
     }
 
     public List<List<Integer>> getPossibleSlots(
-        ConnectorSide connectorSide
+        ConnectorSettings exportSettings,
+        ConnectorSettings importSettings
     )
     {
-        return PossibleSlots.calculate();
+        this.possibleSlotsToExtract.computeIfAbsent(exportSettings, k -> new HashMap<>());
+        this.possibleSlotsToExtract.get(exportSettings).computeIfAbsent(importSettings, k -> new ArrayList<>());
+
+        return this.possibleSlotsToExtract.get(exportSettings).get(importSettings);
     }
 
-    public void removeInsertInventoryPosition(
-        BlockPos inventoryPosition,
-        BlockPos connectorPosition
-    )
+    public void reCalculateAllPossibleSlots()
     {
         this.isDisabled = true;
+        this.possibleSlotsToExtract.clear();
 
-        this.insertInventoryPositions.computeIfAbsent(inventoryPosition, k -> new ArrayList<>());
+        for (Map.Entry<ConnectorSettings, BlockPos> insertEntry : this.insertConnectorSettings.entrySet()) {
+            for (Map.Entry<ConnectorSettings, BlockPos> extractEntry : this.extractConnectorSettings.entrySet()) {
+                // 1: extract, 2: insert, 3: insertIndex, 4: extractIndex
+                this.possibleSlotsToExtract.putIfAbsent(extractEntry.getKey(), new HashMap<>());
+                this.possibleSlotsToExtract.get(extractEntry.getKey()).putIfAbsent(insertEntry.getKey(), new ArrayList<>());
 
-        this.insertInventoryPositions.get(inventoryPosition).remove(connectorPosition);
-
-        if (this.insertInventoryPositions.get(inventoryPosition).isEmpty()) {
-            this.insertInventoryPositions.remove(inventoryPosition);
+                this.possibleSlotsToExtract.get(extractEntry.getKey())
+                    .put(insertEntry.getKey(), PossibleSlots.calculate(extractEntry.getKey(), insertEntry.getKey()));
+            }
         }
 
-        // List<List<Integer>> possibleSlots = PossibleSlots.calculate(); // todo
+        this.isDisabled = false;
+    }
+
+    public void removeInsert(
+        ConnectorSettings connectorSettings
+    )
+    {
+        if (!this.insertConnectorSettings.containsKey(connectorSettings)) {
+            return;
+        }
+
+        this.isDisabled = true;
+
+        this.insertConnectorSettings.remove(connectorSettings);
+        this.removeInsertFromPossibleSlots(connectorSettings);
+
+        this.isDisabled = false;
+    }
+
+    public void removeExtract(
+        ConnectorSettings connectorSettings
+    )
+    {
+        if (!this.extractConnectorSettings.containsKey(connectorSettings)) {
+            return;
+        }
+
+        this.isDisabled = true;
+
+        this.extractConnectorSettings.remove(connectorSettings);
+        this.removeExtractFromPossibleSlots(connectorSettings);
 
         this.isDisabled = false;
     }
@@ -176,4 +248,65 @@ public class ConnectorNetwork
 
         return mergeToNetwork.get(position);
     }
+
+    public void updateSlotCount(
+        int sizeInventory,
+        ConnectorSettings connector
+    )
+    {
+        if (connector.inventorySlotCount() == sizeInventory) {
+            return;
+        }
+
+        connector.changeInventorySlotCount(sizeInventory);
+
+        if (connector.isInsertEnabled()) {
+            this.recalculateInsertsFromPossibleSlots(connector);
+        }
+
+        if (connector.isExtractEnabled()) {
+            this.recalculateExtractsFromPossibleSlots(connector);
+        }
+    }
+
+    private void removeInsertFromPossibleSlots(
+        ConnectorSettings insertSettings
+    )
+    {
+        this.possibleSlotsToExtract.forEach((k, v) -> {
+            v.remove(insertSettings);
+        });
+    }
+
+    private void removeExtractFromPossibleSlots(
+        ConnectorSettings extractSettings
+    )
+    {
+        this.possibleSlotsToExtract.remove(extractSettings);
+    }
+
+    private void recalculateInsertsFromPossibleSlots(
+        ConnectorSettings insertSettings
+    )
+    {
+        this.extractConnectorSettings.forEach((k, v) -> {
+            this.possibleSlotsToExtract.putIfAbsent(k, new HashMap<>());
+
+            List<List<Integer>> possibleSlots = PossibleSlots.calculate(k, insertSettings);
+            this.possibleSlotsToExtract.get(k).put(insertSettings, possibleSlots);
+        });
+    }
+
+    private void recalculateExtractsFromPossibleSlots(
+        ConnectorSettings extractSettings
+    )
+    {
+        this.insertConnectorSettings.forEach((k, v) -> {
+            this.possibleSlotsToExtract.putIfAbsent(extractSettings, new HashMap<>());
+
+            List<List<Integer>> possibleSlots = PossibleSlots.calculate(extractSettings, k);
+            this.possibleSlotsToExtract.get(extractSettings).put(k, possibleSlots);
+        });
+    }
+
 }

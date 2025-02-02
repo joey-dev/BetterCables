@@ -17,8 +17,7 @@ public class ConnectorSettings
 {
     private boolean isExtractEnabled = false;
     private boolean isInsertEnabled = false;
-    private int insertSlotCount = 27;
-    private int extractSlotCount = 27;
+    private int inventorySlotCount = 27;
 
     // extract
     private int extractChannelId = 0;
@@ -60,24 +59,14 @@ public class ConnectorSettings
         isInsertEnabled = insertEnabled;
     }
 
-    public int insertSlotCount()
+    public int inventorySlotCount()
     {
-        return insertSlotCount;
+        return inventorySlotCount;
     }
 
-    public void changeInsertSlotCount(int insertSlotCount)
+    public void changeInventorySlotCount(int inventorySlotCount)
     {
-        this.insertSlotCount = insertSlotCount;
-    }
-
-    public int extractSlotCount()
-    {
-        return extractSlotCount;
-    }
-
-    public void changeExtractSlotCount(int extractSlotCount)
-    {
-        this.extractSlotCount = extractSlotCount;
+        this.inventorySlotCount = inventorySlotCount;
     }
 
     public int insertChannelId()
@@ -202,8 +191,7 @@ public class ConnectorSettings
         NBTTagCompound nbt = new NBTTagCompound();
         nbt.setBoolean(key + "-" + "isInsertEnabled", isInsertEnabled);
         nbt.setBoolean(key + "-" + "isExtractEnabled", isExtractEnabled);
-        nbt.setInteger(key + "-" + "insertSlotCount", insertSlotCount);
-        nbt.setInteger(key + "-" + "extractSlotCount", extractSlotCount);
+        nbt.setInteger(key + "-" + "inventorySlotCount", inventorySlotCount);
 
         // extract
         nbt.setInteger(key + "-" + "extractChannelId", extractChannelId);
@@ -257,11 +245,8 @@ public class ConnectorSettings
         if (nbt.hasKey(key + "-" + "isExtractEnabled", Constants.NBT.TAG_BYTE)) {
             isExtractEnabled = nbt.getBoolean(key + "-" + "isExtractEnabled");
         }
-        if (nbt.hasKey(key + "-" + "insertSlotCount", Constants.NBT.TAG_INT)) {
-            insertSlotCount = nbt.getInteger(key + "-" + "insertSlotCount");
-        }
-        if (nbt.hasKey(key + "-" + "extractSlotCount", Constants.NBT.TAG_INT)) {
-            extractSlotCount = nbt.getInteger(key + "-" + "extractSlotCount");
+        if (nbt.hasKey(key + "-" + "inventorySlotCount", Constants.NBT.TAG_INT)) {
+            inventorySlotCount = nbt.getInteger(key + "-" + "inventorySlotCount");
         }
 
         // extract

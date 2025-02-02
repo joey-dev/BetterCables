@@ -601,7 +601,9 @@ public class GuiConnector extends GuiContainer
         ModNetworkHandler.INSTANCE.sendToServer(new PacketUpdateConnector(
             tileEntity.getPos(),
             this.direction,
-            tileSettings
+            tileSettings,
+            false,
+            false
         ));
     }
 
@@ -663,7 +665,9 @@ public class GuiConnector extends GuiContainer
         ModNetworkHandler.INSTANCE.sendToServer(new PacketUpdateConnector(
             tileEntity.getPos(),
             this.direction,
-            tileSettings
+            tileSettings,
+            false,
+            false
         ));
     }
 
@@ -707,12 +711,17 @@ public class GuiConnector extends GuiContainer
         ConnectorSettings tileSettings
     )
     {
+        boolean didInsertChange = false;
+        boolean didExtractChange = false;
+
         switch (checkbox.id) {
             case INSERT_CHECKBOX_ID:
                 tileEntity.setInsertEnabled(checkbox.isChecked(), this.direction);
+                didInsertChange = true;
                 break;
             case EXTRACT_CHECKBOX_ID:
                 tileEntity.setExtractEnabled(checkbox.isChecked(), this.direction);
+                didExtractChange = true;
                 break;
             case DYNAMIC_TICK_RATE_BUTTON_ID:
                 tileSettings.changeDynamicTickRateEnabled(checkbox.isChecked());
@@ -728,7 +737,9 @@ public class GuiConnector extends GuiContainer
         ModNetworkHandler.INSTANCE.sendToServer(new PacketUpdateConnector(
             tileEntity.getPos(),
             this.direction,
-            tileSettings
+            tileSettings,
+            didInsertChange,
+            didExtractChange
         ));
     }
 }
