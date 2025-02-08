@@ -1,5 +1,6 @@
 package com.emorn.bettercables.objects.api.forge.blocks.connector;
 
+import com.emorn.bettercables.common.performance.PerformanceTester;
 import com.emorn.bettercables.objects.api.forge.common.Direction;
 import com.emorn.bettercables.objects.api.forge.common.Logger;
 import com.emorn.bettercables.objects.api.forge.common.Settings;
@@ -47,6 +48,7 @@ public class TileEntityConnector extends TileEntity implements ITickable
 
     public void update()
     {
+        PerformanceTester.printResults();
         // isRemote means isClient
         if (this.getWorld().isRemote) {
             return;
@@ -59,6 +61,8 @@ public class TileEntityConnector extends TileEntity implements ITickable
         if (this.network.isRemoved()) {
             this.network = this.network.mergeToNetwork(this.getPos());
         }
+
+        PerformanceTester.start("ConnectorBlockEntity.tick");
 
         this.tick();
 
@@ -75,7 +79,9 @@ public class TileEntityConnector extends TileEntity implements ITickable
         }
 
         if (west.canExport()) {
+            PerformanceTester.start("export west");
             this.exportItem(Direction.WEST);
+            PerformanceTester.end("export west");
         }
 
         if (up.canExport()) {
@@ -85,6 +91,8 @@ public class TileEntityConnector extends TileEntity implements ITickable
         if (down.canExport()) {
             this.exportItem(Direction.DOWN);
         }
+
+        PerformanceTester.end("ConnectorBlockEntity.tick");
     }
 
     private void tick()
