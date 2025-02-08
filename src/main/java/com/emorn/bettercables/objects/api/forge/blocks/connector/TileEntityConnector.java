@@ -12,7 +12,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
@@ -117,7 +116,7 @@ public class TileEntityConnector extends TileEntity implements ITickable
         BlockPos inventoryPosition = this.network.findInventoryPositionBy(nextIndex);
 
         if (inventoryPosition == null) {
-            Logger.error("No chest found at: " + direction);
+            Logger.error("No inventory found at: " + direction);
             return;
         }
 
@@ -130,19 +129,18 @@ public class TileEntityConnector extends TileEntity implements ITickable
 
         BlockPos exportInventoryPosition = this.findPositionByDirection(direction);
 
-        TileEntityChest exportInventory = this.findInventoryEntityByPosition(
+        IInventory exportInventory = this.findInventoryEntityByPosition(
             this.world,
             exportInventoryPosition
         );
         if (exportInventory == null) {
-            Logger.error("Failed to get chest inventory for export.");
+            Logger.error("Failed to get inventory inventory for export.");
             return;
         }
 
-        // todo this does not work for IInventory
-        TileEntityChest importInventory = this.findInventoryEntityByPosition(this.world, inventoryPosition);
+        IInventory importInventory = this.findInventoryEntityByPosition(this.world, inventoryPosition);
         if (importInventory == null) {
-            Logger.error("Failed to get chest inventory for import.");
+            Logger.error("Failed to get inventory inventory for import.");
             return;
         }
 
@@ -155,20 +153,10 @@ public class TileEntityConnector extends TileEntity implements ITickable
             return;
         }
 
-        int inventorySlotCount = this.getInventorySlotCount(importInventory, inventoryPosition);
-        if (inventorySettings.inventorySlotCount() != inventorySlotCount) {
-            this.network.updateSlotCount(inventorySlotCount, inventorySettings);
-        }
-
         ConnectorSettings exportConnectorSettings = settings(direction);
 
         if (exportConnectorSettings == null) {
             return;
-        }
-
-        int exportInventorySlotCount = this.getInventorySlotCount(exportInventory, exportInventoryPosition);
-        if (exportConnectorSettings.inventorySlotCount() != exportInventorySlotCount) {
-            this.network.updateSlotCount(exportInventorySlotCount, exportConnectorSettings);
         }
 
         List<List<Integer>> possibleIndexes = this.network.getPossibleSlots(
@@ -179,36 +167,19 @@ public class TileEntityConnector extends TileEntity implements ITickable
         exportItemFromSlots(possibleIndexes, exportInventory, importInventory);
     }
 
-    private int getInventorySlotCount(IInventory inventory, BlockPos inventoryPosition)
-    {
-        int slotCount = inventory.getSizeInventory();
-
-        if (inventory instanceof TileEntityChest) {
-            for (EnumFacing facing : EnumFacing.HORIZONTALS) {
-                TileEntity chestNeighbor = world.getTileEntity(inventoryPosition.offset(facing));
-                if (chestNeighbor  instanceof TileEntityChest) {
-                    slotCount += ((TileEntityChest) chestNeighbor).getSizeInventory();
-                    break;
-                }
-            }
-        }
-
-        return slotCount;
-    }
-
     @Nullable
-    private TileEntityChest findInventoryEntityByPosition(
+    private IInventory findInventoryEntityByPosition(
         World world,
-        BlockPos chestPos
+        BlockPos inventoryPosition
     )
     {
-        TileEntity tileEntity = world.getTileEntity(chestPos);
-        if (!(tileEntity instanceof TileEntityChest)) {
-            Logger.error("No chest found at: " + chestPos);
+        TileEntity tileEntity = world.getTileEntity(inventoryPosition);
+        if (!(tileEntity instanceof IInventory)) {
+            Logger.error("No inventory found at: " + inventoryPosition);
             return null;
         }
 
-        return (TileEntityChest) tileEntity;
+        return (IInventory) tileEntity;
     }
 
     private BlockPos findPositionByDirection(Direction direction)
@@ -263,23 +234,25 @@ public class TileEntityConnector extends TileEntity implements ITickable
 
     private void exportItemFromSlots(
         List<List<Integer>> possibleIndexes,
-        TileEntityChest exportInventory,
-        TileEntityChest importInventory
+        IInventory exportInventory,
+        IInventory importInventory
     )
     {
         // todo, slow when there are many stacks with only 1 item
+        // prob want to move this list and make the possibleIndexes a queue
+        // than it takes the top one, and at the end, adds it to the bottom
         for (List<Integer> possibleIndex : possibleIndexes) {
-            ItemStack items = this.extractItemFromChest(exportInventory, possibleIndex.get(1), 1);
+            ItemStack items = this.extractItemFromInventory(exportInventory, possibleIndex.get(1), 1);
             if (items.isEmpty()) {
                 continue;
             }
 
-            ItemStack itemsNotInserted = this.insertItemIntoChest(importInventory, possibleIndex.get(0), items);
+            ItemStack itemsNotInserted = this.insertItemIntoInventory(importInventory, possibleIndex.get(0), items);
             if (itemsNotInserted.isEmpty()) {
                 return;
             }
 
-            this.insertItemIntoChest(exportInventory, possibleIndex.get(1), itemsNotInserted);
+            this.insertItemIntoInventory(exportInventory, possibleIndex.get(1), itemsNotInserted);
 
             if (itemsNotInserted.getCount() != items.getCount()) {
                 return;
@@ -287,43 +260,65 @@ public class TileEntityConnector extends TileEntity implements ITickable
         }
     }
 
-    private ItemStack extractItemFromChest(
-        TileEntityChest chest,
+    private ItemStack extractItemFromInventory(
+        IInventory inventory,
         Integer slot,
         int amount
     )
     {
-        IItemHandler exportInventory = chest.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
+        TileEntity inventoryEntity = (TileEntity) inventory;
+        IItemHandler exportInventory = inventoryEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
 
         if (exportInventory == null) {
-            Logger.error("Failed to get chest inventory.");
+            Logger.error("Failed to get inventory inventory.");
             return ItemStack.EMPTY;
         }
 
-        ItemStack extracted = exportInventory.extractItem(slot, amount, false);
+        ItemStack extracted;
+        try {
+            extracted = exportInventory.extractItem(slot, amount, false);
+        } catch (ArrayIndexOutOfBoundsException e) {
+            Logger.error("Failed to extract item from inventory.");
+            return ItemStack.EMPTY;
+        }
+
         if (!extracted.isEmpty()) {
-            chest.markDirty();
+            inventory.markDirty();
         }
 
         return extracted;
     }
 
-    private ItemStack insertItemIntoChest(
-        TileEntityChest chest,
+    private ItemStack insertItemIntoInventory(
+        IInventory inventory,
         Integer slot,
         ItemStack items
     )
     {
-        IItemHandler inventory = chest.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
+        TileEntity inventoryEntity = (TileEntity) inventory;
+        IItemHandler insertInventory = inventoryEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
 
-        if (inventory == null) {
-            Logger.error("Failed to get chest inventory.");
+        if (insertInventory == null) {
+            Logger.error("Failed to get inventory.");
             return ItemStack.EMPTY;
         }
 
-        ItemStack itemsLeft = inventory.insertItem(slot, items, false);
+        ItemStack itemsLeft;
+
+        try {
+            itemsLeft = insertInventory.insertItem(slot, items, false);
+            /**
+             * todo does not auto update when
+             * there was a large chest with full slots
+             * large chest is changed to small chest
+             */
+        } catch (ArrayIndexOutOfBoundsException e) {
+            Logger.error("Failed to insert item from inventory.");
+            return items;
+        }
+
         if (itemsLeft.getCount() != items.getCount()) {
-            chest.markDirty();
+            inventory.markDirty();
         }
 
         return itemsLeft;
