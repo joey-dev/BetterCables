@@ -1,14 +1,13 @@
-package com.emorn.bettercables.objects.api.forge.common;
+package com.emorn.bettercables.core.common;
 
 import mcp.MethodsReturnNonnullByDefault;
-import net.minecraft.util.IStringSerializable;
 
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
 
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
-public enum Direction implements IStringSerializable
+public enum Direction
 {
     NORTH,
     EAST,
@@ -17,7 +16,6 @@ public enum Direction implements IStringSerializable
     UP,
     DOWN;
 
-    @Override
     @Nonnull
     public String getName()
     {

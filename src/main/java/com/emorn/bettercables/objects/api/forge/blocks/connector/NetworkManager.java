@@ -118,18 +118,18 @@ public class NetworkManager
             }
 
             if (neighborBlock instanceof BlockConnector) {
-                ConnectorNetwork oldNetwork = (
-                    (TileEntityConnector) Objects.requireNonNull(
-                        worldIn.getTileEntity(neighborBlockPosition)
-                    )
-                )
-                    .getNetwork();
-
-                if (oldNetwork.id() == network.id()) {
-                    continue;
-                }
-
-                oldNetwork.remove(neighborBlockPosition, network);
+//                ConnectorNetwork oldNetwork = (
+//                    (ForgeTileEntityConnector) Objects.requireNonNull(
+//                        worldIn.getTileEntity(neighborBlockPosition)
+//                    )
+//                )
+//                    .getNetwork();
+//
+//                if (oldNetwork.id() == network.id()) {
+//                    continue;
+//                }
+//
+//                oldNetwork.remove(neighborBlockPosition, network);
             }
 
             reCalculateNetworkFrom(neighborBlockPosition, worldIn, network);
@@ -158,17 +158,17 @@ public class NetworkManager
             }
 
             if (neighborBlock instanceof BlockConnector) {
-                ConnectorNetwork network = (
-                    (TileEntityConnector) Objects.requireNonNull(
-                        worldIn.getTileEntity(neighborBlockPosition)
-                    )
-                ).getNetwork();
-
-                networks.putIfAbsent(network.id(), network);
-
-                if (networks.size() == totalConnections) {
-                    return networks;
-                }
+//                ConnectorNetwork network = (
+//                    (ForgeTileEntityConnector) Objects.requireNonNull(
+//                        worldIn.getTileEntity(neighborBlockPosition)
+//                    )
+//                ).getNetwork();
+//
+//                networks.putIfAbsent(network.id(), network);
+//
+//                if (networks.size() == totalConnections) {
+//                    return networks;
+//                }
             }
             Map<Integer, ConnectorNetwork> connectorNetworks = findNetworks(
                 worldIn,

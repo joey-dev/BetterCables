@@ -1,5 +1,6 @@
 package com.emorn.bettercables.objects.api.forge.blocks.connector;
 
+import com.emorn.bettercables.api.v1_12_2.blocks.connector.ForgeTileEntityConnector;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
@@ -12,11 +13,11 @@ import javax.annotation.ParametersAreNonnullByDefault;
 @ParametersAreNonnullByDefault
 public class ContainerConnector extends Container
 {
-    private final TileEntityConnector tileEntity;
+    private final ForgeTileEntityConnector tileEntity;
 
     public ContainerConnector(
         InventoryPlayer player,
-        TileEntityConnector tileEntity
+        ForgeTileEntityConnector tileEntity
     )
     {
         this.tileEntity = tileEntity;
@@ -40,7 +41,8 @@ public class ContainerConnector extends Container
     @Override
     public boolean canInteractWith(EntityPlayer playerIn)
     {
-        return this.tileEntity.isUsableByPlayer(playerIn);
+        // return this.tileEntity.isUsableByPlayer(playerIn); todo fix
+        return true;
     }
 
 }

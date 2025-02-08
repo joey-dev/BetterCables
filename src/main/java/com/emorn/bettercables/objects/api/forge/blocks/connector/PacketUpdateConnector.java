@@ -1,7 +1,7 @@
 package com.emorn.bettercables.objects.api.forge.blocks.connector;
 
-import com.emorn.bettercables.objects.api.forge.common.Direction;
-import com.emorn.bettercables.objects.api.forge.common.Logger;
+import com.emorn.bettercables.api.v1_12_2.blocks.connector.ForgeTileEntityConnector;
+import com.emorn.bettercables.core.common.Direction;
 import com.emorn.bettercables.objects.gateway.blocks.ConnectorSettings;
 import com.google.common.collect.ImmutableMap;
 import io.netty.buffer.ByteBuf;
@@ -92,21 +92,21 @@ public class PacketUpdateConnector implements IMessage
         {
             ctx.getServerHandler().player.getServerWorld().addScheduledTask(() -> {
                 TileEntity tileEntity = ctx.getServerHandler().player.world.getTileEntity(message.pos);
-                if (tileEntity instanceof TileEntityConnector) {
-                    TileEntityConnector connector = (TileEntityConnector) tileEntity;
-                    ConnectorSettings settings = connector.settings(message.direction);
-                    if (settings == null) {
-                        Logger.error("Could not find settings for direction " + message.direction);
-                        return;
-                    }
-                    settings.deserializeNBT(message.settingsNBT);
-                    if (message.didInsertChange) {
-                        ((TileEntityConnector) tileEntity).setInsertEnabled(settings.isInsertEnabled(), message.direction);
-                    }
-                    if (message.didExtractChange) {
-                        ((TileEntityConnector) tileEntity).setExtractEnabled(settings.isInsertEnabled(), message.direction);
-                    }
-                    connector.markDirty();
+                if (tileEntity instanceof ForgeTileEntityConnector) {
+//                    ForgeTileEntityConnector connector = (ForgeTileEntityConnector) tileEntity;
+//                    ConnectorSettings settings = connector.settings(message.direction);
+//                    if (settings == null) {
+//                        Logger.error("Could not find settings for direction " + message.direction);
+//                        return;
+//                    }
+//                    settings.deserializeNBT(message.settingsNBT);
+//                    if (message.didInsertChange) {
+//                        ((ForgeTileEntityConnector) tileEntity).setInsertEnabled(settings.isInsertEnabled(), message.direction);
+//                    }
+//                    if (message.didExtractChange) {
+//                        ((ForgeTileEntityConnector) tileEntity).setExtractEnabled(settings.isInsertEnabled(), message.direction);
+//                    }
+//                    connector.markDirty();
                 }
             });
             return null;

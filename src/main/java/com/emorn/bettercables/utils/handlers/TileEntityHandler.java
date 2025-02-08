@@ -1,6 +1,6 @@
 package com.emorn.bettercables.utils.handlers;
 
-import com.emorn.bettercables.objects.api.forge.blocks.connector.TileEntityConnector;
+import com.emorn.bettercables.api.v1_12_2.blocks.connector.ForgeTileEntityConnector;
 import com.emorn.bettercables.utils.Reference;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.util.ResourceLocation;
@@ -15,7 +15,7 @@ public class TileEntityHandler
     public static void registerTileEntities()
     {
         GameRegistry.registerTileEntity(
-            TileEntityConnector.class,
+            ForgeTileEntityConnector.class,
             new ResourceLocation(Reference.MODID + ":connector")
         );
     }

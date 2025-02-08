@@ -1,9 +1,9 @@
 package com.emorn.bettercables.utils.handlers;
 
 import com.emorn.bettercables.objects.api.forge.blocks.connector.ContainerConnector;
-import com.emorn.bettercables.objects.api.forge.common.Direction;
+import com.emorn.bettercables.core.common.Direction;
 import com.emorn.bettercables.objects.api.forge.blocks.connector.GuiConnector;
-import com.emorn.bettercables.objects.api.forge.blocks.connector.TileEntityConnector;
+import com.emorn.bettercables.api.v1_12_2.blocks.connector.ForgeTileEntityConnector;
 import com.emorn.bettercables.utils.Reference;
 import com.google.common.collect.ImmutableMap;
 import mcp.MethodsReturnNonnullByDefault;
@@ -44,12 +44,12 @@ public class GuiHandler implements IGuiHandler
 
         if (direction != null) {
             TileEntity tileEntity = world.getTileEntity(new BlockPos(x, y, z));
-            if (!(tileEntity instanceof TileEntityConnector)) {
+            if (!(tileEntity instanceof ForgeTileEntityConnector)) {
                 return null;
             }
             return new ContainerConnector(
                 player.inventory,
-                (TileEntityConnector) tileEntity
+                (ForgeTileEntityConnector) tileEntity
             );
         }
         return null;
@@ -79,7 +79,7 @@ public class GuiHandler implements IGuiHandler
         if (direction != null) {
             return new GuiConnector(
                 player.inventory,
-                (TileEntityConnector) world.getTileEntity(new BlockPos(x, y, z)),
+                (ForgeTileEntityConnector) world.getTileEntity(new BlockPos(x, y, z)),
                 direction
             );
         }

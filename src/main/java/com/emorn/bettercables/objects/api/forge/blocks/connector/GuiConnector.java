@@ -1,9 +1,9 @@
 package com.emorn.bettercables.objects.api.forge.blocks.connector;
 
+import com.emorn.bettercables.api.v1_12_2.blocks.connector.ForgeTileEntityConnector;
 import com.emorn.bettercables.common.gui.*;
 import com.emorn.bettercables.common.gui.toggle.*;
-import com.emorn.bettercables.objects.api.forge.common.Direction;
-import com.emorn.bettercables.objects.api.forge.common.Logger;
+import com.emorn.bettercables.core.common.Direction;
 import com.emorn.bettercables.objects.gateway.blocks.ConnectorSettings;
 import com.emorn.bettercables.objects.gateway.blocks.ConnectorSettingsFilter;
 import com.emorn.bettercables.proxy.ModNetworkHandler;
@@ -31,7 +31,7 @@ public class GuiConnector extends GuiContainer
         Reference.MODID + ":textures/gui/empty_gui_inventory.png"
     );
     private final InventoryPlayer player;
-    private final TileEntityConnector tileEntity;
+    private final ForgeTileEntityConnector tileEntity;
     private final Direction direction;
     private final ArrayList<GuiNumberInput> numberInputs = new ArrayList<>();
     private boolean isInsertSettingsOpen = false;
@@ -71,7 +71,7 @@ public class GuiConnector extends GuiContainer
 
     public GuiConnector(
         InventoryPlayer player,
-        TileEntityConnector tileEntity,
+        ForgeTileEntityConnector tileEntity,
         Direction direction
     )
     {
@@ -85,79 +85,79 @@ public class GuiConnector extends GuiContainer
     @Override
     public void initGui()
     {
-        super.initGui();
-
-        int checkboxX = this.guiLeft + 26;
-        int checkboxInsertY = this.guiTop + 20;
-        int checkboxExtractY = this.guiTop + 54;
-        int gearX = checkboxX - 20;
-
-        Consumer<Integer> onSettingsClicked = this::onSettingsClicked;
-
-        ConnectorSettings tileSettings = this.tileEntity.settings(this.direction);
-        if (tileSettings == null) {
-            Logger.error("ConnectorSettings is null");
-            return;
-        }
-
-        if (this.isInsertSettingsOpen || this.isExtractSettingsOpen) {
-            this.settingsMenu(tileSettings);
-            return;
-        }
-
-        GuiCheckbox insertCheckbox = new GuiCheckbox(
-            INSERT_CHECKBOX_ID,
-            checkboxX,
-            checkboxInsertY,
-            "Insert",
-            tileEntity.isInsertEnabled(this.direction),
-            false
-        );
-
-        GuiGear insertSettings = new GuiGear(
-            INSERT_SETTINGS_ID,
-            gearX,
-            checkboxInsertY,
-            onSettingsClicked
-        );
-        GuiCheckbox extractCheckbox = new GuiCheckbox(
-            EXTRACT_CHECKBOX_ID,
-            checkboxX,
-            checkboxExtractY,
-            "Extract",
-            tileEntity.isExtractEnabled(this.direction),
-            false
-        );
-        GuiGear extractSettings = new GuiGear(
-            EXTRACT_SETTINGS_ID,
-            gearX,
-            checkboxExtractY,
-            onSettingsClicked
-        );
-
-        this.buttonList.add(insertCheckbox);
-        this.buttonList.add(insertSettings);
-        this.buttonList.add(extractCheckbox);
-        this.buttonList.add(extractSettings);
+//        super.initGui();
+//
+//        int checkboxX = this.guiLeft + 26;
+//        int checkboxInsertY = this.guiTop + 20;
+//        int checkboxExtractY = this.guiTop + 54;
+//        int gearX = checkboxX - 20;
+//
+//        Consumer<Integer> onSettingsClicked = this::onSettingsClicked;
+//
+//        ConnectorSettings tileSettings = this.tileEntity.settings(this.direction);
+//        if (tileSettings == null) {
+//            Logger.error("ConnectorSettings is null");
+//            return;
+//        }
+//
+//        if (this.isInsertSettingsOpen || this.isExtractSettingsOpen) {
+//            this.settingsMenu(tileSettings);
+//            return;
+//        }
+//
+//        GuiCheckbox insertCheckbox = new GuiCheckbox(
+//            INSERT_CHECKBOX_ID,
+//            checkboxX,
+//            checkboxInsertY,
+//            "Insert",
+//            tileEntity.isInsertEnabled(this.direction),
+//            false
+//        );
+//
+//        GuiGear insertSettings = new GuiGear(
+//            INSERT_SETTINGS_ID,
+//            gearX,
+//            checkboxInsertY,
+//            onSettingsClicked
+//        );
+//        GuiCheckbox extractCheckbox = new GuiCheckbox(
+//            EXTRACT_CHECKBOX_ID,
+//            checkboxX,
+//            checkboxExtractY,
+//            "Extract",
+//            tileEntity.isExtractEnabled(this.direction),
+//            false
+//        );
+//        GuiGear extractSettings = new GuiGear(
+//            EXTRACT_SETTINGS_ID,
+//            gearX,
+//            checkboxExtractY,
+//            onSettingsClicked
+//        );
+//
+//        this.buttonList.add(insertCheckbox);
+//        this.buttonList.add(insertSettings);
+//        this.buttonList.add(extractCheckbox);
+//        this.buttonList.add(extractSettings);
     }
 
     private void onSettingsClicked(Integer buttonId)
     {
-        ConnectorSettings tileSettings = this.tileEntity.settings(this.direction);
-        if (tileSettings == null) {
-            Logger.error("ConnectorSettings is null");
-            return;
-        }
-
-        if (buttonId == INSERT_SETTINGS_ID) {
-            this.isInsertSettingsOpen = true;
-            this.filter = tileSettings.defaultInsertFilter();
-        } else if (buttonId == EXTRACT_SETTINGS_ID) {
-            this.isExtractSettingsOpen = true;
-            this.filter = tileSettings.defaultExtractFilter();
-        }
-
-        this.settingsMenu(tileSettings);
+//        ConnectorSettings tileSettings = this.tileEntity.settings(this.direction);
+//        if (tileSettings == null) {
+//            Logger.error("ConnectorSettings is null");
+//            return;
+//        }
+//
+//        if (buttonId == INSERT_SETTINGS_ID) {
+//            this.isInsertSettingsOpen = true;
+//            this.filter = tileSettings.defaultInsertFilter();
+//        } else if (buttonId == EXTRACT_SETTINGS_ID) {
+//            this.isExtractSettingsOpen = true;
+//            this.filter = tileSettings.defaultExtractFilter();
+//        }
+//
+//        this.settingsMenu(tileSettings);
     }
 
     private void settingsMenu(ConnectorSettings tileSettings)
@@ -212,20 +212,20 @@ public class GuiConnector extends GuiContainer
 
     private void onFilterSettingsClicked(Integer id)
     {
-        ConnectorSettings tileSettings = this.tileEntity.settings(this.direction);
-        if (tileSettings == null) {
-            Logger.error("ConnectorSettings is null");
-            return;
-        }
-
-        this.filterId = id;
-
-        if (this.isExtractSettingsOpen) {
-            this.filter = tileSettings.extractFilter(this.filterId - FILTER_START_ID);
-        } else {
-            this.filter = tileSettings.insertFilter(this.filterId - FILTER_START_ID);
-        }
-        this.initGui();
+//        ConnectorSettings tileSettings = this.tileEntity.settings(this.direction);
+//        if (tileSettings == null) {
+//            Logger.error("ConnectorSettings is null");
+//            return;
+//        }
+//
+//        this.filterId = id;
+//
+//        if (this.isExtractSettingsOpen) {
+//            this.filter = tileSettings.extractFilter(this.filterId - FILTER_START_ID);
+//        } else {
+//            this.filter = tileSettings.insertFilter(this.filterId - FILTER_START_ID);
+//        }
+//        this.initGui();
     }
 
     private void drawSettings(ConnectorSettings tileSettings)
@@ -546,45 +546,45 @@ public class GuiConnector extends GuiContainer
     @Override
     protected void actionPerformed(GuiButton button)
     {
-        for (Map.Entry<GuiButton, GuiButton> entry : this.dynamicEnableOnChecked.entrySet()) {
-            if (!(entry.getKey() instanceof AbleToChangeDisabledState)) {
-                continue;
-            }
-            if (!(entry.getValue() instanceof GuiToggle)) {
-                continue;
-            }
-            GuiToggle toggle = (GuiToggle) entry.getValue();
-            ((AbleToChangeDisabledState) entry.getKey()).changeDisabledState(!toggle.isChecked());
-        }
-
-        for (Map.Entry<GuiButton, GuiButton> entry : this.dynamicDisableOnChecked.entrySet()) {
-            if (!(entry.getKey() instanceof AbleToChangeDisabledState)) {
-                continue;
-            }
-            if (!(entry.getValue() instanceof GuiToggle)) {
-                continue;
-            }
-            GuiToggle toggle = (GuiToggle) entry.getValue();
-            ((AbleToChangeDisabledState) entry.getKey()).changeDisabledState(toggle.isChecked());
-        }
-
-        ConnectorSettings tileSettings = this.tileEntity.settings(this.direction);
-        if (tileSettings == null) {
-            Logger.error("Tile settings is null");
-            return;
-        }
-
-        if (button instanceof GuiToggle) {
-            updateCheckboxes((GuiToggle) button, tileSettings);
-        } else if (button instanceof GuiNumberInput) {
-            updateNumberInput((GuiNumberInput) button, tileSettings);
-        } else if (button instanceof GuiComparisonOperatorButton) {
-            updateDurability((GuiComparisonOperatorButton) button);
-        } else if (button instanceof GuiExtractTypeButton) {
-            updateExtractType((GuiExtractTypeButton) button, tileSettings);
-        } else if (button instanceof GuiFilter) {
-            updateFilters((GuiFilter) button, tileSettings);
-        }
+//        for (Map.Entry<GuiButton, GuiButton> entry : this.dynamicEnableOnChecked.entrySet()) {
+//            if (!(entry.getKey() instanceof AbleToChangeDisabledState)) {
+//                continue;
+//            }
+//            if (!(entry.getValue() instanceof GuiToggle)) {
+//                continue;
+//            }
+//            GuiToggle toggle = (GuiToggle) entry.getValue();
+//            ((AbleToChangeDisabledState) entry.getKey()).changeDisabledState(!toggle.isChecked());
+//        }
+//
+//        for (Map.Entry<GuiButton, GuiButton> entry : this.dynamicDisableOnChecked.entrySet()) {
+//            if (!(entry.getKey() instanceof AbleToChangeDisabledState)) {
+//                continue;
+//            }
+//            if (!(entry.getValue() instanceof GuiToggle)) {
+//                continue;
+//            }
+//            GuiToggle toggle = (GuiToggle) entry.getValue();
+//            ((AbleToChangeDisabledState) entry.getKey()).changeDisabledState(toggle.isChecked());
+//        }
+//
+//        ConnectorSettings tileSettings = this.tileEntity.settings(this.direction);
+//        if (tileSettings == null) {
+//            Logger.error("Tile settings is null");
+//            return;
+//        }
+//
+//        if (button instanceof GuiToggle) {
+//            updateCheckboxes((GuiToggle) button, tileSettings);
+//        } else if (button instanceof GuiNumberInput) {
+//            updateNumberInput((GuiNumberInput) button, tileSettings);
+//        } else if (button instanceof GuiComparisonOperatorButton) {
+//            updateDurability((GuiComparisonOperatorButton) button);
+//        } else if (button instanceof GuiExtractTypeButton) {
+//            updateExtractType((GuiExtractTypeButton) button, tileSettings);
+//        } else if (button instanceof GuiFilter) {
+//            updateFilters((GuiFilter) button, tileSettings);
+//        }
     }
 
     private void updateFilters(
@@ -711,35 +711,35 @@ public class GuiConnector extends GuiContainer
         ConnectorSettings tileSettings
     )
     {
-        boolean didInsertChange = false;
-        boolean didExtractChange = false;
-
-        switch (checkbox.id) {
-            case INSERT_CHECKBOX_ID:
-                tileEntity.setInsertEnabled(checkbox.isChecked(), this.direction);
-                didInsertChange = true;
-                break;
-            case EXTRACT_CHECKBOX_ID:
-                tileEntity.setExtractEnabled(checkbox.isChecked(), this.direction);
-                didExtractChange = true;
-                break;
-            case DYNAMIC_TICK_RATE_BUTTON_ID:
-                tileSettings.changeDynamicTickRateEnabled(checkbox.isChecked());
-                break;
-            case OVERWRITE_CHECKBOX_ID:
-            case ORE_DICTIONARY_BUTTON_ID:
-            case NBT_DATA_BUTTON_ID:
-            case BLACK_LIST_BUTTON_ID:
-                this.changeFilter(checkbox);
-                break;
-        }
-
-        ModNetworkHandler.INSTANCE.sendToServer(new PacketUpdateConnector(
-            tileEntity.getPos(),
-            this.direction,
-            tileSettings,
-            didInsertChange,
-            didExtractChange
-        ));
+//        boolean didInsertChange = false;
+//        boolean didExtractChange = false;
+//
+//        switch (checkbox.id) {
+//            case INSERT_CHECKBOX_ID:
+//                tileEntity.setInsertEnabled(checkbox.isChecked(), this.direction);
+//                didInsertChange = true;
+//                break;
+//            case EXTRACT_CHECKBOX_ID:
+//                tileEntity.setExtractEnabled(checkbox.isChecked(), this.direction);
+//                didExtractChange = true;
+//                break;
+//            case DYNAMIC_TICK_RATE_BUTTON_ID:
+//                tileSettings.changeDynamicTickRateEnabled(checkbox.isChecked());
+//                break;
+//            case OVERWRITE_CHECKBOX_ID:
+//            case ORE_DICTIONARY_BUTTON_ID:
+//            case NBT_DATA_BUTTON_ID:
+//            case BLACK_LIST_BUTTON_ID:
+//                this.changeFilter(checkbox);
+//                break;
+//        }
+//
+//        ModNetworkHandler.INSTANCE.sendToServer(new PacketUpdateConnector(
+//            tileEntity.getPos(),
+//            this.direction,
+//            tileSettings,
+//            didInsertChange,
+//            didExtractChange
+//        ));
     }
 }

@@ -1,75 +1,41 @@
-package com.emorn.bettercables.objects.api.forge.blocks.connector;
+package com.emorn.bettercables.api.v1_12_2.blocks.connector;
 
+import com.emorn.bettercables.api.v1_12_2.common.PositionInWorld;
+import com.emorn.bettercables.core.blocks.connector.ConnectorUpdateHandler;
 import mcp.MethodsReturnNonnullByDefault;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ITickable;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
-public class TileEntityConnector
+public class ForgeTileEntityConnector extends TileEntity implements ITickable
 {
-//    public static final String NETWORK_ID = "NetworkId";
-//    public static final String CUSTOM_NAME = "CustomName";
-//    private final Map<Direction, Integer> directionToIndexMap = new HashMap<>(); // todo maybe something else
-//    private final ConnectorSide north = new ConnectorSide();
-//    private final ConnectorSide east = new ConnectorSide();
-//    private final ConnectorSide south = new ConnectorSide();
-//    private final ConnectorSide west = new ConnectorSide();
-//    private final ConnectorSide up = new ConnectorSide();
-//    private final ConnectorSide down = new ConnectorSide();
-//    private String customName;
-//    @Nullable
-//    private ConnectorNetwork network = null;
-//
-//    public void update()
-//    {
-//        PerformanceTester.printResults();
-//        // isRemote means isClient
-//        if (this.getWorld().isRemote) {
-//            return;
-//        }
-//
-//        if (this.network == null || this.network.isDisabled()) {
-//            return;
-//        }
-//
-//        if (this.network.isRemoved()) {
-//            this.network = this.network.mergeToNetwork(this.getPos());
-//        }
-//
-//        PerformanceTester.start("ConnectorBlockEntity.tick");
-//
-//        this.tick();
-//
-//        if (north.canExport()) {
-//            this.exportItem(Direction.NORTH);
-//        }
-//
-//        if (east.canExport()) {
-//            this.exportItem(Direction.EAST);
-//        }
-//
-//        if (south.canExport()) {
-//            this.exportItem(Direction.SOUTH);
-//        }
-//
-//        if (west.canExport()) {
-//            PerformanceTester.start("export west");
-//            this.exportItem(Direction.WEST);
-//            PerformanceTester.end("export west");
-//        }
-//
-//        if (up.canExport()) {
-//            this.exportItem(Direction.UP);
-//        }
-//
-//        if (down.canExport()) {
-//            this.exportItem(Direction.DOWN);
-//        }
-//
-//        PerformanceTester.end("ConnectorBlockEntity.tick");
-//    }
-//
+    ConnectorUpdateHandler connectorUpdateHandler;
+
+    public ForgeTileEntityConnector()
+    {
+        super();
+
+        BlockPos position = this.getPos();
+        World worldIn = this.getWorld();
+
+        connectorUpdateHandler = new ConnectorUpdateHandler(
+            new PositionInWorld(position.getX(), position.getY(), position.getZ()),
+            new com.emorn.bettercables.api.v1_12_2.common.World(worldIn)
+        );
+    }
+
+    public void update()
+    {
+        connectorUpdateHandler.invoke(
+            !this.getWorld().isRemote
+        );
+    }
+
 //    private void tick()
 //    {
 //        north.tick();
@@ -150,21 +116,6 @@ public class TileEntityConnector
 //        exportItemFromSlots(possibleIndexes, exportInventory, importInventory);
 //    }
 //
-//    @Nullable
-//    private IInventory findInventoryEntityByPosition(
-//        World world,
-//        BlockPos inventoryPosition
-//    )
-//    {
-//        TileEntity tileEntity = world.getTileEntity(inventoryPosition);
-//        if (!(tileEntity instanceof IInventory)) {
-//            Logger.error("No inventory found at: " + inventoryPosition);
-//            return null;
-//        }
-//
-//        return (IInventory) tileEntity;
-//    }
-//
 //    private BlockPos findPositionByDirection(Direction direction)
 //    {
 //        if (direction == Direction.NORTH) {
@@ -195,6 +146,21 @@ public class TileEntityConnector
 //    }
 //
 //    @Nullable
+//    private IInventory findInventoryEntityByPosition(
+//        World world,
+//        BlockPos inventoryPosition
+//    )
+//    {
+//        TileEntity tileEntity = world.getTileEntity(inventoryPosition);
+//        if (!(tileEntity instanceof IInventory)) {
+//            Logger.error("No inventory found at: " + inventoryPosition);
+//            return null;
+//        }
+//
+//        return (IInventory) tileEntity;
+//    }
+//
+//    @Nullable
 //    private ConnectorSide findConnectorByDirection(Direction direction)
 //    {
 //        switch (direction) {
@@ -213,6 +179,12 @@ public class TileEntityConnector
 //            default:
 //                return null;
 //        }
+//    }
+//
+//    @Nullable
+//    public ConnectorSettings settings(Direction direction)
+//    {
+//        return this.findConnectorSettingsByDirection(direction);
 //    }
 //
 //    private void exportItemFromSlots(
@@ -248,6 +220,17 @@ public class TileEntityConnector
 //        }
 //    }
 //
+//    @Nullable
+//    private ConnectorSettings findConnectorSettingsByDirection(Direction direction)
+//    {
+//        ConnectorSide connectorSide = this.findConnectorByDirection(direction);
+//        if (connectorSide == null) {
+//            return null;
+//        }
+//
+//        return connectorSide.connectorSettings;
+//    }
+//
 //    private ItemStack extractItemFromInventory(
 //        IInventory inventory,
 //        Integer slot,
@@ -255,7 +238,10 @@ public class TileEntityConnector
 //    )
 //    {
 //        TileEntity inventoryEntity = (TileEntity) inventory;
-//        IItemHandler exportInventory = inventoryEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
+//        IItemHandler exportInventory = inventoryEntity.getCapability(
+//            CapabilityItemHandler.ITEM_HANDLER_CAPABILITY,
+//            null
+//        );
 //
 //        if (exportInventory == null) {
 //            Logger.error("Failed to get inventory inventory.");
@@ -284,7 +270,10 @@ public class TileEntityConnector
 //    )
 //    {
 //        TileEntity inventoryEntity = (TileEntity) inventory;
-//        IItemHandler insertInventory = inventoryEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
+//        IItemHandler insertInventory = inventoryEntity.getCapability(
+//            CapabilityItemHandler.ITEM_HANDLER_CAPABILITY,
+//            null
+//        );
 //
 //        if (insertInventory == null) {
 //            Logger.error("Failed to get inventory.");
@@ -321,17 +310,6 @@ public class TileEntityConnector
 //        }
 //
 //        return connectorSettings.isExtractEnabled();
-//    }
-//
-//    @Nullable
-//    private ConnectorSettings findConnectorSettingsByDirection(Direction direction)
-//    {
-//        ConnectorSide connectorSide = this.findConnectorByDirection(direction);
-//        if (connectorSide == null) {
-//            return null;
-//        }
-//
-//        return connectorSide.connectorSettings;
 //    }
 //
 //    public boolean isUsableByPlayer(EntityPlayer player)
@@ -379,17 +357,6 @@ public class TileEntityConnector
 //        notifyUpdate();
 //    }
 //
-//    public boolean isInsertEnabled(Direction direction)
-//    {
-//        ConnectorSettings connectorSettings = this.findConnectorSettingsByDirection(direction);
-//
-//        if (connectorSettings == null) {
-//            return false;
-//        }
-//
-//        return connectorSettings.isInsertEnabled();
-//    }
-//
 //    private void notifyUpdate()
 //    {
 //        this.markDirty();
@@ -401,6 +368,17 @@ public class TileEntityConnector
 //                3
 //            );
 //        }
+//    }
+//
+//    public boolean isInsertEnabled(Direction direction)
+//    {
+//        ConnectorSettings connectorSettings = this.findConnectorSettingsByDirection(direction);
+//
+//        if (connectorSettings == null) {
+//            return false;
+//        }
+//
+//        return connectorSettings.isInsertEnabled();
 //    }
 //
 //    public void setExtractEnabled(
@@ -450,31 +428,6 @@ public class TileEntityConnector
 //        this.network = connectorNetwork;
 //    }
 //
-//
-//
-//    @Override
-//    public NBTTagCompound getUpdateTag()
-//    {
-//        return this.writeToNBT(new NBTTagCompound());
-//    }
-//
-//    @Override
-//    public void onDataPacket(
-//        net.minecraft.network.NetworkManager net,
-//        SPacketUpdateTileEntity pkt
-//    )
-//    {
-//        this.readFromNBT(pkt.getNbtCompound());
-//    }
-//
-//
-//    @Override
-//    public SPacketUpdateTileEntity getUpdatePacket()
-//    {
-//        return new SPacketUpdateTileEntity(this.pos, 1, this.writeToNBT(new NBTTagCompound()));
-//    }
-//
-//
 //    @Override
 //    public void readFromNBT(NBTTagCompound compound)
 //    {
@@ -492,6 +445,72 @@ public class TileEntityConnector
 //        if (compound.hasKey(CUSTOM_NAME, 8)) {
 //            this.setCustomName(compound.getString(CUSTOM_NAME));
 //        }
+//    }
+//
+//    @Override
+//    public NBTTagCompound writeToNBT(NBTTagCompound compound)
+//    {
+//        super.writeToNBT(compound);
+//
+//        Settings.save(this.north.connectorSettings, compound, "north");
+//        Settings.save(this.east.connectorSettings, compound, "east");
+//        Settings.save(this.south.connectorSettings, compound, "south");
+//        Settings.save(this.west.connectorSettings, compound, "west");
+//        Settings.save(this.up.connectorSettings, compound, "up");
+//        Settings.save(this.down.connectorSettings, compound, "down");
+//
+//        this.storeNetworkFromNBT(compound);
+//
+//        if (this.hasCustomName()) {
+//            compound.setString(CUSTOM_NAME, this.customName);
+//        }
+//
+//        return compound;
+//    }
+//
+//    @Override
+//    public SPacketUpdateTileEntity getUpdatePacket()
+//    {
+//        return new SPacketUpdateTileEntity(this.pos, 1, this.writeToNBT(new NBTTagCompound()));
+//    }
+//
+//    @Override
+//    public NBTTagCompound getUpdateTag()
+//    {
+//        return this.writeToNBT(new NBTTagCompound());
+//    }
+//
+//    private void storeNetworkFromNBT(
+//        NBTTagCompound compound
+//    )
+//    {
+//        if (this.network == null) {
+//            compound.setInteger(NETWORK_ID, 0);
+//        } else {
+//            compound.setInteger(NETWORK_ID, this.network.id());
+//        }
+//    }
+//
+//    public boolean hasCustomName()
+//    {
+//        return this.customName != null && !this.customName.isEmpty();
+//    }
+//
+//    @Override
+//    public ITextComponent getDisplayName()
+//    {
+//        return this.hasCustomName()
+//            ? new TextComponentString(this.customName)
+//            : new TextComponentTranslation("container.connector");
+//    }
+//
+//    @Override
+//    public void onDataPacket(
+//        net.minecraft.network.NetworkManager net,
+//        net.minecraft.network.play.server.SPacketUpdateTileEntity pkt
+//    )
+//    {
+//        this.readFromNBT(pkt.getNbtCompound());
 //    }
 //
 //    @Nullable
@@ -593,56 +612,5 @@ public class TileEntityConnector
 //    public void setCustomName(String customName)
 //    {
 //        this.customName = customName;
-//    }
-//
-//    @Override
-//    public NBTTagCompound writeToNBT(NBTTagCompound compound)
-//    {
-//        super.writeToNBT(compound);
-//
-//        Settings.save(this.north.connectorSettings, compound, "north");
-//        Settings.save(this.east.connectorSettings, compound, "east");
-//        Settings.save(this.south.connectorSettings, compound, "south");
-//        Settings.save(this.west.connectorSettings, compound, "west");
-//        Settings.save(this.up.connectorSettings, compound, "up");
-//        Settings.save(this.down.connectorSettings, compound, "down");
-//
-//        this.storeNetworkFromNBT(compound);
-//
-//        if (this.hasCustomName()) {
-//            compound.setString(CUSTOM_NAME, this.customName);
-//        }
-//
-//        return compound;
-//    }
-//
-//    private void storeNetworkFromNBT(
-//        NBTTagCompound compound
-//    )
-//    {
-//        if (this.network == null) {
-//            compound.setInteger(NETWORK_ID, 0);
-//        } else {
-//            compound.setInteger(NETWORK_ID, this.network.id());
-//        }
-//    }
-//
-//    @Override
-//    public ITextComponent getDisplayName()
-//    {
-//        return this.hasCustomName()
-//            ? new TextComponentString(this.customName)
-//            : new TextComponentTranslation("container.connector");
-//    }
-//
-//    public boolean hasCustomName()
-//    {
-//        return this.customName != null && !this.customName.isEmpty();
-//    }
-//
-//    @Nullable
-//    public ConnectorSettings settings(Direction direction)
-//    {
-//        return this.findConnectorSettingsByDirection(direction);
 //    }
 }

@@ -1,11 +1,11 @@
 package com.emorn.bettercables.objects.api.forge.blocks.connector;
 
 import com.emorn.bettercables.Main;
-import com.emorn.bettercables.init.BlockInit;
+import com.emorn.bettercables.api.v1_12_2.blocks.connector.ForgeTileEntityConnector;
+import com.emorn.bettercables.core.common.Direction;
 import com.emorn.bettercables.objects.api.forge.blocks.cable.BlockCable;
 import com.emorn.bettercables.objects.api.forge.common.AxisAlignedBoundingBoxConverter;
 import com.emorn.bettercables.objects.api.forge.common.BaseCable;
-import com.emorn.bettercables.objects.api.forge.common.Direction;
 import com.emorn.bettercables.objects.application.blocks.cable.CableAxisAlignedBoundingBox;
 import com.emorn.bettercables.objects.application.blocks.connector.ConnectorAxisAlignedBoundingBox;
 import com.emorn.bettercables.utils.IHasModel;
@@ -21,7 +21,6 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -382,7 +381,7 @@ public class BlockConnector extends BaseCable implements IHasModel
         IBlockState state
     )
     {
-        return new TileEntityConnector();
+        return new ForgeTileEntityConnector();
     }
 
     @Override
@@ -452,22 +451,22 @@ public class BlockConnector extends BaseCable implements IHasModel
 
         TileEntity tileEntity = world.getTileEntity(pos);
         if (neighborTileEntity instanceof IInventory) {
-            if (tileEntity instanceof TileEntityConnector) {
-                TileEntityConnector connector = (TileEntityConnector) tileEntity;
-                ConnectorNetwork network = connector.getNetwork();
-                int slotCount = ((IInventory) neighborTileEntity).getSizeInventory();
-
-                if (neighborTileEntity instanceof TileEntityChest) {
-                    for (EnumFacing facing : EnumFacing.HORIZONTALS) {
-                        TileEntity chestNeighbor = world.getTileEntity(neighbor.offset(facing));
-                        if (chestNeighbor  instanceof TileEntityChest) {
-                            slotCount += ((TileEntityChest) chestNeighbor).getSizeInventory();
-                            break; // Only add once, since there should be one extra chest max
-                        }
-                    }
-                }
-
-                network.updateSlotCount(slotCount, connector.settings(direction));
+            if (tileEntity instanceof ForgeTileEntityConnector) {
+//                ForgeTileEntityConnector connector = (ForgeTileEntityConnector) tileEntity;
+//                ConnectorNetwork network = connector.getNetwork();
+//                int slotCount = ((IInventory) neighborTileEntity).getSizeInventory();
+//
+//                if (neighborTileEntity instanceof TileEntityChest) {
+//                    for (EnumFacing facing : EnumFacing.HORIZONTALS) {
+//                        TileEntity chestNeighbor = world.getTileEntity(neighbor.offset(facing));
+//                        if (chestNeighbor  instanceof TileEntityChest) {
+//                            slotCount += ((TileEntityChest) chestNeighbor).getSizeInventory();
+//                            break; // Only add once, since there should be one extra chest max
+//                        }
+//                    }
+//                }
+//
+//                network.updateSlotCount(slotCount, connector.settings(direction));
             }
         }
 
@@ -475,18 +474,18 @@ public class BlockConnector extends BaseCable implements IHasModel
             return;
         }
 
-        if (tileEntity instanceof TileEntityConnector) {
-            TileEntityConnector connector = (TileEntityConnector) tileEntity;
+        if (tileEntity instanceof ForgeTileEntityConnector) {
+            ForgeTileEntityConnector connector = (ForgeTileEntityConnector) tileEntity;
 
 
 
-            ConnectorNetwork network = connector.getNetwork();
+//            ConnectorNetwork network = connector.getNetwork();
 
-            network.removeInsert(
-                connector.settings(direction)
-            );
-
-            connector.setInsertEnabled(false, direction);
+//            network.removeInsert(
+//                connector.settings(direction)
+//            );
+//
+//            connector.setInsertEnabled(false, direction);
 
             //network.reCalculateAllPossibleSlots(); // todo, this has to happen more often, as inventories can change
             /**
@@ -523,7 +522,8 @@ public class BlockConnector extends BaseCable implements IHasModel
     @Override
     protected Block currentBlock()
     {
-        return BlockInit.CONNECTOR;
+        return this;
+//        return BlockInit.CONNECTOR; todo
     }
 
     @Override
@@ -533,7 +533,8 @@ public class BlockConnector extends BaseCable implements IHasModel
         int fortune
     )
     {
-        return Item.getItemFromBlock(BlockInit.CONNECTOR);
+        return Item.getItemFromBlock(this);
+        //return Item.getItemFromBlock(BlockInit.CONNECTOR); todo
     }
 
     @Override
@@ -543,7 +544,8 @@ public class BlockConnector extends BaseCable implements IHasModel
         IBlockState state
     )
     {
-        return new ItemStack(BlockInit.CONNECTOR);
+        return new ItemStack(this);
+//        return new ItemStack(BlockInit.CONNECTOR); todo
     }
 
     private ConnectionType getConnectionType(
@@ -655,21 +657,21 @@ public class BlockConnector extends BaseCable implements IHasModel
     {
         this.foundCablePositions.clear();
         this.foundCablePositions.put(pos, true);
-        TileEntityConnector connector = (
-            (TileEntityConnector) Objects.requireNonNull(
+        ForgeTileEntityConnector connector = (
+            (ForgeTileEntityConnector) Objects.requireNonNull(
                 worldIn.getTileEntity(pos)
             )
         );
 
         ConnectorNetwork network = this.findNetwork(worldIn, pos);
-        if (network == null) {
-            connector.setNetwork(ConnectorNetwork.create());
-            this.foundCablePositions.clear();
-            return;
-        }
-
-        connector.setNetwork(network);
-        this.foundCablePositions.clear();
+//        if (network == null) {
+//            connector.setNetwork(ConnectorNetwork.create());
+//            this.foundCablePositions.clear();
+//            return;
+//        }
+//
+//        connector.setNetwork(network);
+//        this.foundCablePositions.clear();
     }
 
     @Nullable
@@ -693,11 +695,11 @@ public class BlockConnector extends BaseCable implements IHasModel
             }
 
             if (neighborBlock instanceof BlockConnector) {
-                return (
-                    (TileEntityConnector) Objects.requireNonNull(
-                        worldIn.getTileEntity(neighborBlockPosition)
-                    )
-                ).getNetwork();
+//                return (
+//                    (ForgeTileEntityConnector) Objects.requireNonNull(
+//                        worldIn.getTileEntity(neighborBlockPosition)
+//                    )
+//                ).getNetwork();
             }
             ConnectorNetwork connectorNetwork = this.findNetwork(worldIn, neighborBlockPosition);
             if (connectorNetwork == null) {

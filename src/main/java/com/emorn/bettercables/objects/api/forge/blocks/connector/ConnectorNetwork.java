@@ -1,5 +1,6 @@
 package com.emorn.bettercables.objects.api.forge.blocks.connector;
 
+import com.emorn.bettercables.contract.IPositionInWorld;
 import com.emorn.bettercables.objects.api.forge.common.Logger;
 import com.emorn.bettercables.objects.application.blocks.connector.PossibleSlots;
 import com.emorn.bettercables.objects.gateway.blocks.ConnectorSettings;
@@ -20,7 +21,7 @@ public class ConnectorNetwork
     private static final Map<Integer, ConnectorNetwork> createdNetworksById = new HashMap<>();
     private static int lastId = 1;
     private final int id;
-    private final Map<BlockPos, ConnectorNetwork> mergeToNetwork = new HashMap<>();
+    private final Map<IPositionInWorld, ConnectorNetwork> mergeToNetwork = new HashMap<>();
     private boolean shouldMerge = false;
     private boolean isDisabled = false;
     // 1: extract settings, 2: insert settings, 3: insertIndex, 4: extractIndex
@@ -79,7 +80,7 @@ public class ConnectorNetwork
     }
 
     @Nullable
-    public BlockPos findInventoryPositionBy(Integer index)
+    public IPositionInWorld findInventoryPositionBy(Integer index)
     {
         int totalItems = this.insertConnectorSettings.size();
 
@@ -91,7 +92,7 @@ public class ConnectorNetwork
             Logger.error("Tried to get empty");
         }
 
-        return (BlockPos) this.insertConnectorSettings.values().toArray()[index];
+        return (IPositionInWorld) this.insertConnectorSettings.values().toArray()[index];
     }
 
     @Nullable
@@ -120,7 +121,7 @@ public class ConnectorNetwork
     public void remove(ConnectorNetwork newNetwork)
     {
         this.shouldMerge = true;
-        this.mergeToNetwork.put(new BlockPos(0, 0, 0), newNetwork);
+        //this.mergeToNetwork.put(new BlockPos(0, 0, 0), newNetwork); todo fix
     }
 
     public void addInsert(
@@ -225,7 +226,7 @@ public class ConnectorNetwork
     }
 
     public void remove(
-        BlockPos position,
+        IPositionInWorld position,
         ConnectorNetwork newNetwork
     )
     {
@@ -240,7 +241,7 @@ public class ConnectorNetwork
     }
 
     @Nullable
-    public ConnectorNetwork mergeToNetwork(BlockPos position)
+    public ConnectorNetwork mergeToNetwork(IPositionInWorld position)
     {
         if (mergeToNetwork.containsKey(new BlockPos(0, 0, 0))) {
             return mergeToNetwork.get(new BlockPos(0, 0, 0));
