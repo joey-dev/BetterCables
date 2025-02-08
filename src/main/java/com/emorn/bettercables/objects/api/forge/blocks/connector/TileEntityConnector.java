@@ -238,12 +238,17 @@ public class TileEntityConnector extends TileEntity implements ITickable
         IInventory importInventory
     )
     {
-        // todo, slow when there are many stacks with only 1 item
-        // prob want to move this list and make the possibleIndexes a queue
-        // than it takes the top one, and at the end, adds it to the bottom
+        // todo maybe a queue
+        Map<Integer, Boolean> cannotExtractPositions = new HashMap<>();
+
         for (List<Integer> possibleIndex : possibleIndexes) {
+            if (Boolean.TRUE.equals(cannotExtractPositions.get(possibleIndex.get(1)))) {
+                continue;
+            }
+
             ItemStack items = this.extractItemFromInventory(exportInventory, possibleIndex.get(1), 1);
             if (items.isEmpty()) {
+                cannotExtractPositions.put(possibleIndex.get(1), true);
                 continue;
             }
 
