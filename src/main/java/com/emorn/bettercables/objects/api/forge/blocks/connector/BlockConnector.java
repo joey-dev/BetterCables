@@ -21,6 +21,7 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -33,6 +34,7 @@ import net.minecraft.world.World;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.*;
+
 
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
@@ -384,42 +386,114 @@ public class BlockConnector extends BaseCable implements IHasModel
     }
 
     @Override
-
     public void onNeighborChange(
         IBlockAccess world,
         BlockPos pos,
         BlockPos neighbor
     )
     {
+        // takes ~0.00014 seconds everytime a inventory changes
         super.onNeighborChange(world, pos, neighbor);
         IBlockState neighborBlock = world.getBlockState(neighbor);
+
+        TileEntity neighborTileEntity = world.getTileEntity(neighbor);
+
+        if (neighborTileEntity instanceof IInventory) {
+            /**
+             * todo
+             * when the neighbor changes, it will change the tile entity of the connector
+             * to say that the inventory has been changed
+             *
+             * the connector, on a tick, if it cannot extract anything, it will enable:
+             * couldNotExtract
+             *
+             * this tick from above, will change that to true
+             *
+             * this might need to be in the background, unsure how heavy retrieving the tileEntity is
+             *
+             * ALL, might want to move this all to the background
+             */
+
+            /**
+             * might be overkill, but we can also change the possible slots, depending on if there's something in it
+             * this could be in a different list, so it does not have to fully recalculate everything
+             * this than can be compared, when retrieving possible slots, before even trying to extract
+             *
+             * overkill version 2
+             * find out which slots depending on the filters, and add those to the possible slots
+             * this can also be more dynamic, so we do not have to recalculate everything
+             *
+             * can have an inventory map, with all the items in the inventory.
+             * this might be too much data in memory. can also just do the item name, that's just a string
+             * or char, of the first letter of the item, that's even less (check)
+             * this way we do not need the expensive call, of checking the inventory per slot
+             *
+             * prob better to do this all, before any settings
+             */
+        }
+
+        Direction direction;
+
+        if (neighbor.getX() == pos.getX() + 1) {
+            direction = Direction.EAST;
+        } else if (neighbor.getX() + 1 == pos.getX()) {
+            direction = Direction.WEST;
+        } else if (neighbor.getY() + 1 == pos.getY()) {
+            direction = Direction.DOWN;
+        } else if (neighbor.getY() == pos.getY() + 1) {
+            direction = Direction.UP;
+        } else if (neighbor.getZ() == pos.getZ() + 1) {
+            direction = Direction.SOUTH;
+        } else if (neighbor.getZ() + 1 == pos.getZ()) {
+            direction = Direction.NORTH;
+        } else {
+            return;
+        }
+
+        TileEntity tileEntity = world.getTileEntity(pos);
+        if (neighborTileEntity instanceof IInventory) {
+            if (tileEntity instanceof TileEntityConnector) {
+                TileEntityConnector connector = (TileEntityConnector) tileEntity;
+                ConnectorNetwork network = connector.getNetwork();
+                int slotCount = ((IInventory) neighborTileEntity).getSizeInventory();
+
+                if (neighborTileEntity instanceof TileEntityChest) {
+                    for (EnumFacing facing : EnumFacing.HORIZONTALS) {
+                        TileEntity chestNeighbor = world.getTileEntity(neighbor.offset(facing));
+                        if (chestNeighbor  instanceof TileEntityChest) {
+                            slotCount += ((TileEntityChest) chestNeighbor).getSizeInventory();
+                            break; // Only add once, since there should be one extra chest max
+                        }
+                    }
+                }
+
+                network.updateSlotCount(slotCount, connector.settings(direction));
+            }
+        }
 
         if (!(neighborBlock.getBlock() instanceof BlockAir)) {
             return;
         }
 
-        TileEntity tileEntity = world.getTileEntity(pos);
         if (tileEntity instanceof TileEntityConnector) {
             TileEntityConnector connector = (TileEntityConnector) tileEntity;
 
-            connector.getNetwork().removeInsertInventoryPosition(
-                neighbor,
-                pos
+
+
+            ConnectorNetwork network = connector.getNetwork();
+
+            network.removeInsert(
+                connector.settings(direction)
             );
 
-            if (neighbor.getX() == pos.getX() + 1) {
-                connector.setInsertEnabled(false, Direction.EAST);
-            } else if (neighbor.getX() + 1 == pos.getX()) {
-                connector.setInsertEnabled(false, Direction.WEST);
-            } else if (neighbor.getY() + 1 == pos.getY()) {
-                connector.setInsertEnabled(false, Direction.DOWN);
-            } else if (neighbor.getY() == pos.getY() + 1) {
-                connector.setInsertEnabled(false, Direction.UP);
-            } else if (neighbor.getZ() == pos.getZ() + 1) {
-                connector.setInsertEnabled(false, Direction.SOUTH);
-            } else if (neighbor.getZ() + 1 == pos.getZ()) {
-                connector.setInsertEnabled(false, Direction.NORTH);
-            }
+            connector.setInsertEnabled(false, direction);
+
+            //network.reCalculateAllPossibleSlots(); // todo, this has to happen more often, as inventories can change
+            /**
+             * have another list, with the BlockPos and as value the inventory count
+             * than compare the 2 inventory counts
+             * when not equal, reCalculate possible slots
+             */
         }
     }
 
