@@ -1,8 +1,8 @@
 package com.emorn.bettercables.api.v1_12_2.common;
 
-import com.emorn.bettercables.contract.IPositionInWorld;
-import com.emorn.bettercables.contract.ITileEntity;
-import com.emorn.bettercables.contract.IWorld;
+import com.emorn.bettercables.contract.common.IPositionInWorld;
+import com.emorn.bettercables.contract.common.ITileEntity;
+import com.emorn.bettercables.contract.common.IWorld;
 import net.minecraft.util.math.BlockPos;
 
 public class World implements IWorld

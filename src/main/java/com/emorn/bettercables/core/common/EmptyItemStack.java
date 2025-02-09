@@ -1,6 +1,6 @@
 package com.emorn.bettercables.core.common;
 
-import com.emorn.bettercables.contract.IItemStack;
+import com.emorn.bettercables.contract.common.IItemStack;
 import mcp.MethodsReturnNonnullByDefault;
 
 import javax.annotation.ParametersAreNonnullByDefault;

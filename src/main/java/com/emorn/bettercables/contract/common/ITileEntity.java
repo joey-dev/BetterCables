@@ -1,4 +1,4 @@
-package com.emorn.bettercables.contract;
+package com.emorn.bettercables.contract.common;
 
 public interface ITileEntity
 {

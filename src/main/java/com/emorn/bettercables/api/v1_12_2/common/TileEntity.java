@@ -1,7 +1,7 @@
 package com.emorn.bettercables.api.v1_12_2.common;
 
-import com.emorn.bettercables.contract.IInventory;
-import com.emorn.bettercables.contract.ITileEntity;
+import com.emorn.bettercables.contract.common.IInventory;
+import com.emorn.bettercables.contract.common.ITileEntity;
 
 public class TileEntity implements ITileEntity
 {

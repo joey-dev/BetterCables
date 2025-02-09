@@ -1,6 +1,6 @@
 package com.emorn.bettercables.objects.api.forge.blocks.connector;
 
-import com.emorn.bettercables.contract.IPositionInWorld;
+import com.emorn.bettercables.contract.common.IPositionInWorld;
 import com.emorn.bettercables.objects.api.forge.common.Logger;
 import com.emorn.bettercables.objects.application.blocks.connector.PossibleSlots;
 import com.emorn.bettercables.objects.gateway.blocks.ConnectorSettings;

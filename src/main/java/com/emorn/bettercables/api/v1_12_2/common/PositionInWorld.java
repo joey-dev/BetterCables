@@ -1,6 +1,6 @@
 package com.emorn.bettercables.api.v1_12_2.common;
 
-import com.emorn.bettercables.contract.IPositionInWorld;
+import com.emorn.bettercables.contract.common.IPositionInWorld;
 import com.emorn.bettercables.core.common.Direction;
 import net.minecraft.util.EnumFacing;
 

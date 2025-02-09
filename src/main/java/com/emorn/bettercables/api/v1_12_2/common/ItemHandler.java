@@ -1,7 +1,7 @@
 package com.emorn.bettercables.api.v1_12_2.common;
 
-import com.emorn.bettercables.contract.IItemHandler;
-import com.emorn.bettercables.contract.IItemStack;
+import com.emorn.bettercables.contract.common.IItemHandler;
+import com.emorn.bettercables.contract.common.IItemStack;
 
 import javax.annotation.Nonnull;
 

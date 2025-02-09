@@ -1,4 +1,4 @@
-package com.emorn.bettercables.contract;
+package com.emorn.bettercables.contract.common;
 
 import com.emorn.bettercables.core.common.Direction;
 

@@ -1,6 +1,6 @@
 package com.emorn.bettercables.api.v1_12_2.common;
 
-import com.emorn.bettercables.contract.IItemStack;
+import com.emorn.bettercables.contract.common.IItemStack;
 
 public class ItemStack implements IItemStack
 {
