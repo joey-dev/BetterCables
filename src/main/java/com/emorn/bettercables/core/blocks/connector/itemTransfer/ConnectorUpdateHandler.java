@@ -1,6 +1,6 @@
 package com.emorn.bettercables.core.blocks.connector.itemTransfer;
 
-import com.emorn.bettercables.common.performance.PerformanceTester;
+import com.emorn.bettercables.core.common.performance.PerformanceTester;
 import com.emorn.bettercables.contract.common.IPositionInWorld;
 import com.emorn.bettercables.contract.common.IWorld;
 import com.emorn.bettercables.core.blocks.connector.settings.ConnectorSides;

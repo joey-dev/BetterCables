@@ -1,6 +1,6 @@
-package com.emorn.bettercables.objects.application.blocks.cable;
+package com.emorn.bettercables.core.blocks.cable;
 
-import com.emorn.bettercables.objects.gateway.blocks.AxisAlignedBoundingBox;
+import com.emorn.bettercables.contract.blocks.AxisAlignedBoundingBox;
 import mcp.MethodsReturnNonnullByDefault;
 
 import javax.annotation.ParametersAreNonnullByDefault;

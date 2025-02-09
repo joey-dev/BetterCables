@@ -1,9 +1,9 @@
 package com.emorn.bettercables.api.v1_12_2.common;
 
 import com.emorn.bettercables.contract.common.IBlock;
-import com.emorn.bettercables.objects.api.forge.blocks.cable.BlockCable;
-import com.emorn.bettercables.objects.api.forge.blocks.connector.BlockConnector;
-import com.emorn.bettercables.objects.api.forge.common.BaseCable;
+import com.emorn.bettercables.api.v1_12_2.blocks.cable.BlockCable;
+import com.emorn.bettercables.api.v1_12_2.blocks.connector.BlockConnector;
+import com.emorn.bettercables.api.v1_12_2.blocks.BaseCable;
 
 public class Block implements IBlock
 {

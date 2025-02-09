@@ -1,14 +1,17 @@
-package com.emorn.bettercables.objects.api.forge.blocks.connector;
+package com.emorn.bettercables.api.v1_12_2.blocks.connector;
 
 import com.emorn.bettercables.Main;
-import com.emorn.bettercables.api.v1_12_2.blocks.connector.ForgeTileEntityConnector;
+import com.emorn.bettercables.api.v1_12_2.blocks.BaseCable;
+import com.emorn.bettercables.api.v1_12_2.common.PositionInWorld;
+import com.emorn.bettercables.core.blocks.cable.CableAxisAlignedBoundingBox;
+import com.emorn.bettercables.core.blocks.connector.ConnectorAxisAlignedBoundingBox;
 import com.emorn.bettercables.core.blocks.connector.network.ConnectorNetwork;
+import com.emorn.bettercables.core.blocks.connector.network.NetworkManager;
 import com.emorn.bettercables.core.common.Direction;
-import com.emorn.bettercables.objects.api.forge.blocks.cable.BlockCable;
+import com.emorn.bettercables.api.v1_12_2.init.BlockInit;
+import com.emorn.bettercables.api.v1_12_2.blocks.cable.BlockCable;
+import com.emorn.bettercables.objects.api.forge.blocks.connector.ConnectionType;
 import com.emorn.bettercables.objects.api.forge.common.AxisAlignedBoundingBoxConverter;
-import com.emorn.bettercables.objects.api.forge.common.BaseCable;
-import com.emorn.bettercables.objects.application.blocks.cable.CableAxisAlignedBoundingBox;
-import com.emorn.bettercables.objects.application.blocks.connector.ConnectorAxisAlignedBoundingBox;
 import com.emorn.bettercables.utils.IHasModel;
 import com.emorn.bettercables.utils.Reference;
 import mcp.MethodsReturnNonnullByDefault;
@@ -22,6 +25,7 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -135,15 +139,15 @@ public class BlockConnector extends BaseCable implements IHasModel
         IBlockState state
     )
     {
-        // todo fix
-//        boolean didMergeCurrentNetwork = NetworkManager.mergeNetworks(
-//            worldIn,
-//            pos,
-//            findTotalConnections(getActualState(state, worldIn, pos))
-//        );
-//        if (!didMergeCurrentNetwork) {
-//            this.addNetwork(worldIn, pos);
-//        }
+
+        boolean didMergeCurrentNetwork = NetworkManager.mergeNetworks(
+            new com.emorn.bettercables.api.v1_12_2.common.World(worldIn),
+            new PositionInWorld(pos.getX(), pos.getY(), pos.getZ()),
+            findTotalConnections(getActualState(state, worldIn, pos))
+        );
+        if (!didMergeCurrentNetwork) {
+            this.addNetwork(worldIn, pos);
+        }
         if (!worldIn.isRemote) {
             worldIn.setBlockState(pos, state, 2);
         }
@@ -159,7 +163,7 @@ public class BlockConnector extends BaseCable implements IHasModel
         Vec3d end
     )
     {
-        IBlockState actualState = getActualState(blockState, worldIn, pos); // Get the actual state
+        IBlockState actualState = getActualState(blockState, worldIn, pos);
         List<AxisAlignedBB> allBoxes = retrieveAllBoxes(actualState);
 
         RayTraceResult closestResult = null;
@@ -199,7 +203,7 @@ public class BlockConnector extends BaseCable implements IHasModel
 
         AxisAlignedBB clickedBox = null;
         for (AxisAlignedBB box : allBoxes) {
-            AxisAlignedBB expandedBox = box.offset(pos).grow(0.001); // Expand the box slightly
+            AxisAlignedBB expandedBox = box.offset(pos).grow(0.001);
             if (expandedBox.contains(hitVec)) {
                 clickedBox = box;
                 break;
@@ -393,7 +397,7 @@ public class BlockConnector extends BaseCable implements IHasModel
         BlockPos neighbor
     )
     {
-        // takes ~0.00014 seconds everytime a inventory changes
+        // takes ~0.00014 seconds everytime an inventory changes
         super.onNeighborChange(world, pos, neighbor);
         IBlockState neighborBlock = world.getBlockState(neighbor);
 
@@ -454,21 +458,21 @@ public class BlockConnector extends BaseCable implements IHasModel
         TileEntity tileEntity = world.getTileEntity(pos);
         if (neighborTileEntity instanceof IInventory) {
             if (tileEntity instanceof ForgeTileEntityConnector) {
-//                ForgeTileEntityConnector connector = (ForgeTileEntityConnector) tileEntity;
-//                ConnectorNetwork network = connector.getNetwork();
-//                int slotCount = ((IInventory) neighborTileEntity).getSizeInventory();
-//
-//                if (neighborTileEntity instanceof TileEntityChest) {
-//                    for (EnumFacing facing : EnumFacing.HORIZONTALS) {
-//                        TileEntity chestNeighbor = world.getTileEntity(neighbor.offset(facing));
-//                        if (chestNeighbor  instanceof TileEntityChest) {
-//                            slotCount += ((TileEntityChest) chestNeighbor).getSizeInventory();
-//                            break; // Only add once, since there should be one extra chest max
-//                        }
-//                    }
-//                }
-//
-//                network.updateSlotCount(slotCount, connector.settings(direction));
+                ForgeTileEntityConnector connector = (ForgeTileEntityConnector) tileEntity;
+                ConnectorNetwork network = connector.getNetwork();
+                int slotCount = ((IInventory) neighborTileEntity).getSizeInventory();
+
+                if (neighborTileEntity instanceof TileEntityChest) {
+                    for (EnumFacing facing : EnumFacing.HORIZONTALS) {
+                        TileEntity chestNeighbor = world.getTileEntity(neighbor.offset(facing));
+                        if (chestNeighbor instanceof TileEntityChest) {
+                            slotCount += ((TileEntityChest) chestNeighbor).getSizeInventory();
+                            break; // Only add once, since there should be one extra chest max
+                        }
+                    }
+                }
+
+                network.updateSlotCount(slotCount, connector.settings(direction));
             }
         }
 
@@ -479,15 +483,13 @@ public class BlockConnector extends BaseCable implements IHasModel
         if (tileEntity instanceof ForgeTileEntityConnector) {
             ForgeTileEntityConnector connector = (ForgeTileEntityConnector) tileEntity;
 
+            ConnectorNetwork network = connector.getNetwork();
 
+            network.removeInsert(
+                connector.settings(direction)
+            );
 
-//            ConnectorNetwork network = connector.getNetwork();
-
-//            network.removeInsert(
-//                connector.settings(direction)
-//            );
-//
-//            connector.setInsertEnabled(false, direction);
+            connector.settings(direction).changeInsertEnabled(false);
 
             //network.reCalculateAllPossibleSlots(); // todo, this has to happen more often, as inventories can change
             /**
@@ -496,58 +498,6 @@ public class BlockConnector extends BaseCable implements IHasModel
              * when not equal, reCalculate possible slots
              */
         }
-    }
-
-    @Override
-    protected List<AxisAlignedBB> retrieveAllBoxes(IBlockState state)
-    {
-        List<AxisAlignedBB> allBoxes = new ArrayList<>();
-
-        allBoxes.add(BASE_AABB);
-
-        allBoxes.addAll(this.retrieveBoxesFor(NORTH, state, NORTH_CABLE_AABB, NORTH_CABLE_CONNECTOR_AABB));
-        allBoxes.addAll(this.retrieveBoxesFor(EAST, state, EAST_CABLE_AABB, EAST_CABLE_CONNECTOR_AABB));
-        allBoxes.addAll(this.retrieveBoxesFor(SOUTH, state, SOUTH_CABLE_AABB, SOUTH_CABLE_CONNECTOR_AABB));
-        allBoxes.addAll(this.retrieveBoxesFor(WEST, state, WEST_CABLE_AABB, WEST_CABLE_CONNECTOR_AABB));
-        allBoxes.addAll(this.retrieveBoxesFor(UP, state, UP_CABLE_AABB, UP_CABLE_CONNECTOR_AABB));
-        allBoxes.addAll(this.retrieveBoxesFor(DOWN, state, DOWN_CABLE_AABB, DOWN_CABLE_CONNECTOR_AABB));
-
-        return allBoxes;
-    }
-
-    @Override
-    protected AxisAlignedBB baseAABB()
-    {
-        return BASE_AABB;
-    }
-
-    @Override
-    protected Block currentBlock()
-    {
-        return this;
-//        return BlockInit.CONNECTOR; todo
-    }
-
-    @Override
-    public Item getItemDropped(
-        IBlockState state,
-        Random rand,
-        int fortune
-    )
-    {
-        return Item.getItemFromBlock(this);
-        //return Item.getItemFromBlock(BlockInit.CONNECTOR); todo
-    }
-
-    @Override
-    public ItemStack getItem(
-        World worldIn,
-        BlockPos pos,
-        IBlockState state
-    )
-    {
-        return new ItemStack(this);
-//        return new ItemStack(BlockInit.CONNECTOR); todo
     }
 
     private ConnectionType getConnectionType(
@@ -619,6 +569,55 @@ public class BlockConnector extends BaseCable implements IHasModel
         return state.getValue(facing).toString().equals(ConnectionType.CONNECTOR.toString());
     }
 
+    @Override
+    protected AxisAlignedBB baseAABB()
+    {
+        return BASE_AABB;
+    }
+
+    @Override
+    protected List<AxisAlignedBB> retrieveAllBoxes(IBlockState state)
+    {
+        List<AxisAlignedBB> allBoxes = new ArrayList<>();
+
+        allBoxes.add(BASE_AABB);
+
+        allBoxes.addAll(this.retrieveBoxesFor(NORTH, state, NORTH_CABLE_AABB, NORTH_CABLE_CONNECTOR_AABB));
+        allBoxes.addAll(this.retrieveBoxesFor(EAST, state, EAST_CABLE_AABB, EAST_CABLE_CONNECTOR_AABB));
+        allBoxes.addAll(this.retrieveBoxesFor(SOUTH, state, SOUTH_CABLE_AABB, SOUTH_CABLE_CONNECTOR_AABB));
+        allBoxes.addAll(this.retrieveBoxesFor(WEST, state, WEST_CABLE_AABB, WEST_CABLE_CONNECTOR_AABB));
+        allBoxes.addAll(this.retrieveBoxesFor(UP, state, UP_CABLE_AABB, UP_CABLE_CONNECTOR_AABB));
+        allBoxes.addAll(this.retrieveBoxesFor(DOWN, state, DOWN_CABLE_AABB, DOWN_CABLE_CONNECTOR_AABB));
+
+        return allBoxes;
+    }
+
+    @Override
+    public Item getItemDropped(
+        IBlockState state,
+        Random rand,
+        int fortune
+    )
+    {
+        return Item.getItemFromBlock(BlockInit.CONNECTOR);
+    }
+
+    @Override
+    protected Block currentBlock()
+    {
+        return BlockInit.CONNECTOR;
+    }
+
+    @Override
+    public ItemStack getItem(
+        World worldIn,
+        BlockPos pos,
+        IBlockState state
+    )
+    {
+        return new ItemStack(BlockInit.CONNECTOR);
+    }
+
     private int findTotalConnections(
         IBlockState state
     )
@@ -666,14 +665,14 @@ public class BlockConnector extends BaseCable implements IHasModel
         );
 
         ConnectorNetwork network = this.findNetwork(worldIn, pos);
-//        if (network == null) {
-//            connector.setNetwork(ConnectorNetwork.create());
-//            this.foundCablePositions.clear();
-//            return;
-//        }
-//
-//        connector.setNetwork(network);
-//        this.foundCablePositions.clear();
+        if (network == null) {
+            connector.setNetwork(NetworkManager.createNewNetwork());
+            this.foundCablePositions.clear();
+            return;
+        }
+
+        connector.setNetwork(network);
+        this.foundCablePositions.clear();
     }
 
     @Nullable
@@ -697,11 +696,11 @@ public class BlockConnector extends BaseCable implements IHasModel
             }
 
             if (neighborBlock instanceof BlockConnector) {
-//                return (
-//                    (ForgeTileEntityConnector) Objects.requireNonNull(
-//                        worldIn.getTileEntity(neighborBlockPosition)
-//                    )
-//                ).getNetwork();
+                return (
+                    (ForgeTileEntityConnector) Objects.requireNonNull(
+                        worldIn.getTileEntity(neighborBlockPosition)
+                    )
+                ).getNetwork();
             }
             ConnectorNetwork connectorNetwork = this.findNetwork(worldIn, neighborBlockPosition);
             if (connectorNetwork == null) {

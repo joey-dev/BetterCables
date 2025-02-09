@@ -1,8 +1,8 @@
-package com.emorn.bettercables.objects.api.forge.common;
+package com.emorn.bettercables.api.v1_12_2.blocks;
 
 import com.emorn.bettercables.Main;
-import com.emorn.bettercables.init.BlockInit;
-import com.emorn.bettercables.init.ItemInit;
+import com.emorn.bettercables.api.v1_12_2.init.BlockInit;
+import com.emorn.bettercables.api.v1_12_2.init.ItemInit;
 import com.emorn.bettercables.utils.IHasModel;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.block.Block;

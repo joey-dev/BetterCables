@@ -1,6 +1,6 @@
 package com.emorn.bettercables.objects.api.forge.common;
 
-import com.emorn.bettercables.objects.gateway.blocks.AxisAlignedBoundingBox;
+import com.emorn.bettercables.contract.blocks.AxisAlignedBoundingBox;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.util.math.AxisAlignedBB;
 
@@ -15,6 +15,7 @@ public class AxisAlignedBoundingBoxConverter
     {
     }
 
+    // todo remove
     public static AxisAlignedBB from(
         AxisAlignedBoundingBox boundingBox
     )

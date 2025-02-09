@@ -1,4 +1,4 @@
-package com.emorn.bettercables.init;
+package com.emorn.bettercables.api.v1_12_2.init;
 
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.item.Item;

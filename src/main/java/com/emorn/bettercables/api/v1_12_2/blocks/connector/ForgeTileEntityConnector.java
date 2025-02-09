@@ -5,9 +5,11 @@ import com.emorn.bettercables.contract.blocks.connector.IData;
 import com.emorn.bettercables.contract.blocks.connector.ITileEntityConnector;
 import com.emorn.bettercables.core.blocks.connector.ConnectorNetworkHandler;
 import com.emorn.bettercables.core.blocks.connector.itemTransfer.ConnectorUpdateHandler;
-import com.emorn.bettercables.core.blocks.connector.settings.ConnectorSavedDataHandler;
-import com.emorn.bettercables.core.common.Logger;
 import com.emorn.bettercables.core.blocks.connector.network.ConnectorNetwork;
+import com.emorn.bettercables.core.blocks.connector.settings.ConnectorSavedDataHandler;
+import com.emorn.bettercables.core.blocks.connector.settings.ConnectorSettings;
+import com.emorn.bettercables.core.common.Direction;
+import com.emorn.bettercables.core.common.Logger;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
@@ -82,7 +84,17 @@ public class ForgeTileEntityConnector extends TileEntity implements ITickable, I
         return connectorNetworkHandler.getNetwork();
     }
 
-    @Override
+    public void setNetwork(ConnectorNetwork network)
+    {
+        connectorNetworkHandler.setNetwork(
+            network
+        );
+    }
+
+    public ConnectorSettings settings(Direction direction)
+    {
+        return this.connectorUpdateHandler.getConnectorSides().connectorSettings(direction);
+    }    @Override
     public void readFromNBT(NBTTagCompound compound)
     {
         super.readFromNBT(compound);
@@ -159,4 +171,6 @@ public class ForgeTileEntityConnector extends TileEntity implements ITickable, I
     {
         return this.customName != null && !this.customName.isEmpty();
     }
+
+
 }

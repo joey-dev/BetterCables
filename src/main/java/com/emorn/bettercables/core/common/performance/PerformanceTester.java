@@ -1,4 +1,4 @@
-package com.emorn.bettercables.common.performance;
+package com.emorn.bettercables.core.common.performance;
 
 import mcp.MethodsReturnNonnullByDefault;
 

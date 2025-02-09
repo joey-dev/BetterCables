@@ -1,4 +1,4 @@
-package com.emorn.bettercables.objects.api.forge.common;
+package com.emorn.bettercables.api.v1_12_2.blocks;
 
 import com.emorn.bettercables.utils.IHasModel;
 import mcp.MethodsReturnNonnullByDefault;

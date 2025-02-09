@@ -1,4 +1,4 @@
-package com.emorn.bettercables.objects.gateway.blocks;
+package com.emorn.bettercables.contract.blocks;
 
 import mcp.MethodsReturnNonnullByDefault;
 

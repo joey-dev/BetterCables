@@ -1,10 +1,12 @@
-package com.emorn.bettercables.objects.api.forge.blocks.cable;
+package com.emorn.bettercables.api.v1_12_2.blocks.cable;
 
-import com.emorn.bettercables.init.BlockInit;
-import com.emorn.bettercables.objects.api.forge.blocks.connector.BlockConnector;
+import com.emorn.bettercables.api.v1_12_2.blocks.BaseCable;
+import com.emorn.bettercables.api.v1_12_2.blocks.connector.BlockConnector;
+import com.emorn.bettercables.api.v1_12_2.common.PositionInWorld;
+import com.emorn.bettercables.core.blocks.cable.CableAxisAlignedBoundingBox;
+import com.emorn.bettercables.core.blocks.connector.network.NetworkManager;
+import com.emorn.bettercables.api.v1_12_2.init.BlockInit;
 import com.emorn.bettercables.objects.api.forge.common.AxisAlignedBoundingBoxConverter;
-import com.emorn.bettercables.objects.api.forge.common.BaseCable;
-import com.emorn.bettercables.objects.application.blocks.cable.CableAxisAlignedBoundingBox;
 import com.emorn.bettercables.utils.IHasModel;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.block.Block;
@@ -95,8 +97,11 @@ public class BlockCable extends BaseCable implements IHasModel
     )
     {
         IBlockState actualState = getActualState(state, worldIn, pos);
-        // todo fix
-        //NetworkManager.mergeNetworks(worldIn, pos, findTotalConnections(actualState));
+        NetworkManager.mergeNetworks(
+            new com.emorn.bettercables.api.v1_12_2.common.World(worldIn),
+            new PositionInWorld(pos.getX(), pos.getY(), pos.getZ()),
+            findTotalConnections(actualState)
+        );
 
         if (!worldIn.isRemote) {
             worldIn.setBlockState(pos, state, 2);
