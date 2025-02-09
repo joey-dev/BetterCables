@@ -5,7 +5,7 @@ import com.emorn.bettercables.contract.common.IPositionInWorld;
 import com.emorn.bettercables.contract.common.ITileEntity;
 import com.emorn.bettercables.contract.common.IWorld;
 import com.emorn.bettercables.core.common.Direction;
-import com.emorn.bettercables.objects.api.forge.blocks.connector.ConnectorNetwork;
+import com.emorn.bettercables.core.blocks.connector.network.ConnectorNetwork;
 import com.emorn.bettercables.core.common.Logger;
 import mcp.MethodsReturnNonnullByDefault;
 

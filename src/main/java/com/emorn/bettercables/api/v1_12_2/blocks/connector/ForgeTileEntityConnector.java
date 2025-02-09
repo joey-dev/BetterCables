@@ -7,7 +7,7 @@ import com.emorn.bettercables.core.blocks.connector.ConnectorNetworkHandler;
 import com.emorn.bettercables.core.blocks.connector.itemTransfer.ConnectorUpdateHandler;
 import com.emorn.bettercables.core.blocks.connector.settings.ConnectorSavedDataHandler;
 import com.emorn.bettercables.core.common.Logger;
-import com.emorn.bettercables.objects.api.forge.blocks.connector.ConnectorNetwork;
+import com.emorn.bettercables.core.blocks.connector.network.ConnectorNetwork;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;

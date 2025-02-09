@@ -1,6 +1,5 @@
 package com.emorn.bettercables.objects.api.forge.common;
 
-import com.emorn.bettercables.objects.api.forge.blocks.connector.NetworkManager;
 import com.emorn.bettercables.utils.IHasModel;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.block.Block;
@@ -127,7 +126,8 @@ public abstract class BaseCable extends BlockBase implements IHasModel
     {
         super.onBlockDestroyedByPlayer(worldIn, pos, state);
         if (!worldIn.isRemote) {
-            NetworkManager.reCalculateNetworksAround(pos, worldIn);
+            // todo fix
+            //NetworkManager.reCalculateNetworksAround(pos, worldIn);
         }
     }
 
@@ -152,7 +152,8 @@ public abstract class BaseCable extends BlockBase implements IHasModel
     {
         super.onBlockDestroyedByExplosion(worldIn, pos, explosionIn);
         if (!worldIn.isRemote) {
-            NetworkManager.reCalculateNetworksAround(pos, worldIn);
+            // todo fix
+            //NetworkManager.reCalculateNetworksAround(pos, worldIn);
         }
     }
 

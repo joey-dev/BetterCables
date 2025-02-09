@@ -2,8 +2,9 @@ package com.emorn.bettercables.core.blocks.connector.settings;
 
 import com.emorn.bettercables.contract.blocks.connector.IData;
 import com.emorn.bettercables.contract.common.IPositionInWorld;
+import com.emorn.bettercables.core.blocks.connector.network.NetworkManager;
 import com.emorn.bettercables.core.common.Direction;
-import com.emorn.bettercables.objects.api.forge.blocks.connector.ConnectorNetwork;
+import com.emorn.bettercables.core.blocks.connector.network.ConnectorNetwork;
 import mcp.MethodsReturnNonnullByDefault;
 
 import javax.annotation.Nullable;
@@ -36,7 +37,7 @@ public class ConnectorNetworkSavedDataHandler
             return null;
         }
 
-        ConnectorNetwork foundNetwork = ConnectorNetwork.create(compound.loadInteger(NETWORK_ID));
+        ConnectorNetwork foundNetwork = NetworkManager.createNewNetwork(compound.loadInteger(NETWORK_ID));
 
         this.addInsertConnectorInformationToNetwork(foundNetwork);
         this.addExtractConnectorInformationToNetwork(foundNetwork);

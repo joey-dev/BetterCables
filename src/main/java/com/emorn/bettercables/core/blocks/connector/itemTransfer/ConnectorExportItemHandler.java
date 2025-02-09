@@ -8,7 +8,7 @@ import com.emorn.bettercables.core.blocks.connector.settings.ConnectorNetworkSet
 import com.emorn.bettercables.core.blocks.connector.settings.ConnectorSides;
 import com.emorn.bettercables.core.blocks.connector.IConnectorNetworkService;
 import com.emorn.bettercables.core.common.Direction;
-import com.emorn.bettercables.objects.api.forge.blocks.connector.ConnectorNetwork;
+import com.emorn.bettercables.core.blocks.connector.network.ConnectorNetwork;
 import com.emorn.bettercables.objects.application.blocks.connector.ConnectorSide;
 import com.emorn.bettercables.core.blocks.connector.settings.ConnectorSettings;
 import mcp.MethodsReturnNonnullByDefault;

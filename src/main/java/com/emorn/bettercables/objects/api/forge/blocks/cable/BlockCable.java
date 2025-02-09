@@ -2,7 +2,6 @@ package com.emorn.bettercables.objects.api.forge.blocks.cable;
 
 import com.emorn.bettercables.init.BlockInit;
 import com.emorn.bettercables.objects.api.forge.blocks.connector.BlockConnector;
-import com.emorn.bettercables.objects.api.forge.blocks.connector.NetworkManager;
 import com.emorn.bettercables.objects.api.forge.common.AxisAlignedBoundingBoxConverter;
 import com.emorn.bettercables.objects.api.forge.common.BaseCable;
 import com.emorn.bettercables.objects.application.blocks.cable.CableAxisAlignedBoundingBox;
@@ -96,7 +95,8 @@ public class BlockCable extends BaseCable implements IHasModel
     )
     {
         IBlockState actualState = getActualState(state, worldIn, pos);
-        NetworkManager.mergeNetworks(worldIn, pos, findTotalConnections(actualState));
+        // todo fix
+        //NetworkManager.mergeNetworks(worldIn, pos, findTotalConnections(actualState));
 
         if (!worldIn.isRemote) {
             worldIn.setBlockState(pos, state, 2);

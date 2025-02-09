@@ -44,5 +44,7 @@ public class PerformanceTester
 
         results.clear();
         lastRan = 0;
+
+        //Minecraft.getMinecraft().player.sendChatMessage("");
     }
 }
