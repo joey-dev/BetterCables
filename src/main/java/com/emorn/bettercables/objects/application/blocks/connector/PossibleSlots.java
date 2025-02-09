@@ -1,6 +1,6 @@
 package com.emorn.bettercables.objects.application.blocks.connector;
 
-import com.emorn.bettercables.objects.gateway.blocks.ConnectorSettings;
+import com.emorn.bettercables.core.blocks.connector.settings.ConnectorSettings;
 import mcp.MethodsReturnNonnullByDefault;
 
 import javax.annotation.ParametersAreNonnullByDefault;

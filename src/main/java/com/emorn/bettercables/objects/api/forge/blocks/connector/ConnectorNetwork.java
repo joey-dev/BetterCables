@@ -1,9 +1,9 @@
 package com.emorn.bettercables.objects.api.forge.blocks.connector;
 
 import com.emorn.bettercables.contract.common.IPositionInWorld;
-import com.emorn.bettercables.objects.api.forge.common.Logger;
+import com.emorn.bettercables.core.common.Logger;
 import com.emorn.bettercables.objects.application.blocks.connector.PossibleSlots;
-import com.emorn.bettercables.objects.gateway.blocks.ConnectorSettings;
+import com.emorn.bettercables.core.blocks.connector.settings.ConnectorSettings;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.util.math.BlockPos;
 
@@ -125,7 +125,7 @@ public class ConnectorNetwork
     }
 
     public void addInsert(
-        BlockPos inventoryPosition,
+        IPositionInWorld inventoryPosition,
         ConnectorSettings settings
     )
     {
@@ -135,14 +135,15 @@ public class ConnectorNetwork
 
         this.isDisabled = true;
 
-        this.insertConnectorSettings.put(settings, inventoryPosition);
+        // todo fix
+        //this.insertConnectorSettings.put(settings, inventoryPosition);
         this.recalculateInsertsFromPossibleSlots(settings);
 
         this.isDisabled = false;
     }
 
     public void addExtract(
-        BlockPos inventoryPosition,
+        IPositionInWorld inventoryPosition,
         ConnectorSettings settings
     )
     {
@@ -152,7 +153,8 @@ public class ConnectorNetwork
 
         this.isDisabled = true;
 
-        this.extractConnectorSettings.put(settings, inventoryPosition);
+        // todo fix
+        //this.extractConnectorSettings.put(settings, inventoryPosition);
         this.recalculateExtractsFromPossibleSlots(settings);
 
         this.isDisabled = false;

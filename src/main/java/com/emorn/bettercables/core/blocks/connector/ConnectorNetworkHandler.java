@@ -52,8 +52,13 @@ public class ConnectorNetworkHandler implements IConnectorNetworkService
         return this.network;
     }
 
-    // todo, needed?
-    public void setNetwork(ConnectorNetwork connectorNetwork)
+    @Nullable
+    public ConnectorNetwork getNetworkOrNull()
+    {
+        return this.network;
+    }
+
+    public void setNetwork(@Nullable ConnectorNetwork connectorNetwork)
     {
         this.network = connectorNetwork;
     }

@@ -4,7 +4,7 @@ import com.emorn.bettercables.contract.common.IInventory;
 import com.emorn.bettercables.contract.common.IItemHandler;
 import com.emorn.bettercables.contract.common.IItemStack;
 import com.emorn.bettercables.core.common.EmptyItemStack;
-import com.emorn.bettercables.objects.api.forge.common.Logger;
+import com.emorn.bettercables.core.common.Logger;
 import mcp.MethodsReturnNonnullByDefault;
 
 import javax.annotation.ParametersAreNonnullByDefault;

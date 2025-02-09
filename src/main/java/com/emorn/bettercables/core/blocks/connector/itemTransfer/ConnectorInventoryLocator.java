@@ -6,7 +6,7 @@ import com.emorn.bettercables.contract.common.ITileEntity;
 import com.emorn.bettercables.contract.common.IWorld;
 import com.emorn.bettercables.core.common.Direction;
 import com.emorn.bettercables.objects.api.forge.blocks.connector.ConnectorNetwork;
-import com.emorn.bettercables.objects.api.forge.common.Logger;
+import com.emorn.bettercables.core.common.Logger;
 import mcp.MethodsReturnNonnullByDefault;
 
 import javax.annotation.Nullable;

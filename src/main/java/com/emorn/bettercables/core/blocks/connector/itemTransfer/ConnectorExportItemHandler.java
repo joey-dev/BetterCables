@@ -4,13 +4,13 @@ import com.emorn.bettercables.contract.common.IInventory;
 import com.emorn.bettercables.contract.common.IItemStack;
 import com.emorn.bettercables.contract.common.IPositionInWorld;
 import com.emorn.bettercables.contract.common.IWorld;
-import com.emorn.bettercables.core.blocks.connector.ConnectorNetworkSettingsService;
-import com.emorn.bettercables.core.blocks.connector.ConnectorSides;
+import com.emorn.bettercables.core.blocks.connector.settings.ConnectorNetworkSettingsService;
+import com.emorn.bettercables.core.blocks.connector.settings.ConnectorSides;
 import com.emorn.bettercables.core.blocks.connector.IConnectorNetworkService;
 import com.emorn.bettercables.core.common.Direction;
 import com.emorn.bettercables.objects.api.forge.blocks.connector.ConnectorNetwork;
 import com.emorn.bettercables.objects.application.blocks.connector.ConnectorSide;
-import com.emorn.bettercables.objects.gateway.blocks.ConnectorSettings;
+import com.emorn.bettercables.core.blocks.connector.settings.ConnectorSettings;
 import mcp.MethodsReturnNonnullByDefault;
 
 import javax.annotation.Nullable;

@@ -4,8 +4,8 @@ import com.emorn.bettercables.api.v1_12_2.blocks.connector.ForgeTileEntityConnec
 import com.emorn.bettercables.common.gui.*;
 import com.emorn.bettercables.common.gui.toggle.*;
 import com.emorn.bettercables.core.common.Direction;
-import com.emorn.bettercables.objects.gateway.blocks.ConnectorSettings;
-import com.emorn.bettercables.objects.gateway.blocks.ConnectorSettingsFilter;
+import com.emorn.bettercables.core.blocks.connector.settings.ConnectorSettings;
+import com.emorn.bettercables.core.blocks.connector.settings.ConnectorSettingsFilter;
 import com.emorn.bettercables.proxy.ModNetworkHandler;
 import com.emorn.bettercables.utils.Reference;
 import mcp.MethodsReturnNonnullByDefault;
@@ -188,21 +188,22 @@ public class GuiConnector extends GuiContainer
                 int y = i * 18;
 
                 ItemStack item;
-                if (this.isInsertSettingsOpen) {
-                    item = tileSettings.insertFilter(iteration).itemStack();
-                } else {
-                    item = tileSettings.extractFilter(iteration).itemStack();
-                }
+                // todo fix
+//                if (this.isInsertSettingsOpen) {
+//                    item = tileSettings.insertFilter(iteration).itemStack();
+//                } else {
+//                    item = tileSettings.extractFilter(iteration).itemStack();
+//                }
+//
+//                GuiFilter guiFilter = new GuiFilter(
+//                    FILTER_START_ID + iteration,
+//                    this.guiLeft + 7 + x,
+//                    this.guiTop + 17 + y,
+//                    item,
+//                    onFilterSettingsClicked
+//                );
 
-                GuiFilter guiFilter = new GuiFilter(
-                    FILTER_START_ID + iteration,
-                    this.guiLeft + 7 + x,
-                    this.guiTop + 17 + y,
-                    item,
-                    onFilterSettingsClicked
-                );
-
-                this.buttonList.add(guiFilter);
+//                this.buttonList.add(guiFilter);
                 iteration++;
             }
         }
@@ -595,7 +596,8 @@ public class GuiConnector extends GuiContainer
         tileSettings.changeFilterItem(
             guiFilter.id - FILTER_START_ID,
             this.isInsertSettingsOpen,
-            guiFilter.filteredItem()
+            // todo fix
+            new com.emorn.bettercables.api.v1_12_2.common.ItemStack(guiFilter.filteredItem())
         );
 
         ModNetworkHandler.INSTANCE.sendToServer(new PacketUpdateConnector(

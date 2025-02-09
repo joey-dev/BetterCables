@@ -1,4 +1,4 @@
-package com.emorn.bettercables.core.blocks.connector;
+package com.emorn.bettercables.core.blocks.connector.settings;
 
 import com.emorn.bettercables.core.common.Direction;
 import com.emorn.bettercables.objects.application.blocks.connector.ConnectorSide;
@@ -69,6 +69,31 @@ public class ConnectorSides
         return this.down.canExport();
     }
 
+    public ConnectorSettings connectorSettings(Direction direction)
+    {
+        return this.connectorSideByDirection(direction).connectorSettings;
+    }
+
+    private ConnectorSide connectorSideByDirection(Direction direction)
+    {
+        switch (direction) {
+            case NORTH:
+                return this.north;
+            case EAST:
+                return this.east;
+            case SOUTH:
+                return this.south;
+            case WEST:
+                return this.west;
+            case UP:
+                return this.up;
+            case DOWN:
+                return this.down;
+            default:
+                throw new IllegalStateException("Unexpected value: " + direction);
+        }
+    }
+
     public void tick()
     {
         this.north.tick();
@@ -77,5 +102,23 @@ public class ConnectorSides
         this.west.tick();
         this.up.tick();
         this.down.tick();
+    }
+
+    public boolean isInsertEnabled(Direction direction)
+    {
+        ConnectorSide connectorSide = this.findConnectorByDirection(direction);
+        if (connectorSide != null) {
+            return connectorSide.connectorSettings.isInsertEnabled();
+        }
+        return false;
+    }
+
+    public boolean isExtractEnabled(Direction direction)
+    {
+        ConnectorSide connectorSide = this.findConnectorByDirection(direction);
+        if (connectorSide != null) {
+            return connectorSide.connectorSettings.isExtractEnabled();
+        }
+        return false;
     }
 }

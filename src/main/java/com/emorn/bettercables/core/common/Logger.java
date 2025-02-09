@@ -1,4 +1,4 @@
-package com.emorn.bettercables.objects.api.forge.common;
+package com.emorn.bettercables.core.common;
 
 import mcp.MethodsReturnNonnullByDefault;
 

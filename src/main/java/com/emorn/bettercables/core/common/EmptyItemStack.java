@@ -1,8 +1,10 @@
 package com.emorn.bettercables.core.common;
 
+import com.emorn.bettercables.contract.blocks.connector.IData;
 import com.emorn.bettercables.contract.common.IItemStack;
 import mcp.MethodsReturnNonnullByDefault;
 
+import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 
 @MethodsReturnNonnullByDefault
@@ -19,5 +21,11 @@ public class EmptyItemStack implements IItemStack
     public int getCount()
     {
         return 0;
+    }
+
+    @Nullable
+    public IData serialize()
+    {
+        return null;
     }
 }
