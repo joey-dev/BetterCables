@@ -1,4 +1,4 @@
-package com.emorn.bettercables.proxy;
+package com.emorn.bettercables.api.v1_12_2.proxy;
 
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;

@@ -1,6 +1,6 @@
 package com.emorn.bettercables.common.gui;
 
-import com.emorn.bettercables.utils.Reference;
+import com.emorn.bettercables.core.common.Reference;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ResourceLocation;

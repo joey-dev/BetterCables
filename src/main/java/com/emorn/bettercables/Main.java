@@ -1,8 +1,8 @@
 package com.emorn.bettercables;
 
-import com.emorn.bettercables.proxy.CommonProxy;
-import com.emorn.bettercables.proxy.ModNetworkHandler;
-import com.emorn.bettercables.utils.Reference;
+import com.emorn.bettercables.api.v1_12_2.proxy.CommonProxy;
+import com.emorn.bettercables.api.v1_12_2.proxy.ModNetworkHandler;
+import com.emorn.bettercables.core.common.Reference;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.Mod.Instance;

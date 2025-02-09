@@ -1,4 +1,4 @@
-package com.emorn.bettercables.objects.api.forge.blocks.connector;
+package com.emorn.bettercables.api.v1_12_2.blocks.connector;
 
 import net.minecraft.util.IStringSerializable;
 

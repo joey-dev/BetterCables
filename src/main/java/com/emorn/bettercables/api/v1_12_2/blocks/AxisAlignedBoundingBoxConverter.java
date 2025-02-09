@@ -1,4 +1,4 @@
-package com.emorn.bettercables.objects.api.forge.common;
+package com.emorn.bettercables.api.v1_12_2.blocks;
 
 import com.emorn.bettercables.contract.blocks.AxisAlignedBoundingBox;
 import mcp.MethodsReturnNonnullByDefault;
@@ -15,7 +15,6 @@ public class AxisAlignedBoundingBoxConverter
     {
     }
 
-    // todo remove
     public static AxisAlignedBB from(
         AxisAlignedBoundingBox boundingBox
     )

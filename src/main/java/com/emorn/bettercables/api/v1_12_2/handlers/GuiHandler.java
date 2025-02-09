@@ -1,10 +1,10 @@
-package com.emorn.bettercables.utils.handlers;
+package com.emorn.bettercables.api.v1_12_2.handlers;
 
-import com.emorn.bettercables.objects.api.forge.blocks.connector.ContainerConnector;
+import com.emorn.bettercables.api.v1_12_2.gui.ContainerConnector;
 import com.emorn.bettercables.core.common.Direction;
 import com.emorn.bettercables.objects.api.forge.blocks.connector.GuiConnector;
 import com.emorn.bettercables.api.v1_12_2.blocks.connector.ForgeTileEntityConnector;
-import com.emorn.bettercables.utils.Reference;
+import com.emorn.bettercables.core.common.Reference;
 import com.google.common.collect.ImmutableMap;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.entity.player.EntityPlayer;

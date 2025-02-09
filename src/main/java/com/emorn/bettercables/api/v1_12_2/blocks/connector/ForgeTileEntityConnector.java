@@ -11,6 +11,7 @@ import com.emorn.bettercables.core.blocks.connector.settings.ConnectorSettings;
 import com.emorn.bettercables.core.common.Direction;
 import com.emorn.bettercables.core.common.Logger;
 import mcp.MethodsReturnNonnullByDefault;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
@@ -94,7 +95,9 @@ public class ForgeTileEntityConnector extends TileEntity implements ITickable, I
     public ConnectorSettings settings(Direction direction)
     {
         return this.connectorUpdateHandler.getConnectorSides().connectorSettings(direction);
-    }    @Override
+    }
+
+    @Override
     public void readFromNBT(NBTTagCompound compound)
     {
         super.readFromNBT(compound);
@@ -173,4 +176,14 @@ public class ForgeTileEntityConnector extends TileEntity implements ITickable, I
     }
 
 
+    public boolean isUsableByPlayer(EntityPlayer player)
+    {
+        return
+            this.world.getTileEntity(this.pos) == this
+                && player.getDistanceSq(
+                this.pos.getX() + 0.5D,
+                this.pos.getY() + 0.5D,
+                this.pos.getZ() + 0.5D
+            ) <= 64.0D;
+    }
 }

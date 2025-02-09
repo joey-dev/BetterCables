@@ -1,4 +1,4 @@
-package com.emorn.bettercables.objects.api.forge.blocks.connector;
+package com.emorn.bettercables.api.v1_12_2.gui;
 
 import com.emorn.bettercables.api.v1_12_2.blocks.connector.ForgeTileEntityConnector;
 import mcp.MethodsReturnNonnullByDefault;
@@ -41,8 +41,6 @@ public class ContainerConnector extends Container
     @Override
     public boolean canInteractWith(EntityPlayer playerIn)
     {
-        // return this.tileEntity.isUsableByPlayer(playerIn); todo fix
-        return true;
+        return this.tileEntity.isUsableByPlayer(playerIn);
     }
-
 }

@@ -1,8 +1,8 @@
-package com.emorn.bettercables.objects.items;
+package com.emorn.bettercables.api.v1_12_2.items;
 
 import com.emorn.bettercables.Main;
 import com.emorn.bettercables.api.v1_12_2.init.ItemInit;
-import com.emorn.bettercables.utils.IHasModel;
+import com.emorn.bettercables.api.v1_12_2.IHasModel;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
