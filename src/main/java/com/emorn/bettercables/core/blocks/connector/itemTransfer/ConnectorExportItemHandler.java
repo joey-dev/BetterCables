@@ -9,7 +9,7 @@ import com.emorn.bettercables.core.blocks.connector.settings.ConnectorSides;
 import com.emorn.bettercables.core.blocks.connector.IConnectorNetworkService;
 import com.emorn.bettercables.core.common.Direction;
 import com.emorn.bettercables.core.blocks.connector.network.ConnectorNetwork;
-import com.emorn.bettercables.objects.application.blocks.connector.ConnectorSide;
+import com.emorn.bettercables.core.blocks.connector.settings.ConnectorSide;
 import com.emorn.bettercables.core.blocks.connector.settings.ConnectorSettings;
 import mcp.MethodsReturnNonnullByDefault;
 
@@ -24,7 +24,6 @@ import java.util.Map;
 @ParametersAreNonnullByDefault
 public class ConnectorExportItemHandler
 {
-    // todo maybe something else than a hashmap
     private final Map<Direction, Integer> directionToIndexMap = new EnumMap<>(Direction.class);
     private final ConnectorSides connectorSides;
     private final IConnectorNetworkService connectorNetworkService;

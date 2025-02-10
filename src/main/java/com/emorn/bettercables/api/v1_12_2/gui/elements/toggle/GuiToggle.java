@@ -1,6 +1,6 @@
-package com.emorn.bettercables.common.gui.toggle;
+package com.emorn.bettercables.api.v1_12_2.gui.elements.toggle;
 
-import com.emorn.bettercables.common.gui.AbleToChangeDisabledState;
+import com.emorn.bettercables.api.v1_12_2.gui.elements.AbleToChangeDisabledState;
 import com.emorn.bettercables.core.common.Reference;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.client.gui.GuiButton;

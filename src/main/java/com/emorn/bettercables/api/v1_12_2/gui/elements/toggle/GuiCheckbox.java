@@ -1,4 +1,4 @@
-package com.emorn.bettercables.common.gui.toggle;
+package com.emorn.bettercables.api.v1_12_2.gui.elements.toggle;
 
 import mcp.MethodsReturnNonnullByDefault;
 

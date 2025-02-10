@@ -1,6 +1,6 @@
 package com.emorn.bettercables.api.v1_12_2.proxy;
 
-import com.emorn.bettercables.objects.api.forge.blocks.connector.PacketUpdateConnector;
+import com.emorn.bettercables.api.v1_12_2.gui.PacketUpdateConnector;
 import com.emorn.bettercables.core.common.Reference;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraftforge.fml.common.network.NetworkRegistry;

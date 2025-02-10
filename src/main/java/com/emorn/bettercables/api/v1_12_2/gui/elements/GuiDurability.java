@@ -1,5 +1,6 @@
-package com.emorn.bettercables.common.gui;
+package com.emorn.bettercables.api.v1_12_2.gui.elements;
 
+import com.emorn.bettercables.contract.gui.ComparisonOperator;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.client.gui.GuiButton;
 

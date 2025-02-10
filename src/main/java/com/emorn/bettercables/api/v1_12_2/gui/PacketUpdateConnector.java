@@ -1,4 +1,4 @@
-package com.emorn.bettercables.objects.api.forge.blocks.connector;
+package com.emorn.bettercables.api.v1_12_2.gui;
 
 import com.emorn.bettercables.api.v1_12_2.blocks.connector.Data;
 import com.emorn.bettercables.api.v1_12_2.blocks.connector.ForgeTileEntityConnector;
@@ -104,13 +104,7 @@ public class PacketUpdateConnector implements IMessage
                         Logger.error("Could not find settings for direction " + message.direction);
                         return;
                     }
-//                    settings.deserializeNBT(message.settingsNBT);
-//                    if (message.didInsertChange) {
-//                        ((ForgeTileEntityConnector) tileEntity).setInsertEnabled(settings.isInsertEnabled(), message.direction);
-//                    }
-//                    if (message.didExtractChange) {
-//                        ((ForgeTileEntityConnector) tileEntity).setExtractEnabled(settings.isInsertEnabled(), message.direction);
-//                    }
+                    settings.deserializeNBT(message.settingsNBT, "");
                     connector.markDirty();
                 }
             });

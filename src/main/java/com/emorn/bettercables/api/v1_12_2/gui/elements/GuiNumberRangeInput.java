@@ -1,4 +1,4 @@
-package com.emorn.bettercables.common.gui;
+package com.emorn.bettercables.api.v1_12_2.gui.elements;
 
 import com.emorn.bettercables.core.common.Reference;
 import net.minecraft.client.Minecraft;

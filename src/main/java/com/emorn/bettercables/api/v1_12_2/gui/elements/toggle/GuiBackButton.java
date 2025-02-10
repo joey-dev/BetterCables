@@ -1,7 +1,8 @@
-package com.emorn.bettercables.common.gui;
+package com.emorn.bettercables.api.v1_12_2.gui.elements.toggle;
 
 import com.emorn.bettercables.core.common.Reference;
 import mcp.MethodsReturnNonnullByDefault;
+import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ResourceLocation;
 
@@ -10,22 +11,30 @@ import java.util.function.Consumer;
 
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
-public class GuiGear extends net.minecraft.client.gui.GuiButton
+public class GuiBackButton extends GuiButton
 {
     private static final ResourceLocation TEXTURES = new ResourceLocation(
         Reference.MODID + ":textures/gui/gui_elements.png"
     );
 
-    private Consumer<Integer> callback;
+    private final Consumer<Integer> callback;
 
-    public GuiGear(
+    public GuiBackButton(
         int buttonId,
         int x,
         int y,
         Consumer<Integer> callback
     )
     {
-        super(buttonId, x, y, 18, 18, "settings");
+        super(
+            buttonId,
+            x,
+            y,
+            18,
+            18,
+            ""
+        );
+
         this.callback = callback;
     }
 
@@ -47,7 +56,15 @@ public class GuiGear extends net.minecraft.client.gui.GuiButton
     {
         mc.getTextureManager().bindTexture(TEXTURES);
         GlStateManager.color(1.0f, 1.0f, 1.0f, 1.0f);
-        drawTexturedModalRect(this.x, this.y, 0, 18, 18, 18);
+
+        drawTexturedModalRect(
+            this.x,
+            this.y,
+            36,
+            21,
+            this.width,
+            this.height
+        );
     }
 
     @Override

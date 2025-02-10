@@ -3,7 +3,6 @@ package com.emorn.bettercables.core.blocks.connector.settings;
 import com.emorn.bettercables.core.common.Direction;
 import com.emorn.bettercables.core.blocks.connector.network.ConnectorNetwork;
 import com.emorn.bettercables.core.common.Logger;
-import com.emorn.bettercables.objects.application.blocks.connector.ConnectorSide;
 import mcp.MethodsReturnNonnullByDefault;
 
 import javax.annotation.Nullable;

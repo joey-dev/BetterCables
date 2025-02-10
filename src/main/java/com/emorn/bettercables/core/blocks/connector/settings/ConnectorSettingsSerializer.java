@@ -1,6 +1,6 @@
 package com.emorn.bettercables.core.blocks.connector.settings;
 
-import com.emorn.bettercables.common.gui.ExtractType;
+import com.emorn.bettercables.contract.gui.ExtractType;
 import com.emorn.bettercables.contract.blocks.connector.DataType;
 import com.emorn.bettercables.contract.blocks.connector.IData;
 import com.emorn.bettercables.contract.blocks.connector.IDataList;
