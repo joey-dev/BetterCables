@@ -1,4 +1,4 @@
-package com.emorn.bettercables.core.blocks.connector.itemTransfer;
+package com.emorn.bettercables.core.blocks.connector.item_transfer;
 
 import com.emorn.bettercables.contract.common.IInventory;
 import com.emorn.bettercables.contract.common.IItemStack;

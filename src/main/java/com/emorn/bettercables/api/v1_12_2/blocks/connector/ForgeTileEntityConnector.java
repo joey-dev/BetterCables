@@ -4,7 +4,7 @@ import com.emorn.bettercables.api.v1_12_2.common.PositionInWorld;
 import com.emorn.bettercables.contract.blocks.connector.IData;
 import com.emorn.bettercables.contract.blocks.connector.ITileEntityConnector;
 import com.emorn.bettercables.core.blocks.connector.ConnectorNetworkHandler;
-import com.emorn.bettercables.core.blocks.connector.itemTransfer.ConnectorUpdateHandler;
+import com.emorn.bettercables.core.blocks.connector.item_transfer.ConnectorUpdateHandler;
 import com.emorn.bettercables.core.blocks.connector.network.ConnectorNetwork;
 import com.emorn.bettercables.core.blocks.connector.settings.ConnectorSavedDataHandler;
 import com.emorn.bettercables.core.blocks.connector.settings.ConnectorSettings;
