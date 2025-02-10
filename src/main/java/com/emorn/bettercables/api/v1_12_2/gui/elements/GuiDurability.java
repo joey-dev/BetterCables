@@ -49,11 +49,6 @@ public class GuiDurability extends GuiButton implements AbleToChangeDisabledStat
         // not really a button, so it shouldn't draw one
     }
 
-    public ComparisonOperator comparisonOperator()
-    {
-        return this.button.comparisonOperator();
-    }
-
     public GuiComparisonOperatorButton operatorInput()
     {
         return this.button;

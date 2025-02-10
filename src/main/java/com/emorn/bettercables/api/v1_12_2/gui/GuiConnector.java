@@ -3,13 +3,12 @@ package com.emorn.bettercables.api.v1_12_2.gui;
 import com.emorn.bettercables.api.v1_12_2.blocks.connector.ForgeTileEntityConnector;
 import com.emorn.bettercables.api.v1_12_2.common.ItemStack;
 import com.emorn.bettercables.api.v1_12_2.gui.elements.*;
-import com.emorn.bettercables.api.v1_12_2.proxy.ModNetworkHandler;
 import com.emorn.bettercables.api.v1_12_2.gui.elements.toggle.*;
+import com.emorn.bettercables.api.v1_12_2.proxy.ModNetworkHandler;
 import com.emorn.bettercables.contract.common.IItemStack;
 import com.emorn.bettercables.core.blocks.connector.settings.ConnectorSettings;
 import com.emorn.bettercables.core.blocks.connector.settings.ConnectorSettingsFilter;
 import com.emorn.bettercables.core.common.Direction;
-import com.emorn.bettercables.core.common.Logger;
 import com.emorn.bettercables.core.common.Reference;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.client.gui.GuiButton;
@@ -97,10 +96,6 @@ public class GuiConnector extends GuiContainer
         Consumer<Integer> onSettingsClicked = this::onSettingsClicked;
 
         ConnectorSettings tileSettings = this.tileEntity.settings(this.direction);
-        if (tileSettings == null) {
-            Logger.error("ConnectorSettings is null");
-            return;
-        }
 
         if (this.isInsertSettingsOpen || this.isExtractSettingsOpen) {
             this.settingsMenu(tileSettings);
@@ -146,10 +141,6 @@ public class GuiConnector extends GuiContainer
     private void onSettingsClicked(Integer buttonId)
     {
         ConnectorSettings tileSettings = this.tileEntity.settings(this.direction);
-        if (tileSettings == null) {
-            Logger.error("ConnectorSettings is null");
-            return;
-        }
 
         if (buttonId == INSERT_SETTINGS_ID) {
             this.isInsertSettingsOpen = true;
@@ -221,10 +212,6 @@ public class GuiConnector extends GuiContainer
     private void onFilterSettingsClicked(Integer id)
     {
         ConnectorSettings tileSettings = this.tileEntity.settings(this.direction);
-        if (tileSettings == null) {
-            Logger.error("ConnectorSettings is null");
-            return;
-        }
 
         this.filterId = id;
 
@@ -577,10 +564,6 @@ public class GuiConnector extends GuiContainer
         }
 
         ConnectorSettings tileSettings = this.tileEntity.settings(this.direction);
-        if (tileSettings == null) {
-            Logger.error("Tile settings is null");
-            return;
-        }
 
         if (button instanceof GuiToggle) {
             updateCheckboxes((GuiToggle) button, tileSettings);

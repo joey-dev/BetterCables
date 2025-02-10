@@ -20,6 +20,8 @@ import javax.annotation.ParametersAreNonnullByDefault;
 @ParametersAreNonnullByDefault
 public class RegistryHandler
 {
+    private RegistryHandler() {}
+
     @SubscribeEvent
     public static void onItemRegister(RegistryEvent.Register<Item> event)
     {

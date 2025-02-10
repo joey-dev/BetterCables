@@ -1,10 +1,15 @@
 package com.emorn.bettercables.api.v1_12_2.gui.elements;
 
 import com.emorn.bettercables.core.common.Reference;
+import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.renderer.GlStateManager;
 
+import javax.annotation.ParametersAreNonnullByDefault;
+
+@MethodsReturnNonnullByDefault
+@ParametersAreNonnullByDefault
 public class GuiNumberRangeInput extends GuiButton implements AbleToChangeDisabledState
 {
     private static final int WIDTH_OF_IMAGE = 27;
@@ -80,17 +85,6 @@ public class GuiNumberRangeInput extends GuiButton implements AbleToChangeDisabl
     {
         return this.maxInput;
     }
-
-    public int minValue()
-    {
-        return this.minInput.value();
-    }
-
-    public int maxValue()
-    {
-        return this.maxInput.value();
-    }
-
 
     public void changeDisabledState(boolean disable)
     {

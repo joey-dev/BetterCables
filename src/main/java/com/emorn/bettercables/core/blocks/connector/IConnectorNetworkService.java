@@ -9,10 +9,9 @@ import javax.annotation.ParametersAreNonnullByDefault;
 @ParametersAreNonnullByDefault
 public interface IConnectorNetworkService
 {
-    public boolean isNetworkEnabled();
+    public boolean isNetworkDisabled();
 
     public ConnectorNetwork getNetwork();
 
-    // todo, needed?
     public void setNetwork(ConnectorNetwork connectorNetwork);
 }

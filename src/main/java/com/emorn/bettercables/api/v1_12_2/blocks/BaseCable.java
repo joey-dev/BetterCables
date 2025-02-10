@@ -1,6 +1,8 @@
 package com.emorn.bettercables.api.v1_12_2.blocks;
 
 import com.emorn.bettercables.api.v1_12_2.IHasModel;
+import com.emorn.bettercables.api.v1_12_2.common.PositionInWorld;
+import com.emorn.bettercables.core.blocks.connector.network.NetworkManager;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
@@ -126,8 +128,10 @@ public abstract class BaseCable extends BlockBase implements IHasModel
     {
         super.onBlockDestroyedByPlayer(worldIn, pos, state);
         if (!worldIn.isRemote) {
-            // todo fix
-            //NetworkManager.reCalculateNetworksAround(pos, worldIn);
+            NetworkManager.reCalculateNetworksAround(
+                new PositionInWorld(pos.getX(), pos.getY(), pos.getZ()),
+                new com.emorn.bettercables.api.v1_12_2.common.World(worldIn)
+            );
         }
     }
 
@@ -152,8 +156,10 @@ public abstract class BaseCable extends BlockBase implements IHasModel
     {
         super.onBlockDestroyedByExplosion(worldIn, pos, explosionIn);
         if (!worldIn.isRemote) {
-            // todo fix
-            //NetworkManager.reCalculateNetworksAround(pos, worldIn);
+            NetworkManager.reCalculateNetworksAround(
+                new PositionInWorld(pos.getX(), pos.getY(), pos.getZ()),
+                new com.emorn.bettercables.api.v1_12_2.common.World(worldIn)
+            );
         }
     }
 

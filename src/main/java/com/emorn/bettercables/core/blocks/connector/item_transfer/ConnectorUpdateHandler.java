@@ -48,7 +48,7 @@ public class ConnectorUpdateHandler
             return;
         }
 
-        if (!this.networkService.isNetworkEnabled()) {
+        if (this.networkService.isNetworkDisabled()) {
             return;
         }
 

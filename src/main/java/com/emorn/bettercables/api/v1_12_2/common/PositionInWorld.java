@@ -6,9 +6,9 @@ import net.minecraft.util.EnumFacing;
 
 public class PositionInWorld implements IPositionInWorld
 {
-    private int x;
-    private int y;
-    private int z;
+    private final int x;
+    private final int y;
+    private final int z;
 
     public PositionInWorld(int x, int y, int z)
     {

@@ -123,9 +123,8 @@ public class PossibleSlotCalculator
         ConnectorSettings insertSettings
     )
     {
-        this.possibleSlotsToExtract.forEach((k, v) -> {
-            v.remove(insertSettings);
-        });
+        this.possibleSlotsToExtract.forEach((k, v)
+            -> v.remove(insertSettings));
     }
 
     public void removeExtract(

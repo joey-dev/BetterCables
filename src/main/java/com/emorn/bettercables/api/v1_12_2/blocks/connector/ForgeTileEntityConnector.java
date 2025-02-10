@@ -120,7 +120,7 @@ public class ForgeTileEntityConnector extends TileEntity implements ITickable, I
             new Data(compound)
         );
 
-        if (this.hasCustomName()) {
+        if (this.hasCustomName() && this.customName != null) {
             compound.setString(CUSTOM_NAME, this.customName);
         }
 
@@ -151,7 +151,7 @@ public class ForgeTileEntityConnector extends TileEntity implements ITickable, I
     @Override
     public ITextComponent getDisplayName()
     {
-        return this.hasCustomName()
+        return this.hasCustomName() && this.customName != null
             ? new TextComponentString(this.customName)
             : new TextComponentTranslation("container.connector");
     }

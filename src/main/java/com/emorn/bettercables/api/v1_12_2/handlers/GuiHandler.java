@@ -56,6 +56,7 @@ public class GuiHandler implements IGuiHandler
     }
 
     @Override
+    @Nullable
     public Object getClientGuiElement(
         int id,
         EntityPlayer player,

@@ -5,7 +5,6 @@ import com.emorn.bettercables.api.v1_12_2.blocks.connector.ForgeTileEntityConnec
 import com.emorn.bettercables.contract.blocks.connector.IData;
 import com.emorn.bettercables.core.blocks.connector.settings.ConnectorSettings;
 import com.emorn.bettercables.core.common.Direction;
-import com.emorn.bettercables.core.common.Logger;
 import com.google.common.collect.ImmutableMap;
 import io.netty.buffer.ByteBuf;
 import mcp.MethodsReturnNonnullByDefault;
@@ -54,7 +53,10 @@ public class PacketUpdateConnector implements IMessage
     public void fromBytes(ByteBuf buf)
     {
         this.pos = new BlockPos(buf.readInt(), buf.readInt(), buf.readInt());
-        this.settingsNBT = new Data(ByteBufUtils.readTag(buf));
+        NBTTagCompound tag = ByteBufUtils.readTag(buf);
+        if (tag != null) {
+            this.settingsNBT = new Data(tag);
+        }
 
         ImmutableMap<Character, Direction> directions = ImmutableMap.<Character, Direction>builder()
             .put(Direction.NORTH.name().charAt(0), Direction.NORTH)
@@ -100,10 +102,7 @@ public class PacketUpdateConnector implements IMessage
                 if (tileEntity instanceof ForgeTileEntityConnector) {
                     ForgeTileEntityConnector connector = (ForgeTileEntityConnector) tileEntity;
                     ConnectorSettings settings = connector.settings(message.direction);
-                    if (settings == null) {
-                        Logger.error("Could not find settings for direction " + message.direction);
-                        return;
-                    }
+
                     settings.deserializeNBT(message.settingsNBT, "");
                     connector.markDirty();
                 }

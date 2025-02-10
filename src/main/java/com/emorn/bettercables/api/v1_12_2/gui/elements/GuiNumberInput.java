@@ -219,9 +219,4 @@ public class GuiNumberInput extends GuiButton implements AbleToChangeDisabledSta
     {
         return this.value;
     }
-
-    public void changeX(int x)
-    {
-        this.x = x;
-    }
 }

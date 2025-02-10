@@ -52,7 +52,7 @@ public class ConnectorExportItemHandler
 
     public void invoke(Direction direction)
     {
-        if (!this.connectorNetworkService.isNetworkEnabled()) {
+        if (this.connectorNetworkService.isNetworkDisabled()) {
             return;
         }
 

@@ -1,5 +1,6 @@
 package com.emorn.bettercables.core.blocks.connector.network;
 
+import com.emorn.bettercables.api.v1_12_2.blocks.connector.ForgeTileEntityConnector;
 import com.emorn.bettercables.contract.common.IBlock;
 import com.emorn.bettercables.contract.common.IPositionInWorld;
 import com.emorn.bettercables.contract.common.IWorld;
@@ -142,18 +143,18 @@ public class NetworkManager
             }
 
             if (neighborBlock.isBlockConnector()) {
-//                ConnectorNetwork oldNetwork = (
-//                    (ForgeTileEntityConnector) Objects.requireNonNull(
-//                        worldIn.getTileEntity(neighborIPositionInWorldPosition)
-//                    )
-//                )
-//                    .getNetwork();
-//
-//                if (oldNetwork.id() == network.id()) {
-//                    continue;
-//                }
-//
-//                oldNetwork.remove(neighborIPositionInWorldPosition, network);
+                ConnectorNetwork oldNetwork = (
+                    (ForgeTileEntityConnector) Objects.requireNonNull(
+                        worldIn.getTileEntity(neighborIPositionInWorldPosition)
+                    )
+                )
+                    .getNetwork();
+
+                if (oldNetwork.id() == network.id()) {
+                    continue;
+                }
+
+                oldNetwork.remove(neighborIPositionInWorldPosition, network);
             }
 
             reCalculateNetworkFrom(neighborIPositionInWorldPosition, worldIn, network);
@@ -182,17 +183,17 @@ public class NetworkManager
             }
 
             if (neighborBlock.isBlockConnector()) {
-//                ConnectorNetwork network = (
-//                    (ForgeTileEntityConnector) Objects.requireNonNull(
-//                        worldIn.getTileEntity(neighborIPositionInWorldPosition)
-//                    )
-//                ).getNetwork();
-//
-//                networks.putIfAbsent(network.id(), network);
-//
-//                if (networks.size() == totalConnections) {
-//                    return networks;
-//                }
+                ConnectorNetwork network = (
+                    (ForgeTileEntityConnector) Objects.requireNonNull(
+                        worldIn.getTileEntity(neighborIPositionInWorldPosition)
+                    )
+                ).getNetwork();
+
+                networks.putIfAbsent(network.id(), network);
+
+                if (networks.size() == totalConnections) {
+                    return networks;
+                }
             }
             Map<Integer, ConnectorNetwork> connectorNetworks = findNetworks(
                 worldIn,

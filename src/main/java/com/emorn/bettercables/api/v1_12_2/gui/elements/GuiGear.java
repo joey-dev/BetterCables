@@ -16,7 +16,7 @@ public class GuiGear extends net.minecraft.client.gui.GuiButton
         Reference.MODID + ":textures/gui/gui_elements.png"
     );
 
-    private Consumer<Integer> callback;
+    private final Consumer<Integer> callback;
 
     public GuiGear(
         int buttonId,

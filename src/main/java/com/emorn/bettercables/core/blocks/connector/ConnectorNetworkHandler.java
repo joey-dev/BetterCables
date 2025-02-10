@@ -39,9 +39,9 @@ public class ConnectorNetworkHandler implements IConnectorNetworkService
         }
     }
 
-    public boolean isNetworkEnabled()
+    public boolean isNetworkDisabled()
     {
-        return this.network != null && !this.network.isDisabled();
+        return this.network == null || this.network.isDisabled();
     }
 
     public ConnectorNetwork getNetwork()
