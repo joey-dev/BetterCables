@@ -16,23 +16,12 @@ import javax.annotation.ParametersAreNonnullByDefault;
 @ParametersAreNonnullByDefault
 public class ConnectorInventoryLocator
 {
-    private final IPositionInWorld positionInWorld;
-    private final IWorld world;
-
-    public ConnectorInventoryLocator(
-        IPositionInWorld positionInWorld,
-        IWorld world
-    )
-    {
-        this.positionInWorld = positionInWorld;
-        this.world = world;
-    }
-
     @Nullable
     public IInventory findImportInventory(
         Direction direction,
         ConnectorNetwork network,
-        Integer nextIndex
+        Integer nextIndex,
+        IWorld world
     )
     {
         IPositionInWorld inventoryPosition = network.findInventoryPositionBy(nextIndex);
@@ -42,9 +31,9 @@ public class ConnectorInventoryLocator
             return null;
         }
 
-        IInventory importInventory = this.findInventoryEntityByPosition(this.world, inventoryPosition);
+        IInventory importInventory = this.findInventoryEntityByPosition(world, inventoryPosition);
         if (importInventory == null) {
-            Logger.error("Failed to get inventory inventory for import.");
+            Logger.error("Failed to get inventory for import.");
             return null;
         }
         return importInventory;
@@ -66,12 +55,19 @@ public class ConnectorInventoryLocator
     }
 
     @Nullable
-    public IInventory findExportInventory(Direction direction)
+    public IInventory findExportInventory(
+        Direction direction,
+        IPositionInWorld positionInWorld,
+        IWorld world
+    )
     {
-        IPositionInWorld exportInventoryPosition = this.findPositionByDirection(direction);
+        IPositionInWorld exportInventoryPosition = this.findPositionByDirection(
+            direction,
+            positionInWorld
+        );
 
         IInventory exportInventory = this.findInventoryEntityByPosition(
-            this.world,
+            world,
             exportInventoryPosition
         );
         if (exportInventory == null) {
@@ -81,8 +77,11 @@ public class ConnectorInventoryLocator
         return exportInventory;
     }
 
-    private IPositionInWorld findPositionByDirection(Direction direction)
+    private IPositionInWorld findPositionByDirection(
+        Direction direction,
+        IPositionInWorld positionInWorld
+    )
     {
-        return this.positionInWorld.offset(direction);
+        return positionInWorld.offset(direction);
     }
 }

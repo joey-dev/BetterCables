@@ -16,20 +16,18 @@ public class ConnectorNetworkSavedDataHandler
 {
     public static final String NETWORK_ID = "NetworkId";
     private final ConnectorSides connectorSides;
-    private final IPositionInWorld positionInWorld;
 
     public ConnectorNetworkSavedDataHandler(
-        ConnectorSides connectorSides,
-        IPositionInWorld positionInWorld
+        ConnectorSides connectorSides
     )
     {
         this.connectorSides = connectorSides;
-        this.positionInWorld = positionInWorld;
     }
 
     @Nullable
     public ConnectorNetwork retrieveNetworkFromNBT(
-        IData compound
+        IData compound,
+        IPositionInWorld positionInWorld
     )
     {
         int networkId = compound.loadInteger(NETWORK_ID);
@@ -39,19 +37,26 @@ public class ConnectorNetworkSavedDataHandler
 
         ConnectorNetwork foundNetwork = NetworkManager.createNewNetwork(compound.loadInteger(NETWORK_ID));
 
-        this.addInsertConnectorInformationToNetwork(foundNetwork);
-        this.addExtractConnectorInformationToNetwork(foundNetwork);
+        this.addInsertConnectorInformationToNetwork(
+            foundNetwork,
+            positionInWorld
+        );
+        this.addExtractConnectorInformationToNetwork(
+            foundNetwork,
+            positionInWorld
+        );
 
         return foundNetwork;
     }
 
     private void addInsertConnectorInformationToNetwork(
-        ConnectorNetwork network
+        ConnectorNetwork network,
+        IPositionInWorld positionInWorld
     )
     {
         if (connectorSides.isInsertEnabled(Direction.NORTH)) {
             network.addInsert(
-                this.positionInWorld.offset(Direction.NORTH),
+                positionInWorld.offset(Direction.NORTH),
                 connectorSides.connectorSettings(Direction.NORTH)
             );
         } else {
@@ -60,7 +65,7 @@ public class ConnectorNetworkSavedDataHandler
 
         if (connectorSides.isInsertEnabled(Direction.EAST)) {
             network.addInsert(
-                this.positionInWorld.offset(Direction.EAST),
+                positionInWorld.offset(Direction.EAST),
                 connectorSides.connectorSettings(Direction.EAST)
             );
         } else {
@@ -69,7 +74,7 @@ public class ConnectorNetworkSavedDataHandler
 
         if (connectorSides.isInsertEnabled(Direction.SOUTH)) {
             network.addInsert(
-                this.positionInWorld.offset(Direction.SOUTH),
+                positionInWorld.offset(Direction.SOUTH),
                 connectorSides.connectorSettings(Direction.SOUTH)
             );
         } else {
@@ -78,7 +83,7 @@ public class ConnectorNetworkSavedDataHandler
 
         if (connectorSides.isInsertEnabled(Direction.WEST)) {
             network.addInsert(
-                this.positionInWorld.offset(Direction.WEST),
+                positionInWorld.offset(Direction.WEST),
                 connectorSides.connectorSettings(Direction.WEST)
             );
         } else {
@@ -87,7 +92,7 @@ public class ConnectorNetworkSavedDataHandler
 
         if (connectorSides.isInsertEnabled(Direction.UP)) {
             network.addInsert(
-                this.positionInWorld.offset(Direction.UP),
+                positionInWorld.offset(Direction.UP),
                 connectorSides.connectorSettings(Direction.UP)
             );
         } else {
@@ -96,7 +101,7 @@ public class ConnectorNetworkSavedDataHandler
 
         if (connectorSides.isInsertEnabled(Direction.DOWN)) {
             network.addInsert(
-                this.positionInWorld.offset(Direction.DOWN),
+                positionInWorld.offset(Direction.DOWN),
                 connectorSides.connectorSettings(Direction.DOWN)
             );
         } else {
@@ -105,12 +110,13 @@ public class ConnectorNetworkSavedDataHandler
     }
 
     private void addExtractConnectorInformationToNetwork(
-        ConnectorNetwork network
+        ConnectorNetwork network,
+        IPositionInWorld positionInWorld
     )
     {
         if (connectorSides.isExtractEnabled(Direction.NORTH)) {
             network.addExtract(
-                this.positionInWorld.offset(Direction.NORTH),
+                positionInWorld.offset(Direction.NORTH),
                 connectorSides.connectorSettings(Direction.NORTH)
             );
         } else {
@@ -119,7 +125,7 @@ public class ConnectorNetworkSavedDataHandler
 
         if (connectorSides.isExtractEnabled(Direction.EAST)) {
             network.addExtract(
-                this.positionInWorld.offset(Direction.EAST),
+                positionInWorld.offset(Direction.EAST),
                 connectorSides.connectorSettings(Direction.EAST)
             );
         } else {
@@ -128,7 +134,7 @@ public class ConnectorNetworkSavedDataHandler
 
         if (connectorSides.isExtractEnabled(Direction.SOUTH)) {
             network.addExtract(
-                this.positionInWorld.offset(Direction.SOUTH),
+                positionInWorld.offset(Direction.SOUTH),
                 connectorSides.connectorSettings(Direction.SOUTH)
             );
         } else {
@@ -137,7 +143,7 @@ public class ConnectorNetworkSavedDataHandler
 
         if (connectorSides.isExtractEnabled(Direction.WEST)) {
             network.addExtract(
-                this.positionInWorld.offset(Direction.WEST),
+                positionInWorld.offset(Direction.WEST),
                 connectorSides.connectorSettings(Direction.WEST)
             );
         } else {
@@ -146,7 +152,7 @@ public class ConnectorNetworkSavedDataHandler
 
         if (connectorSides.isExtractEnabled(Direction.UP)) {
             network.addExtract(
-                this.positionInWorld.offset(Direction.UP),
+                positionInWorld.offset(Direction.UP),
                 connectorSides.connectorSettings(Direction.UP)
             );
         } else {
@@ -155,7 +161,7 @@ public class ConnectorNetworkSavedDataHandler
 
         if (connectorSides.isExtractEnabled(Direction.DOWN)) {
             network.addExtract(
-                this.positionInWorld.offset(Direction.DOWN),
+                positionInWorld.offset(Direction.DOWN),
                 connectorSides.connectorSettings(Direction.DOWN)
             );
         } else {

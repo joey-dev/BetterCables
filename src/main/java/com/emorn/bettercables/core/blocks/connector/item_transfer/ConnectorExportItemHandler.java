@@ -4,13 +4,13 @@ import com.emorn.bettercables.contract.common.IInventory;
 import com.emorn.bettercables.contract.common.IItemStack;
 import com.emorn.bettercables.contract.common.IPositionInWorld;
 import com.emorn.bettercables.contract.common.IWorld;
-import com.emorn.bettercables.core.blocks.connector.settings.ConnectorNetworkSettingsService;
-import com.emorn.bettercables.core.blocks.connector.settings.ConnectorSides;
 import com.emorn.bettercables.core.blocks.connector.IConnectorNetworkService;
-import com.emorn.bettercables.core.common.Direction;
 import com.emorn.bettercables.core.blocks.connector.network.ConnectorNetwork;
-import com.emorn.bettercables.core.blocks.connector.settings.ConnectorSide;
+import com.emorn.bettercables.core.blocks.connector.settings.ConnectorNetworkSettingsService;
 import com.emorn.bettercables.core.blocks.connector.settings.ConnectorSettings;
+import com.emorn.bettercables.core.blocks.connector.settings.ConnectorSide;
+import com.emorn.bettercables.core.blocks.connector.settings.ConnectorSides;
+import com.emorn.bettercables.core.common.Direction;
 import mcp.MethodsReturnNonnullByDefault;
 
 import javax.annotation.Nullable;
@@ -32,8 +32,6 @@ public class ConnectorExportItemHandler
     private final ConnectorNetworkSettingsService connectorNetworkSettingsService;
 
     public ConnectorExportItemHandler(
-        IPositionInWorld positionInWorld,
-        IWorld world,
         ConnectorSides connectorSides,
         IConnectorNetworkService connectorNetworkService
     )
@@ -41,16 +39,17 @@ public class ConnectorExportItemHandler
         this.connectorSides = connectorSides;
         this.connectorNetworkService = connectorNetworkService;
         this.inventoryService = new InventoryService();
-        this.connectorInventoryLocator = new ConnectorInventoryLocator(
-            positionInWorld,
-            world
-        );
+        this.connectorInventoryLocator = new ConnectorInventoryLocator();
         this.connectorNetworkSettingsService = new ConnectorNetworkSettingsService(
             connectorSides
         );
     }
 
-    public void invoke(Direction direction)
+    public void invoke(
+        Direction direction,
+        IPositionInWorld positionInWorld,
+        IWorld world
+    )
     {
         if (this.connectorNetworkService.isNetworkDisabled()) {
             return;
@@ -63,7 +62,12 @@ public class ConnectorExportItemHandler
             return;
         }
 
-        IInventory importInventory = this.connectorInventoryLocator.findImportInventory(direction, network, nextIndex);
+        IInventory importInventory = this.connectorInventoryLocator.findImportInventory(
+            direction,
+            network,
+            nextIndex,
+            world
+        );
         if (importInventory == null) {
             return;
         }
@@ -78,7 +82,11 @@ public class ConnectorExportItemHandler
             return;
         }
 
-        IInventory exportInventory = this.connectorInventoryLocator.findExportInventory(direction);
+        IInventory exportInventory = this.connectorInventoryLocator.findExportInventory(
+            direction,
+            positionInWorld,
+            world
+        );
         if (exportInventory == null) {
             return;
         }

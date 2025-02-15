@@ -18,19 +18,20 @@ public class ConnectorSavedDataHandler
 
     public ConnectorSavedDataHandler(
         ConnectorSides connectorSides,
-        IPositionInWorld positionInWorld,
         ConnectorNetworkHandler connectorNetworkHandler
     )
     {
         this.connectorSides = connectorSides;
         this.connectorNetworkHandler = connectorNetworkHandler;
         this.connectorNetworkSavedDataHandler = new ConnectorNetworkSavedDataHandler(
-            connectorSides,
-            positionInWorld
+            connectorSides
         );
     }
 
-    public void readFromNBT(IData compound)
+    public void readFromNBT(
+        IData compound,
+        IPositionInWorld positionInWorld
+    )
     {
         this.connectorSides.connectorSettings(Direction.NORTH).deserializeNBT(compound, "north");
         this.connectorSides.connectorSettings(Direction.EAST).deserializeNBT(compound, "east");
@@ -40,7 +41,10 @@ public class ConnectorSavedDataHandler
         this.connectorSides.connectorSettings(Direction.DOWN).deserializeNBT(compound, "down");
 
         this.connectorNetworkHandler.setNetwork(
-            this.connectorNetworkSavedDataHandler.retrieveNetworkFromNBT(compound)
+            this.connectorNetworkSavedDataHandler.retrieveNetworkFromNBT(
+                compound,
+                positionInWorld
+            )
         );
     }
 

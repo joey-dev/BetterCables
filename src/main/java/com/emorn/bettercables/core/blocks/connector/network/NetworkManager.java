@@ -1,9 +1,9 @@
 package com.emorn.bettercables.core.blocks.connector.network;
 
-import com.emorn.bettercables.api.v1_12_2.blocks.connector.ForgeTileEntityConnector;
 import com.emorn.bettercables.contract.common.IBlock;
 import com.emorn.bettercables.contract.common.IPositionInWorld;
 import com.emorn.bettercables.contract.common.IWorld;
+import com.emorn.bettercables.core.common.Logger;
 import mcp.MethodsReturnNonnullByDefault;
 
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -143,12 +143,12 @@ public class NetworkManager
             }
 
             if (neighborBlock.isBlockConnector()) {
-                ConnectorNetwork oldNetwork = (
-                    (ForgeTileEntityConnector) Objects.requireNonNull(
-                        worldIn.getTileEntity(neighborIPositionInWorldPosition)
-                    )
-                )
-                    .getNetwork();
+                ConnectorNetwork oldNetwork = worldIn.getTileEntity(neighborIPositionInWorldPosition).getNetworkIfConnector();
+
+                if (oldNetwork == null) {
+                    Logger.error("Connector has no network");
+                    continue;
+                }
 
                 if (oldNetwork.id() == network.id()) {
                     continue;
@@ -183,11 +183,12 @@ public class NetworkManager
             }
 
             if (neighborBlock.isBlockConnector()) {
-                ConnectorNetwork network = (
-                    (ForgeTileEntityConnector) Objects.requireNonNull(
-                        worldIn.getTileEntity(neighborIPositionInWorldPosition)
-                    )
-                ).getNetwork();
+                ConnectorNetwork network  = worldIn.getTileEntity(neighborIPositionInWorldPosition).getNetworkIfConnector();
+
+                if (network == null) {
+                    Logger.error("Connector has no network");
+                    continue;
+                }
 
                 networks.putIfAbsent(network.id(), network);
 

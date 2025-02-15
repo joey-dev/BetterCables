@@ -19,12 +19,12 @@ public class World implements IWorld
     {
         return new TileEntity(
             this.forgeWorld.getTileEntity(
-            new BlockPos(
-                position.getX(),
-                position.getY(),
-                position.getZ()
+                new BlockPos(
+                    position.getX(),
+                    position.getY(),
+                    position.getZ()
+                )
             )
-        )
         );
     }
 

@@ -23,6 +23,13 @@ public class PerformanceTester
 
     public static void end(String test)
     {
+        if (!results.containsKey(test)) {
+            return;
+        }
+        if (results.get(test).isEmpty()){
+            return;
+        }
+
         long startTime = results.get(test).remove(results.get(test).size() - 1);
         long endTime = System.nanoTime();
         results.get(test).add(endTime - startTime);

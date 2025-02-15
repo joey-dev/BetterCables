@@ -586,7 +586,6 @@ public class GuiConnector extends GuiContainer
         tileSettings.changeFilterItem(
             guiFilter.id - FILTER_START_ID,
             this.isInsertSettingsOpen,
-            // todo fix
             new com.emorn.bettercables.api.v1_12_2.common.ItemStack(guiFilter.filteredItem())
         );
 

@@ -488,6 +488,8 @@ public class BlockConnector extends BaseCable implements IHasModel
                 connector.settings(direction)
             );
 
+            // todo also remove extract...
+
             connector.settings(direction).changeInsertEnabled(false);
 
             //network.reCalculateAllPossibleSlots(); // todo, this has to happen more often, as inventories can change

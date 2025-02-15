@@ -18,4 +18,7 @@ public interface IPositionInWorld
     public IPositionInWorld down();
     public IPositionInWorld offset(Direction facing);
     public IPositionInWorld offset(Direction facing, int n);
+
+    public String toString();
+    public String toKey();
 }

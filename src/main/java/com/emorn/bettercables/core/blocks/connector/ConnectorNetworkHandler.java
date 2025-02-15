@@ -13,17 +13,10 @@ public class ConnectorNetworkHandler implements IConnectorNetworkService
 {
     @Nullable
     private ConnectorNetwork network = null;
-    private final IPositionInWorld positionInWorld;
-
-    public ConnectorNetworkHandler(
-        IPositionInWorld positionInWorld
-    )
-    {
-        this.positionInWorld = positionInWorld;
-    }
 
     public void tick(
-        boolean isClient
+        boolean isClient,
+        IPositionInWorld positionInWorld
     )
     {
         if (!isClient) {

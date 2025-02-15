@@ -42,6 +42,21 @@ public class ForgeTileEntityConnector extends TileEntity implements ITickable, I
     {
         super();
 
+        connectorNetworkHandler = new ConnectorNetworkHandler();
+
+        connectorUpdateHandler = new ConnectorUpdateHandler(
+            connectorNetworkHandler
+        );
+
+        connectorSavedDataHandler = new ConnectorSavedDataHandler(
+            connectorUpdateHandler.getConnectorSides(),
+            connectorNetworkHandler
+        );
+    }
+
+    @Override
+    public void update()
+    {
         BlockPos position = this.getPos();
         World worldIn = this.getWorld();
         PositionInWorld positionInWorld = new PositionInWorld(
@@ -50,33 +65,16 @@ public class ForgeTileEntityConnector extends TileEntity implements ITickable, I
             position.getZ()
         );
 
-        connectorNetworkHandler = new ConnectorNetworkHandler(
-            positionInWorld
-        );
-
-        connectorUpdateHandler = new ConnectorUpdateHandler(
-            positionInWorld,
-            new com.emorn.bettercables.api.v1_12_2.common.World(worldIn),
-            connectorNetworkHandler
-        );
-
-        connectorSavedDataHandler = new ConnectorSavedDataHandler(
-            connectorUpdateHandler.getConnectorSides(),
-            positionInWorld,
-            connectorNetworkHandler
-        );
-    }
-
-    @Override
-    public void update()
-    {
         boolean isClient = !this.getWorld().isRemote;
 
         connectorUpdateHandler.invoke(
-            isClient
+            isClient,
+            positionInWorld,
+            new com.emorn.bettercables.api.v1_12_2.common.World(worldIn)
         );
         connectorNetworkHandler.tick(
-            isClient
+            isClient,
+            positionInWorld
         );
     }
 
@@ -102,8 +100,16 @@ public class ForgeTileEntityConnector extends TileEntity implements ITickable, I
     {
         super.readFromNBT(compound);
 
+        BlockPos position = this.getPos();
+        PositionInWorld positionInWorld = new PositionInWorld(
+            position.getX(),
+            position.getY(),
+            position.getZ()
+        );
+
         this.connectorSavedDataHandler.readFromNBT(
-            new Data(compound)
+            new Data(compound),
+            positionInWorld
         );
 
         if (compound.hasKey(CUSTOM_NAME, Constants.NBT.TAG_STRING)) {

@@ -38,6 +38,7 @@ public class ConnectorManager
             return null;
         }
 
+        // no pos (value)
         return (IPositionInWorld) this.insertConnectorSettings.values().toArray()[index];
     }
 

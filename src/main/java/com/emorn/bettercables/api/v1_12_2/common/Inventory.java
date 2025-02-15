@@ -7,12 +7,12 @@ import net.minecraftforge.items.CapabilityItemHandler;
 public class Inventory implements IInventory
 {
     private final net.minecraft.inventory.IInventory forgeInventory;
-    private final TileEntity forgeInventoryEntity;
+    private final net.minecraft.tileentity.TileEntity forgeInventoryEntity;
 
     public Inventory(net.minecraft.inventory.IInventory forgeInventory)
     {
         this.forgeInventory = forgeInventory;
-        this.forgeInventoryEntity = (TileEntity) forgeInventory;
+        this.forgeInventoryEntity = (net.minecraft.tileentity.TileEntity) forgeInventory;
     }
 
     public void markDirty()

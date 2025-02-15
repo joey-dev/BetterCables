@@ -91,7 +91,7 @@ public class PossibleSlotCalculator
         Map<ConnectorSettings, IPositionInWorld> insertConnectorSettings
     )
     {
-        insertConnectorSettings.forEach((k, v) -> {
+        new HashMap<>(insertConnectorSettings).forEach((k, v) -> {
             this.possibleSlotsToExtract.putIfAbsent(extractSettings, new HashMap<>());
 
             List<List<Integer>> possibleSlots = this.calculate(extractSettings, k);

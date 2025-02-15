@@ -110,4 +110,14 @@ public class PositionInWorld implements IPositionInWorld
             this.getZ() + enumFacing.getFrontOffsetZ() * n
         );
     }
+
+    public String toString()
+    {
+        return "PositionInWorld{x=" + this.getX() + ", y=" + this.getY() + ", z=" + this.getZ() + "}";
+    }
+
+    public String toKey()
+    {
+        return this.getX() + "," + this.getY() + "," + this.getZ();
+    }
 }

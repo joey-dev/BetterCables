@@ -2,7 +2,10 @@ package com.emorn.bettercables.api.v1_12_2.gui;
 
 import com.emorn.bettercables.api.v1_12_2.blocks.connector.Data;
 import com.emorn.bettercables.api.v1_12_2.blocks.connector.ForgeTileEntityConnector;
+import com.emorn.bettercables.api.v1_12_2.common.PositionInWorld;
 import com.emorn.bettercables.contract.blocks.connector.IData;
+import com.emorn.bettercables.contract.common.IPositionInWorld;
+import com.emorn.bettercables.core.blocks.connector.network.ConnectorNetwork;
 import com.emorn.bettercables.core.blocks.connector.settings.ConnectorSettings;
 import com.emorn.bettercables.core.common.Direction;
 import com.google.common.collect.ImmutableMap;
@@ -28,6 +31,7 @@ public class PacketUpdateConnector implements IMessage
     private IData settingsNBT;
     private boolean didInsertChange;
     private boolean didExtractChange;
+    private IPositionInWorld inventoryPosition;
 
     public PacketUpdateConnector()
     {
@@ -47,6 +51,7 @@ public class PacketUpdateConnector implements IMessage
         this.direction = direction;
         this.didInsertChange = didInsertChange;
         this.didExtractChange = didExtractChange;
+        this.inventoryPosition = new PositionInWorld(pos.getX(), pos.getY(), pos.getZ()).offset(direction);
     }
 
     @Override
@@ -71,6 +76,7 @@ public class PacketUpdateConnector implements IMessage
 
         this.didInsertChange = buf.readBoolean();
         this.didExtractChange = buf.readBoolean();
+        this.inventoryPosition = new PositionInWorld(pos.getX(), pos.getY(), pos.getZ()).offset(direction);
     }
 
     @Override
@@ -104,6 +110,25 @@ public class PacketUpdateConnector implements IMessage
                     ConnectorSettings settings = connector.settings(message.direction);
 
                     settings.deserializeNBT(message.settingsNBT, "");
+
+                    ConnectorNetwork network = connector.getNetwork();
+                    if (message.didExtractChange) {
+                        if (settings.isExtractEnabled()) {
+                            network.addExtract(message.inventoryPosition, settings);
+                        } else {
+                            network.removeExtract(settings);
+                        }
+                    }
+
+                    if (message.didInsertChange) {
+                        if (settings.isInsertEnabled()) {
+                            System.out.println("Insert operation performed for " + message);
+                            network.addInsert(message.inventoryPosition, settings);
+                        } else {
+                            network.removeInsert(settings);
+                        }
+                    }
+
                     connector.markDirty();
                 }
             });
