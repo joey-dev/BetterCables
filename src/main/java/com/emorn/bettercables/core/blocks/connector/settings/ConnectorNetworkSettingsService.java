@@ -51,6 +51,6 @@ public class ConnectorNetworkSettingsService
             return null;
         }
 
-        return connectorSide.connectorSettings;
+        return connectorSide.connectorSettings();
     }
 }

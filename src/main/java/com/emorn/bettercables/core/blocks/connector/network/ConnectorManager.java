@@ -29,7 +29,7 @@ public class ConnectorManager
     {
         int totalItems = this.insertConnectorSettings.size();
 
-        if (index >= totalItems) {
+        if (index >= totalItems || index < 0) {
             return null;
         }
 
@@ -47,7 +47,7 @@ public class ConnectorManager
     {
         int totalItems = this.insertConnectorSettings.size();
 
-        if (index >= totalItems) {
+        if (index >= totalItems || index < 0) {
             return null;
         }
 

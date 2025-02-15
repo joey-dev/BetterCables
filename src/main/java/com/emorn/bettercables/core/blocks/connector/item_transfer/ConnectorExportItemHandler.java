@@ -103,7 +103,7 @@ public class ConnectorExportItemHandler
         }
 
         List<List<Integer>> possibleIndexes = network.getPossibleSlots(
-            connectorSide.connectorSettings,
+            connectorSide.connectorSettings(),
             inventorySettings
         );
 

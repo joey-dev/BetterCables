@@ -70,7 +70,7 @@ public class ConnectorSides
 
     public ConnectorSettings connectorSettings(Direction direction)
     {
-        return this.connectorSideByDirection(direction).connectorSettings;
+        return this.connectorSideByDirection(direction).connectorSettings();
     }
 
     private ConnectorSide connectorSideByDirection(Direction direction)
@@ -107,7 +107,7 @@ public class ConnectorSides
     {
         ConnectorSide connectorSide = this.findConnectorByDirection(direction);
         if (connectorSide != null) {
-            return connectorSide.connectorSettings.isInsertEnabled();
+            return connectorSide.connectorSettings().isInsertEnabled();
         }
         return false;
     }
@@ -116,7 +116,7 @@ public class ConnectorSides
     {
         ConnectorSide connectorSide = this.findConnectorByDirection(direction);
         if (connectorSide != null) {
-            return connectorSide.connectorSettings.isExtractEnabled();
+            return connectorSide.connectorSettings().isExtractEnabled();
         }
         return false;
     }
