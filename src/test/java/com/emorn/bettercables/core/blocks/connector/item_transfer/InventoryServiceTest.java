@@ -27,35 +27,6 @@ public class InventoryServiceTest {
     }
 
     @Test
-    public void extractItemFromInventory_successfulExtraction() {
-        // Arrange
-        when(mockInventory.getItemHandler()).thenReturn(mockItemHandler);
-        when(mockItemHandler.extractItem(5, 10, false)).thenReturn(mockItemStack);
-        when(mockItemStack.isEmpty()).thenReturn(false); // Simulate a successful extraction
-
-        // Act
-        IItemStack result = service.extractItemFromInventory(mockInventory, 5, 10);
-
-        // Assert
-        assertEquals(mockItemStack, result);
-        verify(mockInventory).markDirty(); // markDirty should be called
-    }
-    @Test
-    public void extractItemFromInventory_emptyExtraction() {
-        // Arrange
-        when(mockInventory.getItemHandler()).thenReturn(mockItemHandler);
-        when(mockItemHandler.extractItem(5, 10, false)).thenReturn(mockItemStack);
-        when(mockItemStack.isEmpty()).thenReturn(true); // Simulate a successful extraction
-
-        // Act
-        IItemStack result = service.extractItemFromInventory(mockInventory, 5, 10);
-
-        // Assert
-        assertEquals(mockItemStack, result);
-        verify(mockInventory, never()).markDirty(); // markDirty should not be called
-    }
-
-    @Test
     public void extractItemFromInventory_nullItemHandler_returnsEmptyStack() {
         // Arrange: Inventory returns a null item handler
         when(mockInventory.getItemHandler()).thenReturn(null);

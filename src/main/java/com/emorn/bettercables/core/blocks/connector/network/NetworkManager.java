@@ -13,7 +13,7 @@ import java.util.*;
 @ParametersAreNonnullByDefault
 public class NetworkManager
 {
-    private static final Map<IPositionInWorld, Boolean> foundCablePositions = new HashMap<>();
+    private static final Map<String, Boolean> foundCablePositions = new HashMap<>();
     private static final Map<Integer, ConnectorNetwork> createdNetworksById = new HashMap<>();
     private static int lastId = 1;
 
@@ -58,7 +58,7 @@ public class NetworkManager
             return false;
         }
 
-        foundCablePositions.put(pos, true);
+        foundCablePositions.put(pos.toKey(), true);
 
         Map<Integer, ConnectorNetwork> networks = findNetworks(
             worldIn,
@@ -96,7 +96,7 @@ public class NetworkManager
     {
         foundCablePositions.clear();
 
-        foundCablePositions.put(position, true);
+        foundCablePositions.put(position.toKey(), true);
         List<IPositionInWorld> neighborIPositionInWorldPositions = getPossibleConnectedBlocks(position);
 
         List<IPositionInWorld> actualNeighborIPositionInWorldPositions = new ArrayList<>();
@@ -131,11 +131,11 @@ public class NetworkManager
         List<IPositionInWorld> neighborIPositionInWorldPositions = getPossibleConnectedBlocks(position);
 
         for (IPositionInWorld neighborIPositionInWorldPosition : neighborIPositionInWorldPositions) {
-            if (foundCablePositions.containsKey(neighborIPositionInWorldPosition)) {
+            if (foundCablePositions.containsKey(neighborIPositionInWorldPosition.toKey())) {
                 continue;
             }
 
-            foundCablePositions.put(neighborIPositionInWorldPosition, true);
+            foundCablePositions.put(neighborIPositionInWorldPosition.toKey(), true);
             IBlock neighborBlock = worldIn.getBlockState(neighborIPositionInWorldPosition).getBlock();
 
             if (!(neighborBlock.isBlockConnector()) && !(neighborBlock.isBlockCable())) {
@@ -171,11 +171,11 @@ public class NetworkManager
         List<IPositionInWorld> neighborIPositionInWorldPositions = getPossibleConnectedBlocks(pos);
 
         for (IPositionInWorld neighborIPositionInWorldPosition : neighborIPositionInWorldPositions) {
-            if (foundCablePositions.containsKey(neighborIPositionInWorldPosition)) {
+            if (foundCablePositions.containsKey(neighborIPositionInWorldPosition.toKey())) {
                 continue;
             }
 
-            foundCablePositions.put(neighborIPositionInWorldPosition, true);
+            foundCablePositions.put(neighborIPositionInWorldPosition.toKey(), true);
             IBlock neighborBlock = worldIn.getBlockState(neighborIPositionInWorldPosition).getBlock();
 
             if (!neighborBlock.isBaseCable()) {
@@ -183,7 +183,7 @@ public class NetworkManager
             }
 
             if (neighborBlock.isBlockConnector()) {
-                ConnectorNetwork network  = worldIn.getTileEntity(neighborIPositionInWorldPosition).getNetworkIfConnector();
+                ConnectorNetwork network = worldIn.getTileEntity(neighborIPositionInWorldPosition).getNetworkIfConnector();
 
                 if (network == null) {
                     Logger.error("Connector has no network");

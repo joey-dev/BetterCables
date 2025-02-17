@@ -15,10 +15,7 @@ import mcp.MethodsReturnNonnullByDefault;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
@@ -134,17 +131,20 @@ public class ConnectorExportItemHandler
         IInventory importInventory
     )
     {
-        // todo maybe a queue
-        Map<Integer, Boolean> cannotExtractPositions = new HashMap<>();
+        Set<Integer> cannotExtractPositions = new HashSet<>();
+        Set<Integer> cannotInsertPositions = new HashSet<>();
 
         for (List<Integer> possibleIndex : possibleIndexes) {
-            if (Boolean.TRUE.equals(cannotExtractPositions.get(possibleIndex.get(1)))) {
+            int exportSlot = possibleIndex.get(1);
+            int importSlot = possibleIndex.get(0);
+
+            if (cannotExtractPositions.contains(exportSlot) || cannotInsertPositions.contains(importSlot)) {
                 continue;
             }
 
             IItemStack items = this.inventoryService.extractItemFromInventory(exportInventory, possibleIndex.get(1), 1);
             if (items.isEmpty()) {
-                cannotExtractPositions.put(possibleIndex.get(1), true);
+                cannotExtractPositions.add(possibleIndex.get(1));
                 continue;
             }
 
@@ -156,6 +156,7 @@ public class ConnectorExportItemHandler
             if (itemsNotInserted.isEmpty()) {
                 return;
             }
+            cannotInsertPositions.add(possibleIndex.get(0));
 
             this.inventoryService.insertItemIntoInventory(exportInventory, possibleIndex.get(1), itemsNotInserted);
 

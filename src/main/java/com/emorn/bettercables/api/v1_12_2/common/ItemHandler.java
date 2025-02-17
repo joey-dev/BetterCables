@@ -22,6 +22,8 @@ public class ItemHandler implements IItemHandler
     {
         ItemStack itemStack = (ItemStack) stack;
 
+        //this.forgeItemHandler.getSlots();
+
         return new ItemStack(
             this.forgeItemHandler.insertItem(
                 slot,

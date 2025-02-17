@@ -1,18 +1,21 @@
 package com.emorn.bettercables.api.v1_12_2.blocks.connector;
 
 import com.emorn.bettercables.Main;
+import com.emorn.bettercables.api.v1_12_2.IHasModel;
+import com.emorn.bettercables.api.v1_12_2.blocks.AxisAlignedBoundingBoxConverter;
 import com.emorn.bettercables.api.v1_12_2.blocks.BaseCable;
+import com.emorn.bettercables.api.v1_12_2.blocks.cable.BlockCable;
 import com.emorn.bettercables.api.v1_12_2.common.PositionInWorld;
+import com.emorn.bettercables.api.v1_12_2.init.BlockInit;
 import com.emorn.bettercables.core.blocks.cable.CableAxisAlignedBoundingBox;
 import com.emorn.bettercables.core.blocks.connector.ConnectorAxisAlignedBoundingBox;
 import com.emorn.bettercables.core.blocks.connector.network.ConnectorNetwork;
 import com.emorn.bettercables.core.blocks.connector.network.NetworkManager;
 import com.emorn.bettercables.core.common.Direction;
-import com.emorn.bettercables.api.v1_12_2.init.BlockInit;
-import com.emorn.bettercables.api.v1_12_2.blocks.cable.BlockCable;
-import com.emorn.bettercables.api.v1_12_2.blocks.AxisAlignedBoundingBoxConverter;
-import com.emorn.bettercables.api.v1_12_2.IHasModel;
 import com.emorn.bettercables.core.common.Reference;
+import com.emorn.bettercables.core.jobs.BackgroundJobQueue;
+import com.emorn.bettercables.core.jobs.recalculatePossibleSlotsBasedOnInventoryChange.RecalculatePossibleSlotsBasedOnInventoryChange;
+import com.emorn.bettercables.core.jobs.recalculatePossibleSlotsBasedOnInventoryChange.RecalculatePossibleSlotsBasedOnInventoryChangeInput;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockAir;
@@ -24,7 +27,6 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -389,8 +391,7 @@ public class BlockConnector extends BaseCable implements IHasModel
         return new ForgeTileEntityConnector();
     }
 
-    @Override
-    public void onNeighborChange(
+    public void onNeighborChangea(
         IBlockAccess world,
         BlockPos pos,
         BlockPos neighbor
@@ -457,21 +458,32 @@ public class BlockConnector extends BaseCable implements IHasModel
         TileEntity tileEntity = world.getTileEntity(pos);
         if (neighborTileEntity instanceof IInventory) {
             if (tileEntity instanceof ForgeTileEntityConnector) {
-                ForgeTileEntityConnector connector = (ForgeTileEntityConnector) tileEntity;
-                ConnectorNetwork network = connector.getNetwork();
-                int slotCount = ((IInventory) neighborTileEntity).getSizeInventory();
+                BackgroundJobQueue.getInstance().addToQueue(
+                    RecalculatePossibleSlotsBasedOnInventoryChange.class,
+                    new RecalculatePossibleSlotsBasedOnInventoryChangeInput(
+                        (ForgeTileEntityConnector) tileEntity,
+                        (IInventory) neighborTileEntity,
+                        direction,
+                        world,
+                        neighbor
+                    )
+                );
 
-                if (neighborTileEntity instanceof TileEntityChest) {
-                    for (EnumFacing facing : EnumFacing.HORIZONTALS) {
-                        TileEntity chestNeighbor = world.getTileEntity(neighbor.offset(facing));
-                        if (chestNeighbor instanceof TileEntityChest) {
-                            slotCount += ((TileEntityChest) chestNeighbor).getSizeInventory();
-                            break; // Only add once, since there should be one extra chest max
-                        }
-                    }
-                }
-
-                network.updateSlotCount(slotCount, connector.settings(direction));
+//                ForgeTileEntityConnector connector = (ForgeTileEntityConnector) tileEntity;
+//                ConnectorNetwork network = connector.getNetwork();
+//                int slotCount = ((IInventory) neighborTileEntity).getSizeInventory();
+//
+//                if (neighborTileEntity instanceof TileEntityChest) {
+//                    for (EnumFacing facing : EnumFacing.HORIZONTALS) {
+//                        TileEntity chestNeighbor = world.getTileEntity(neighbor.offset(facing));
+//                        if (chestNeighbor instanceof TileEntityChest) {
+//                            slotCount += ((TileEntityChest) chestNeighbor).getSizeInventory();
+//                            break; // Only add once, since there should be one extra chest max
+//                        }
+//                    }
+//                }
+//
+//                network.updateSlotCount(slotCount, connector.settings(direction));
             }
         }
 

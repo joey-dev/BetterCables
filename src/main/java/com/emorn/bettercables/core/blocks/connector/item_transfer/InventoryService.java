@@ -28,7 +28,12 @@ public class InventoryService
 
         IItemStack extracted;
         try {
-            // todo might want to check with simulate on first?
+            IItemStack triedToExtract = exportInventory.extractItem(slot, amount, true);
+
+            if (triedToExtract.isEmpty()) {
+                return new EmptyItemStack();
+            }
+
             extracted = exportInventory.extractItem(slot, amount, false);
         } catch (ArrayIndexOutOfBoundsException e) {
             Logger.error("Failed to extract item from inventory.");

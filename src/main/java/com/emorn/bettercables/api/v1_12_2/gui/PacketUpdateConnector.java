@@ -129,7 +129,7 @@ public class PacketUpdateConnector implements IMessage
                         }
                     }
 
-                    connector.markDirty();
+                    //connector.markDirty();
                 }
             });
             return null;
