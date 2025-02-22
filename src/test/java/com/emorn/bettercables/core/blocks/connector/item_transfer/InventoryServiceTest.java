@@ -5,6 +5,7 @@ import com.emorn.bettercables.contract.common.IItemHandler;
 import com.emorn.bettercables.contract.common.IItemStack;
 import com.emorn.bettercables.core.common.EmptyItemStack;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -24,6 +25,38 @@ public class InventoryServiceTest {
         mockInventory = mock(IInventory.class);
         mockItemHandler = mock(IItemHandler.class);
         mockItemStack = mock(IItemStack.class);
+    }
+
+    @Test
+    @Ignore
+    public void extractItemFromInventory_successfulExtraction() {
+        // Arrange
+        when(mockInventory.getItemHandler()).thenReturn(mockItemHandler);
+        when(mockItemHandler.extractItem(5, 10, false)).thenReturn(mockItemStack);
+        when(mockItemStack.isEmpty()).thenReturn(false); // Simulate a successful extraction
+
+        // Act
+        IItemStack result = service.extractItemFromInventory(mockInventory, 5, 10);
+
+        // Assert
+        assertEquals(mockItemStack, result);
+        verify(mockInventory).markDirty(); // markDirty should be called
+    }
+
+    @Test
+    @Ignore
+    public void extractItemFromInventory_emptyExtraction() {
+        // Arrange
+        when(mockInventory.getItemHandler()).thenReturn(mockItemHandler);
+        when(mockItemHandler.extractItem(5, 10, false)).thenReturn(mockItemStack);
+        when(mockItemStack.isEmpty()).thenReturn(true); // Simulate a successful extraction
+
+        // Act
+        IItemStack result = service.extractItemFromInventory(mockInventory, 5, 10);
+
+        // Assert
+        assertEquals(mockItemStack, result);
+        verify(mockInventory, never()).markDirty(); // markDirty should not be called
     }
 
     @Test

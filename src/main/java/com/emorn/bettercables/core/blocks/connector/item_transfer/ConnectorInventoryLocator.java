@@ -34,6 +34,11 @@ public class ConnectorInventoryLocator
         IInventory importInventory = this.findInventoryEntityByPosition(world, inventoryPosition);
         if (importInventory == null) {
             Logger.error("Failed to get inventory for import.");
+            /**
+             * todo now
+             * 1. disable insert
+             * 2. remove cache (in background)
+             */
             return null;
         }
         return importInventory;
@@ -47,7 +52,7 @@ public class ConnectorInventoryLocator
     {
         ITileEntity tileEntity = world.getTileEntity(inventoryPosition);
         if (!tileEntity.isInventory()) {
-            Logger.error("No inventory found at: " + inventoryPosition);
+            Logger.error("No inventory found at: " + inventoryPosition); // here
             return null;
         }
 
@@ -72,6 +77,11 @@ public class ConnectorInventoryLocator
         );
         if (exportInventory == null) {
             Logger.error("Failed to get inventory inventory for export.");
+            /**
+             * todo now
+             * 1. disable extract
+             * 2. remove cache (in background)
+             */
             return null;
         }
         return exportInventory;

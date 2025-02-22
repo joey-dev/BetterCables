@@ -7,7 +7,9 @@ import mcp.MethodsReturnNonnullByDefault;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @MethodsReturnNonnullByDefault
@@ -129,5 +131,15 @@ public class ConnectorManager
     public Map<ConnectorSettings, IPositionInWorld> findAllExtractConnectors()
     {
         return this.extractConnectorSettings;
+    }
+
+    public List<ConnectorSettings> findAllInsertConnectorSettings()
+    {
+        return new ArrayList<>(this.insertConnectorSettings.keySet());
+    }
+
+    public List<ConnectorSettings> findAllExtractConnectorSettings()
+    {
+        return new ArrayList<>(this.extractConnectorSettings.keySet());
     }
 }

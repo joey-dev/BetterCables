@@ -6,6 +6,8 @@ import com.emorn.bettercables.contract.common.IPositionInWorld;
 import com.emorn.bettercables.contract.common.IWorld;
 import com.emorn.bettercables.core.blocks.connector.IConnectorNetworkService;
 import com.emorn.bettercables.core.blocks.connector.network.ConnectorNetwork;
+import com.emorn.bettercables.core.blocks.connector.network.ExtractSlot;
+import com.emorn.bettercables.core.blocks.connector.network.InsertSlot;
 import com.emorn.bettercables.core.blocks.connector.settings.ConnectorNetworkSettingsService;
 import com.emorn.bettercables.core.blocks.connector.settings.ConnectorSettings;
 import com.emorn.bettercables.core.blocks.connector.settings.ConnectorSide;
@@ -14,10 +16,7 @@ import com.emorn.bettercables.core.common.Direction;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
@@ -233,8 +232,14 @@ public class ConnectorExportItemHandlerTest
         when(mockConnectorInventoryLocator.findExportInventory(any(), any(), any())).thenReturn(mockExportInventory);
         when(mockConnectorNetworkSettingsService.findImportSettings(any(), any(), anyInt())).thenReturn(
             mockImportSettings);
-        List<List<Integer>> slotPairs = Collections.singletonList(Arrays.asList(0, 0));
-        when(mockNetwork.getPossibleSlots(any(), any())).thenReturn(slotPairs);
+        List<ExtractSlot> slotPairs = new ArrayList<>();
+        List<InsertSlot> insertSlots = new ArrayList<>();
+        insertSlots.add(new InsertSlot(0));
+        ExtractSlot extractSlot = new ExtractSlot(0);
+        extractSlot.addInsert(mockImportSettings, insertSlots);
+
+        slotPairs.add(extractSlot);
+        when(mockNetwork.getPossibleSlots(any())).thenReturn(slotPairs);
 
         IItemStack mockItemStack = mock(IItemStack.class);
         when(mockItemStack.isEmpty()).thenReturn(false);
@@ -264,7 +269,7 @@ public class ConnectorExportItemHandlerTest
         when(mockConnectorInventoryLocator.findExportInventory(any(), any(), any())).thenReturn(mockExportInventory);
         when(mockConnectorNetworkSettingsService.findImportSettings(any(), any(), anyInt())).thenReturn(
             mockImportSettings);
-        when(mockNetwork.getPossibleSlots(any(), any())).thenReturn(Collections.emptyList());
+        when(mockNetwork.getPossibleSlots(any())).thenReturn(Collections.emptyList());
 
         handler.invoke(Direction.NORTH, mockPositionInWorld, mockWorld);
 
@@ -282,8 +287,14 @@ public class ConnectorExportItemHandlerTest
         when(mockConnectorInventoryLocator.findExportInventory(any(), any(), any())).thenReturn(mockExportInventory);
         when(mockConnectorNetworkSettingsService.findImportSettings(any(), any(), anyInt())).thenReturn(
             mockImportSettings);
-        List<List<Integer>> slotPairs = Collections.singletonList(Arrays.asList(0, 0));
-        when(mockNetwork.getPossibleSlots(any(), any())).thenReturn(slotPairs);
+        List<ExtractSlot> slotPairs = new ArrayList<>();
+        List<InsertSlot> insertSlots = new ArrayList<>();
+        insertSlots.add(new InsertSlot(0));
+        ExtractSlot extractSlot = new ExtractSlot(0);
+        extractSlot.addInsert(mockImportSettings, insertSlots);
+
+        slotPairs.add(extractSlot);
+        when(mockNetwork.getPossibleSlots(any())).thenReturn(slotPairs);
         IItemStack mockItemStack = mock(IItemStack.class);
         when(mockItemStack.isEmpty()).thenReturn(true);
         when(mockInventoryService.extractItemFromInventory(mockExportInventory, 0, 1)).thenReturn(mockItemStack);
@@ -304,8 +315,14 @@ public class ConnectorExportItemHandlerTest
         when(mockConnectorInventoryLocator.findExportInventory(any(), any(), any())).thenReturn(mockExportInventory);
         when(mockConnectorNetworkSettingsService.findImportSettings(any(), any(), anyInt())).thenReturn(
             mockImportSettings);
-        List<List<Integer>> slotPairs = Collections.singletonList(Arrays.asList(0, 0));
-        when(mockNetwork.getPossibleSlots(any(), any())).thenReturn(slotPairs);
+        List<ExtractSlot> slotPairs = new ArrayList<>();
+        List<InsertSlot> insertSlots = new ArrayList<>();
+        insertSlots.add(new InsertSlot(0));
+        ExtractSlot extractSlot = new ExtractSlot(0);
+        extractSlot.addInsert(mockImportSettings, insertSlots);
+
+        slotPairs.add(extractSlot);
+        when(mockNetwork.getPossibleSlots(any())).thenReturn(slotPairs);
 
         IItemStack mockItemStack = mock(IItemStack.class);
         when(mockItemStack.isEmpty()).thenReturn(false);
@@ -335,8 +352,19 @@ public class ConnectorExportItemHandlerTest
         when(mockConnectorInventoryLocator.findExportInventory(any(), any(), any())).thenReturn(mockExportInventory);
         when(mockConnectorNetworkSettingsService.findImportSettings(any(), any(), anyInt())).thenReturn(
             mockImportSettings);
-        List<List<Integer>> slotPairs = Arrays.asList(Arrays.asList(0, 0), Arrays.asList(1, 1));
-        when(mockNetwork.getPossibleSlots(any(), any())).thenReturn(slotPairs);
+        List<ExtractSlot> slotPairs = new ArrayList<>();
+        List<InsertSlot> insertSlots1 = new ArrayList<>();
+        List<InsertSlot> insertSlots2 = new ArrayList<>();
+        insertSlots1.add(new InsertSlot(0));
+        insertSlots2.add(new InsertSlot(1));
+        ExtractSlot extractSlot1 = new ExtractSlot(0);
+        extractSlot1.addInsert(mockImportSettings, insertSlots1);
+        ExtractSlot extractSlot2 = new ExtractSlot(1);
+        extractSlot2.addInsert(mockImportSettings, insertSlots2);
+
+        slotPairs.add(extractSlot1);
+        slotPairs.add(extractSlot2);
+        when(mockNetwork.getPossibleSlots(any())).thenReturn(slotPairs);
 
         IItemStack mockItemStack1 = mock(IItemStack.class);
         when(mockItemStack1.isEmpty()).thenReturn(false);
@@ -368,8 +396,19 @@ public class ConnectorExportItemHandlerTest
         when(mockConnectorInventoryLocator.findExportInventory(any(), any(), any())).thenReturn(mockExportInventory);
         when(mockConnectorNetworkSettingsService.findImportSettings(any(), any(), anyInt())).thenReturn(
             mockImportSettings);
-        List<List<Integer>> slotPairs = Arrays.asList(Arrays.asList(0, 0), Arrays.asList(1, 1));
-        when(mockNetwork.getPossibleSlots(any(), any())).thenReturn(slotPairs);
+        List<ExtractSlot> slotPairs = new ArrayList<>();
+        List<InsertSlot> insertSlots1 = new ArrayList<>();
+        List<InsertSlot> insertSlots2 = new ArrayList<>();
+        insertSlots1.add(new InsertSlot(0));
+        insertSlots2.add(new InsertSlot(1));
+        ExtractSlot extractSlot1 = new ExtractSlot(0);
+        extractSlot1.addInsert(mockImportSettings, insertSlots1);
+        ExtractSlot extractSlot2 = new ExtractSlot(1);
+        extractSlot2.addInsert(mockImportSettings, insertSlots2);
+
+        slotPairs.add(extractSlot1);
+        slotPairs.add(extractSlot2);
+        when(mockNetwork.getPossibleSlots(any())).thenReturn(slotPairs);
 
         IItemStack mockItemStack1 = mock(IItemStack.class);
         when(mockItemStack1.isEmpty()).thenReturn(true);
@@ -391,8 +430,14 @@ public class ConnectorExportItemHandlerTest
         when(mockConnectorInventoryLocator.findExportInventory(any(), any(), any())).thenReturn(mockExportInventory);
         when(mockConnectorNetworkSettingsService.findImportSettings(any(), any(), anyInt())).thenReturn(
             mockImportSettings);
-        List<List<Integer>> slotPairs = Collections.singletonList(Arrays.asList(0, 0));
-        when(mockNetwork.getPossibleSlots(any(), any())).thenReturn(slotPairs);
+        List<ExtractSlot> slotPairs = new ArrayList<>();
+        List<InsertSlot> insertSlots = new ArrayList<>();
+        insertSlots.add(new InsertSlot(0));
+        ExtractSlot extractSlot = new ExtractSlot(0);
+        extractSlot.addInsert(new ConnectorSettings(), insertSlots);
+
+        slotPairs.add(extractSlot);
+        when(mockNetwork.getPossibleSlots(any())).thenReturn(slotPairs);
         IItemStack mockItemStack = mock(IItemStack.class);
         when(mockItemStack.isEmpty()).thenReturn(false);
         when(mockItemStack.getCount()).thenReturn(5);
@@ -440,8 +485,14 @@ public class ConnectorExportItemHandlerTest
         when(mockConnectorInventoryLocator.findExportInventory(any(), any(), any())).thenReturn(mockExportInventory);
         when(mockConnectorNetworkSettingsService.findImportSettings(any(), any(), anyInt())).thenReturn(
             mockImportSettings);
-        List<List<Integer>> slotPairs = Collections.singletonList(Arrays.asList(0, 0));
-        when(mockNetwork.getPossibleSlots(any(), any())).thenReturn(slotPairs);
+        List<ExtractSlot> slotPairs = new ArrayList<>();
+        List<InsertSlot> insertSlots = new ArrayList<>();
+        insertSlots.add(new InsertSlot(0));
+        ExtractSlot extractSlot = new ExtractSlot(0);
+        extractSlot.addInsert(mockImportSettings, insertSlots);
+
+        slotPairs.add(extractSlot);
+        when(mockNetwork.getPossibleSlots(any())).thenReturn(slotPairs);
 
         IItemStack mockItemStack = mock(IItemStack.class);
         when(mockItemStack.isEmpty()).thenReturn(false);

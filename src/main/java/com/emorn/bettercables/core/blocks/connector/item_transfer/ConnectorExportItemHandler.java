@@ -6,6 +6,9 @@ import com.emorn.bettercables.contract.common.IPositionInWorld;
 import com.emorn.bettercables.contract.common.IWorld;
 import com.emorn.bettercables.core.blocks.connector.IConnectorNetworkService;
 import com.emorn.bettercables.core.blocks.connector.network.ConnectorNetwork;
+import com.emorn.bettercables.core.blocks.connector.network.ExtractSlot;
+import com.emorn.bettercables.core.blocks.connector.network.InsertInventory;
+import com.emorn.bettercables.core.blocks.connector.network.InsertSlot;
 import com.emorn.bettercables.core.blocks.connector.settings.ConnectorNetworkSettingsService;
 import com.emorn.bettercables.core.blocks.connector.settings.ConnectorSettings;
 import com.emorn.bettercables.core.blocks.connector.settings.ConnectorSide;
@@ -99,12 +102,11 @@ public class ConnectorExportItemHandler
             return;
         }
 
-        List<List<Integer>> possibleIndexes = network.getPossibleSlots(
-            connectorSide.connectorSettings(),
-            inventorySettings
+        List<ExtractSlot> possibleIndexes = network.getPossibleSlots(
+            connectorSide.connectorSettings()
         );
 
-        exportItemFromSlots(possibleIndexes, exportInventory, importInventory);
+        exportItemFromSlots(possibleIndexes, exportInventory, importInventory, inventorySettings);
     }
 
     @Nullable
@@ -126,42 +128,58 @@ public class ConnectorExportItemHandler
     }
 
     private void exportItemFromSlots(
-        List<List<Integer>> possibleIndexes,
+        List<ExtractSlot> possibleIndexes,
         IInventory exportInventory,
-        IInventory importInventory
+        IInventory importInventory,
+        ConnectorSettings importSettings
     )
     {
         Set<Integer> cannotExtractPositions = new HashSet<>();
         Set<Integer> cannotInsertPositions = new HashSet<>();
 
-        for (List<Integer> possibleIndex : possibleIndexes) {
-            int exportSlot = possibleIndex.get(1);
-            int importSlot = possibleIndex.get(0);
+        for (ExtractSlot possibleIndex : possibleIndexes) {
+            int exportSlot = possibleIndex.extractIndex();
 
-            if (cannotExtractPositions.contains(exportSlot) || cannotInsertPositions.contains(importSlot)) {
+            if (cannotExtractPositions.contains(exportSlot)) {
                 continue;
             }
 
-            IItemStack items = this.inventoryService.extractItemFromInventory(exportInventory, possibleIndex.get(1), 1);
-            if (items.isEmpty()) {
-                cannotExtractPositions.add(possibleIndex.get(1));
+            InsertInventory insertInventory = possibleIndex.find(importSettings);
+
+            if (insertInventory == null) {
                 continue;
             }
 
-            IItemStack itemsNotInserted = this.inventoryService.insertItemIntoInventory(
-                importInventory,
-                possibleIndex.get(0),
-                items
-            );
-            if (itemsNotInserted.isEmpty()) {
-                return;
-            }
-            cannotInsertPositions.add(possibleIndex.get(0));
+            List<InsertSlot> insertSlots = insertInventory.insertSlots();
 
-            this.inventoryService.insertItemIntoInventory(exportInventory, possibleIndex.get(1), itemsNotInserted);
+            for (InsertSlot insertSlot : insertSlots) {
+                int importSlot = insertSlot.insertIndex();
 
-            if (itemsNotInserted.getCount() != items.getCount()) {
-                return;
+                if (cannotInsertPositions.contains(importSlot)) {
+                    continue;
+                }
+
+                IItemStack items = this.inventoryService.extractItemFromInventory(exportInventory, exportSlot, 1);
+                if (items.isEmpty()) {
+                    cannotExtractPositions.add(exportSlot);
+                    continue;
+                }
+
+                IItemStack itemsNotInserted = this.inventoryService.insertItemIntoInventory(
+                    importInventory,
+                    importSlot,
+                    items
+                );
+                if (itemsNotInserted.isEmpty()) {
+                    return;
+                }
+                cannotInsertPositions.add(importSlot);
+
+                this.inventoryService.insertItemIntoInventory(exportInventory, exportSlot, itemsNotInserted);
+
+                if (itemsNotInserted.getCount() != items.getCount()) {
+                    return;
+                }
             }
         }
     }

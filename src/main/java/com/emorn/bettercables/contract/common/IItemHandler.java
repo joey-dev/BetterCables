@@ -12,4 +12,6 @@ public interface IItemHandler
     );
 
     public IItemStack extractItem(int slot, int amount, boolean simulate);
+
+    public int slotCount();
 }

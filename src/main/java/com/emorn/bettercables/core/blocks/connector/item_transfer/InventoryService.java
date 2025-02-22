@@ -20,6 +20,12 @@ public class InventoryService
     )
     {
         IItemHandler exportInventory = inventory.getItemHandler();
+        /**
+         * todo now
+         * check if exportInventory.slotCount() is the same as the settings
+         *  if not, stop the loop, and refresh cache of the extract in background
+         *   maybe disable network
+         */
 
         if (exportInventory == null) {
             Logger.error("Failed to get inventory inventory.");

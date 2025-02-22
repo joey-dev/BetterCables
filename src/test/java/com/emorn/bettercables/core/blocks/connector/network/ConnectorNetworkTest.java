@@ -6,7 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -97,7 +97,7 @@ public class ConnectorNetworkTest
         network.addInsert(mockPosition, mockSettings);
 
         verify(mockConnectorManager).addInsert(mockPosition, mockSettings);
-        verify(mockPossibleSlotCalculator).addInsert(eq(mockSettings), anyMap());
+        verify(mockPossibleSlotCalculator).addInsert(eq(mockSettings), anyList());
     }
 
     @Test
@@ -106,7 +106,7 @@ public class ConnectorNetworkTest
         network.addExtract(mockPosition, mockSettings);
 
         verify(mockConnectorManager).addExtract(mockPosition, mockSettings);
-        verify(mockPossibleSlotCalculator).addExtract(eq(mockSettings), anyMap());
+        verify(mockPossibleSlotCalculator).addExtract(eq(mockSettings), anyList());
     }
 
     @Test
@@ -131,21 +131,27 @@ public class ConnectorNetworkTest
     {
         ConnectorSettings mockExportSettings = mock(ConnectorSettings.class);
         ConnectorSettings mockImportSettings = mock(ConnectorSettings.class);
-        List<List<Integer>> expectedSlots = Collections.singletonList(Collections.singletonList(1));
-        when(mockPossibleSlotCalculator.getPossibleSlots(mockExportSettings, mockImportSettings)).thenReturn(
-            expectedSlots);
+        List<ExtractSlot> slotPairs = new ArrayList<>();
+        List<InsertSlot> insertSlots = new ArrayList<>();
+        insertSlots.add(new InsertSlot(0));
+        ExtractSlot extractSlot = new ExtractSlot(0);
+        extractSlot.addInsert(new ConnectorSettings(), insertSlots);
 
-        List<List<Integer>> actualSlots = network.getPossibleSlots(mockExportSettings, mockImportSettings);
+        slotPairs.add(extractSlot);
+        when(mockPossibleSlotCalculator.getPossibleSlots(mockExportSettings)).thenReturn(
+            slotPairs);
 
-        assertEquals(expectedSlots, actualSlots);
-        verify(mockPossibleSlotCalculator).getPossibleSlots(mockExportSettings, mockImportSettings);
+        List<ExtractSlot> actualSlots = network.getPossibleSlots(mockExportSettings);
+
+        assertEquals(slotPairs, actualSlots);
+        verify(mockPossibleSlotCalculator).getPossibleSlots(mockExportSettings);
     }
 
     @Test
     public void reCalculateAllPossibleSlots_callsCalculator()
     {
         network.reCalculateAllPossibleSlots();
-        verify(mockPossibleSlotCalculator).reCalculateAllPossibleSlots(anyMap(), anyMap());
+        verify(mockPossibleSlotCalculator).reCalculateAllPossibleSlots(anyList(), anyList());
     }
 
     @Test
@@ -181,7 +187,11 @@ public class ConnectorNetworkTest
         network.updateSlotCount(newSize, mockSettings);
 
         verify(mockConnectorManager).updateSlotCount(newSize, mockSettings);
-        verify(mockPossibleSlotCalculator).updateSlotCount(eq(mockSettings), anyMap(), anyMap());
+        verify(mockPossibleSlotCalculator).updateSlotCount(
+            eq(mockSettings),
+            anyList(),
+            anyList()
+        );
     }
 
     @Test

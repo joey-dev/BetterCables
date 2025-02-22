@@ -1,36 +1,29 @@
 package com.emorn.bettercables.core.blocks.connector.network;
 
-import com.emorn.bettercables.contract.common.IPositionInWorld;
 import com.emorn.bettercables.core.blocks.connector.settings.ConnectorSettings;
 import mcp.MethodsReturnNonnullByDefault;
 
 import javax.annotation.ParametersAreNonnullByDefault;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
 public class PossibleSlotCalculator
 {
-    // 1: extract settings, 2: insert settings, 3: insertIndex, 4: extractIndex
-    private final Map<ConnectorSettings, Map<ConnectorSettings, List<List<Integer>>>> possibleSlotsToExtract = new HashMap<>();
+    private final Map<ConnectorSettings, SlotCache> slotsPerExtractSetting = new HashMap<>();
 
-    public List<List<Integer>> getPossibleSlots(
-        ConnectorSettings exportSettings,
-        ConnectorSettings importSettings
+    public List<ExtractSlot> getPossibleSlots(
+        ConnectorSettings exportSettings
     )
     {
-        this.possibleSlotsToExtract.computeIfAbsent(exportSettings, k -> new HashMap<>());
-        this.possibleSlotsToExtract.get(exportSettings).computeIfAbsent(importSettings, k -> new ArrayList<>());
+        this.slotsPerExtractSetting.computeIfAbsent(exportSettings, k -> new SlotCache());
 
-        return this.possibleSlotsToExtract.get(exportSettings).get(importSettings);
+        return this.slotsPerExtractSetting.get(exportSettings).find(SlotCache.DEFAULT);
     }
 
     public void addInsert(
         ConnectorSettings settings,
-        Map<ConnectorSettings, IPositionInWorld> extractConnectorSettings
+        List<ConnectorSettings> extractConnectorSettings
     )
     {
         this.recalculateInsertsFromPossibleSlots(
@@ -41,43 +34,37 @@ public class PossibleSlotCalculator
 
     private void recalculateInsertsFromPossibleSlots(
         ConnectorSettings insertSettings,
-        Map<ConnectorSettings, IPositionInWorld> extractConnectorSettings
+        List<ConnectorSettings> extractConnectorSettings
     )
     {
-        extractConnectorSettings.forEach((k, v) -> {
-            this.possibleSlotsToExtract.putIfAbsent(k, new HashMap<>());
+        for (ConnectorSettings extractSettings : extractConnectorSettings) {
+            this.slotsPerExtractSetting.putIfAbsent(extractSettings, new SlotCache());
 
-            List<List<Integer>> possibleSlots = this.calculate(k, insertSettings);
-            this.possibleSlotsToExtract.get(k).put(insertSettings, possibleSlots);
-        });
-    }
+            int insertSlotCount = insertSettings.inventorySlotCount();
+            int extractSlotCount = extractSettings.inventorySlotCount();
 
-    // 0 = insertIndex, 1 = extractIndex
-    public List<List<Integer>> calculate(
-        ConnectorSettings extractSettings,
-        ConnectorSettings insertSettings
-    )
-    {
-        int insertSlotCount = insertSettings.inventorySlotCount();
-        int extractSlotCount = extractSettings.inventorySlotCount();
+            List<InsertSlot> insertSlots = new ArrayList<>();
+            List<Integer> extractSlotIndices = new ArrayList<>();
 
-        List<List<Integer>> indexes = new ArrayList<>();
-        for (int insertIndex = 0; insertIndex < insertSlotCount; insertIndex++) {
             for (int extractIndex = 0; extractIndex < extractSlotCount; extractIndex++) {
-                List<Integer> combination = new ArrayList<>();
-                combination.add(insertIndex);
-                combination.add(extractIndex);
-
-                indexes.add(combination);
+                extractSlotIndices.add(extractIndex);
             }
-        }
+            for (int insertIndex = 0; insertIndex < insertSlotCount; insertIndex++) {
+                insertSlots.add(new InsertSlot(insertIndex));
+            }
 
-        return indexes;
+            this.slotsPerExtractSetting.get(extractSettings).addInsert(
+                SlotCache.DEFAULT,
+                insertSettings,
+                insertSlots,
+                extractSlotIndices
+            );
+        };
     }
 
     public void addExtract(
         ConnectorSettings settings,
-        Map<ConnectorSettings, IPositionInWorld> insertConnectorSettings
+        List<ConnectorSettings> insertConnectorSettings
     )
     {
         this.recalculateExtractsFromPossibleSlots(
@@ -88,34 +75,50 @@ public class PossibleSlotCalculator
 
     private void recalculateExtractsFromPossibleSlots(
         ConnectorSettings extractSettings,
-        Map<ConnectorSettings, IPositionInWorld> insertConnectorSettings
+        List<ConnectorSettings> insertConnectorSettings
     )
     {
-        new HashMap<>(insertConnectorSettings).forEach((k, v) -> {
-            this.possibleSlotsToExtract.putIfAbsent(extractSettings, new HashMap<>());
+        this.slotsPerExtractSetting.putIfAbsent(extractSettings, new SlotCache());
 
-            List<List<Integer>> possibleSlots = this.calculate(extractSettings, k);
-            this.possibleSlotsToExtract.get(extractSettings).put(k, possibleSlots);
-        });
+        int extractSlotCount = extractSettings.inventorySlotCount();
+
+        SlotCache extractSlotCache = this.slotsPerExtractSetting.get(extractSettings);
+
+        for (ConnectorSettings insertSettings : insertConnectorSettings) {
+            int insertSlotCount = insertSettings.inventorySlotCount();
+
+            List<InsertSlot> insertSlots = new ArrayList<>();
+            List<Integer> extractSlotIndices = new ArrayList<>();
+
+            for (int extractIndex = 0; extractIndex < extractSlotCount; extractIndex++) {
+                extractSlotIndices.add(extractIndex);
+            }
+
+            for (int insertIndex = 0; insertIndex < insertSlotCount; insertIndex++) {
+                insertSlots.add(new InsertSlot(insertIndex));
+            }
+
+            extractSlotCache.addInsert(
+                SlotCache.DEFAULT,
+                insertSettings,
+                insertSlots,
+                extractSlotIndices
+            );
+        }
     }
 
     public void reCalculateAllPossibleSlots(
-        Map<ConnectorSettings, IPositionInWorld> insertConnectorSettings,
-        Map<ConnectorSettings, IPositionInWorld> extractConnectorSettings
+        List<ConnectorSettings> insertConnectorSettings,
+        List<ConnectorSettings> extractConnectorSettings
     )
     {
-        this.possibleSlotsToExtract.clear();
+        this.slotsPerExtractSetting.clear();
 
-        for (Map.Entry<ConnectorSettings, IPositionInWorld> insertEntry : insertConnectorSettings.entrySet()) {
-            for (Map.Entry<ConnectorSettings, IPositionInWorld> extractEntry : extractConnectorSettings.entrySet()) {
-                // 1: extract, 2: insert, 3: insertIndex, 4: extractIndex
-                this.possibleSlotsToExtract.putIfAbsent(extractEntry.getKey(), new HashMap<>());
-                this.possibleSlotsToExtract.get(extractEntry.getKey())
-                    .putIfAbsent(insertEntry.getKey(), new ArrayList<>());
-
-                this.possibleSlotsToExtract.get(extractEntry.getKey())
-                    .put(insertEntry.getKey(), this.calculate(extractEntry.getKey(), insertEntry.getKey()));
-            }
+        for (ConnectorSettings extractSettings : extractConnectorSettings) {
+            this.recalculateExtractsFromPossibleSlots(
+                extractSettings,
+                insertConnectorSettings
+            );
         }
     }
 
@@ -123,21 +126,22 @@ public class PossibleSlotCalculator
         ConnectorSettings insertSettings
     )
     {
-        this.possibleSlotsToExtract.forEach((k, v)
-            -> v.remove(insertSettings));
+        for (SlotCache slotCache : this.slotsPerExtractSetting.values()) {
+            slotCache.removeInsert(SlotCache.DEFAULT, insertSettings);
+        }
     }
 
     public void removeExtract(
         ConnectorSettings extractSettings
     )
     {
-        this.possibleSlotsToExtract.remove(extractSettings);
+        this.slotsPerExtractSetting.remove(extractSettings);
     }
 
     public void updateSlotCount(
         ConnectorSettings connector,
-        Map<ConnectorSettings, IPositionInWorld> insertConnectorSettings,
-        Map<ConnectorSettings, IPositionInWorld> extractConnectorSettings
+        List<ConnectorSettings> insertConnectorSettings,
+        List<ConnectorSettings> extractConnectorSettings
     )
     {
         if (connector.isInsertEnabled()) {

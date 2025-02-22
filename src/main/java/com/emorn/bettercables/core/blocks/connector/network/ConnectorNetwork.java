@@ -76,7 +76,7 @@ public class ConnectorNetwork
         this.connectorManager.addInsert(inventoryPosition, settings);
         this.possibleSlotCalculator.addInsert(
             settings,
-            this.connectorManager.findAllExtractConnectors()
+            this.connectorManager.findAllExtractConnectorSettings()
         );
 
         this.isDisabled = false;
@@ -92,26 +92,25 @@ public class ConnectorNetwork
         this.connectorManager.addExtract(inventoryPosition, settings);
         this.possibleSlotCalculator.addExtract(
             settings,
-            this.connectorManager.findAllInsertConnectors()
+            this.connectorManager.findAllInsertConnectorSettings()
         );
 
         this.isDisabled = false;
     }
 
-    public List<List<Integer>> getPossibleSlots(
-        ConnectorSettings exportSettings,
-        ConnectorSettings importSettings
+    public List<ExtractSlot> getPossibleSlots(
+        ConnectorSettings exportSettings
     )
     {
-        return this.possibleSlotCalculator.getPossibleSlots(exportSettings, importSettings);
+        return this.possibleSlotCalculator.getPossibleSlots(exportSettings);
     }
 
     public void reCalculateAllPossibleSlots()
     {
         this.isDisabled = true;
         this.possibleSlotCalculator.reCalculateAllPossibleSlots(
-            this.connectorManager.findAllInsertConnectors(),
-            this.connectorManager.findAllExtractConnectors()
+            this.connectorManager.findAllInsertConnectorSettings(),
+            this.connectorManager.findAllExtractConnectorSettings()
         );
 
         this.isDisabled = false;
@@ -179,8 +178,8 @@ public class ConnectorNetwork
         this.connectorManager.updateSlotCount(sizeInventory, connector);
         this.possibleSlotCalculator.updateSlotCount(
             connector,
-            this.connectorManager.findAllInsertConnectors(),
-            this.connectorManager.findAllExtractConnectors()
+            this.connectorManager.findAllInsertConnectorSettings(),
+            this.connectorManager.findAllExtractConnectorSettings()
         );
     }
 }
