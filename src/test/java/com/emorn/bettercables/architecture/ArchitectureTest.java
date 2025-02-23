@@ -8,7 +8,6 @@ import org.junit.Test;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 
 public class ArchitectureTest {
-
     @Test
     public void coreShouldNotDependOnApi() {
         JavaClasses importedClasses = new ClassFileImporter().importPackages("com.emorn.bettercables");
@@ -38,6 +37,17 @@ public class ArchitectureTest {
         ArchRule rule = noClasses()
             .that().resideInAPackage("com.emorn.bettercables.core..")
             .should().dependOnClassesThat().resideInAPackage("net.minecraftforge..");
+
+        rule.check(importedClasses);
+    }
+
+    @Test
+    public void contractShouldNotDependOnApi() {
+        JavaClasses importedClasses = new ClassFileImporter().importPackages("com.emorn.bettercables");
+
+        ArchRule rule = noClasses()
+            .that().resideInAPackage("com.emorn.bettercables.contract..")
+            .should().dependOnClassesThat().resideInAPackage("com.emorn.bettercables.api..");
 
         rule.check(importedClasses);
     }

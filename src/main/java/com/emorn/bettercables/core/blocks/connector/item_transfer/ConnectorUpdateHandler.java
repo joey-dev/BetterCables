@@ -1,10 +1,9 @@
 package com.emorn.bettercables.core.blocks.connector.item_transfer;
 
-import com.emorn.bettercables.core.common.performance.PerformanceTester;
 import com.emorn.bettercables.contract.common.IPositionInWorld;
 import com.emorn.bettercables.contract.common.IWorld;
-import com.emorn.bettercables.core.blocks.connector.settings.ConnectorSides;
 import com.emorn.bettercables.core.blocks.connector.IConnectorNetworkService;
+import com.emorn.bettercables.core.blocks.connector.settings.ConnectorSides;
 import com.emorn.bettercables.core.common.Direction;
 import mcp.MethodsReturnNonnullByDefault;
 
@@ -41,7 +40,7 @@ public class ConnectorUpdateHandler
         IWorld world
     )
     {
-        PerformanceTester.printResults();
+        //PerformanceTester.printResults();
         if (!isClient) {
             return;
         }
@@ -50,7 +49,7 @@ public class ConnectorUpdateHandler
             return;
         }
 
-        PerformanceTester.start("ConnectorBlockEntity.tick");
+        //PerformanceTester.start("ConnectorBlockEntity.tick");
 
         this.connectorSides.tick();
 
@@ -79,13 +78,13 @@ public class ConnectorUpdateHandler
         }
 
         if (this.connectorSides.canWestExport()) {
-            PerformanceTester.start("export west");
+//            PerformanceTester.start("export west");
             this.exportItemHandler.invoke(
                 Direction.WEST,
                 positionInWorld,
                 world
             );
-            PerformanceTester.end("export west");
+//            PerformanceTester.end("export west");
         }
 
         if (this.connectorSides.canUpExport()) {
@@ -104,6 +103,6 @@ public class ConnectorUpdateHandler
             );
         }
 
-        PerformanceTester.end("ConnectorBlockEntity.tick");
+//        PerformanceTester.end("ConnectorBlockEntity.tick");
     }
 }

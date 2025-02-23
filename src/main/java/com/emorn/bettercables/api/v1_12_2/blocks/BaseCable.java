@@ -1,6 +1,7 @@
 package com.emorn.bettercables.api.v1_12_2.blocks;
 
 import com.emorn.bettercables.api.v1_12_2.IHasModel;
+import com.emorn.bettercables.api.v1_12_2.asyncEventBus.AsyncEventBus;
 import com.emorn.bettercables.api.v1_12_2.common.PositionInWorld;
 import com.emorn.bettercables.core.blocks.connector.network.NetworkManager;
 import mcp.MethodsReturnNonnullByDefault;
@@ -130,7 +131,8 @@ public abstract class BaseCable extends BlockBase implements IHasModel
         if (!worldIn.isRemote) {
             NetworkManager.reCalculateNetworksAround(
                 new PositionInWorld(pos.getX(), pos.getY(), pos.getZ()),
-                new com.emorn.bettercables.api.v1_12_2.common.World(worldIn)
+                new com.emorn.bettercables.api.v1_12_2.common.World(worldIn),
+                AsyncEventBus.getInstance()
             );
         }
     }
@@ -158,7 +160,8 @@ public abstract class BaseCable extends BlockBase implements IHasModel
         if (!worldIn.isRemote) {
             NetworkManager.reCalculateNetworksAround(
                 new PositionInWorld(pos.getX(), pos.getY(), pos.getZ()),
-                new com.emorn.bettercables.api.v1_12_2.common.World(worldIn)
+                new com.emorn.bettercables.api.v1_12_2.common.World(worldIn),
+                AsyncEventBus.getInstance()
             );
         }
     }

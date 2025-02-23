@@ -17,7 +17,7 @@ public class Inventory implements IInventory
 
     public void markDirty()
     {
-        this.forgeInventory.markDirty();
+        //this.forgeInventory.markDirty();
     }
 
     public IItemHandler getItemHandler()

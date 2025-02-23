@@ -4,6 +4,8 @@ import com.emorn.bettercables.contract.common.IPositionInWorld;
 import com.emorn.bettercables.core.common.Direction;
 import net.minecraft.util.EnumFacing;
 
+import java.util.Objects;
+
 public class PositionInWorld implements IPositionInWorld
 {
     private final int x;
@@ -119,5 +121,18 @@ public class PositionInWorld implements IPositionInWorld
     public String toKey()
     {
         return this.getX() + "," + this.getY() + "," + this.getZ();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        PositionInWorld that = (PositionInWorld ) obj;
+        return Objects.equals(this.toKey(), that.toKey());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.toKey());
     }
 }

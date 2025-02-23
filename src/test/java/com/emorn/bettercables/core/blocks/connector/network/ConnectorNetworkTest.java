@@ -1,12 +1,13 @@
 package com.emorn.bettercables.core.blocks.connector.network;
 
+import com.emorn.bettercables.contract.asyncEventBus.IAsyncEventBus;
 import com.emorn.bettercables.contract.common.IPositionInWorld;
 import com.emorn.bettercables.core.blocks.connector.settings.ConnectorSettings;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -19,11 +20,13 @@ public class ConnectorNetworkTest
     private PossibleSlotCalculator mockPossibleSlotCalculator;
     private IPositionInWorld mockPosition;
     private ConnectorSettings mockSettings;
+    private IAsyncEventBus mockAsyncEventBus;
 
     @Before
     public void setUp()
     {
-        network = new ConnectorNetwork(123);
+        mockAsyncEventBus = mock(IAsyncEventBus.class);
+        network = new ConnectorNetwork(123, mockAsyncEventBus);
         mockConnectorManager = mock(ConnectorManager.class);
         mockPossibleSlotCalculator = mock(PossibleSlotCalculator.class);
         mockPosition = mock(IPositionInWorld.class);
@@ -97,7 +100,6 @@ public class ConnectorNetworkTest
         network.addInsert(mockPosition, mockSettings);
 
         verify(mockConnectorManager).addInsert(mockPosition, mockSettings);
-        verify(mockPossibleSlotCalculator).addInsert(eq(mockSettings), anyMap());
     }
 
     @Test
@@ -106,7 +108,6 @@ public class ConnectorNetworkTest
         network.addExtract(mockPosition, mockSettings);
 
         verify(mockConnectorManager).addExtract(mockPosition, mockSettings);
-        verify(mockPossibleSlotCalculator).addExtract(eq(mockSettings), anyMap());
     }
 
     @Test
@@ -114,7 +115,6 @@ public class ConnectorNetworkTest
     {
         network.removeInsert(mockSettings);
         verify(mockConnectorManager).removeInsert(mockSettings);
-        verify(mockPossibleSlotCalculator).removeInsert(mockSettings);
     }
 
     @Test
@@ -123,35 +123,39 @@ public class ConnectorNetworkTest
         network.removeExtract(mockSettings);
 
         verify(mockConnectorManager).removeExtract(mockSettings);
-        verify(mockPossibleSlotCalculator).removeExtract(mockSettings);
     }
 
     @Test
     public void getPossibleSlots_delegatesToCalculator()
     {
         ConnectorSettings mockExportSettings = mock(ConnectorSettings.class);
-        ConnectorSettings mockImportSettings = mock(ConnectorSettings.class);
-        List<List<Integer>> expectedSlots = Collections.singletonList(Collections.singletonList(1));
-        when(mockPossibleSlotCalculator.getPossibleSlots(mockExportSettings, mockImportSettings)).thenReturn(
-            expectedSlots);
+        List<ExtractSlot> slotPairs = new ArrayList<>();
+        List<InsertSlot> insertSlots = new ArrayList<>();
+        insertSlots.add(new InsertSlot(0));
+        ExtractSlot extractSlot = new ExtractSlot(0);
+        extractSlot.addInsert(new ConnectorSettings(), insertSlots);
 
-        List<List<Integer>> actualSlots = network.getPossibleSlots(mockExportSettings, mockImportSettings);
+        slotPairs.add(extractSlot);
+        when(mockPossibleSlotCalculator.getPossibleSlots(mockExportSettings)).thenReturn(
+            slotPairs);
 
-        assertEquals(expectedSlots, actualSlots);
-        verify(mockPossibleSlotCalculator).getPossibleSlots(mockExportSettings, mockImportSettings);
+        List<ExtractSlot> actualSlots = network.getPossibleSlots(mockExportSettings);
+
+        assertEquals(slotPairs, actualSlots);
+        verify(mockPossibleSlotCalculator).getPossibleSlots(mockExportSettings);
     }
 
     @Test
     public void reCalculateAllPossibleSlots_callsCalculator()
     {
         network.reCalculateAllPossibleSlots();
-        verify(mockPossibleSlotCalculator).reCalculateAllPossibleSlots(anyMap(), anyMap());
+        verify(mockPossibleSlotCalculator).reCalculateAllPossibleSlots(anyList(), anyList());
     }
 
     @Test
     public void remove_network_setsShouldMergeAndMergeNetwork()
     {
-        ConnectorNetwork newNetwork = new ConnectorNetwork(456);
+        ConnectorNetwork newNetwork = new ConnectorNetwork(456, mockAsyncEventBus);
         network.remove(newNetwork);
         assertTrue(network.isRemoved());
         assertEquals(newNetwork, network.mergeToNetwork(null));
@@ -160,7 +164,7 @@ public class ConnectorNetworkTest
     @Test
     public void remove_position_setsShouldMergeAndMergeNetwork()
     {
-        ConnectorNetwork newNetwork = new ConnectorNetwork(456);
+        ConnectorNetwork newNetwork = new ConnectorNetwork(456, mockAsyncEventBus);
         network.remove(mockPosition, newNetwork);
         assertTrue(network.isRemoved());
         assertEquals(newNetwork, network.mergeToNetwork(mockPosition));
@@ -181,7 +185,11 @@ public class ConnectorNetworkTest
         network.updateSlotCount(newSize, mockSettings);
 
         verify(mockConnectorManager).updateSlotCount(newSize, mockSettings);
-        verify(mockPossibleSlotCalculator).updateSlotCount(eq(mockSettings), anyMap(), anyMap());
+        verify(mockPossibleSlotCalculator).calculateForConnector(
+            eq(mockSettings),
+            anyList(),
+            anyList()
+        );
     }
 
     @Test
@@ -197,16 +205,16 @@ public class ConnectorNetworkTest
         doNothing().when(mockConnectorManager).removeExtract(any());
 
         spyNetwork.addInsert(mockPosition, mockSettings);
-        assertFalse(spyNetwork.isDisabled());
+        assertTrue(spyNetwork.isDisabled());
 
         spyNetwork.addExtract(mockPosition, mockSettings);
-        assertFalse(spyNetwork.isDisabled());
+        assertTrue(spyNetwork.isDisabled());
 
         spyNetwork.removeInsert(mockSettings);
-        assertFalse(spyNetwork.isDisabled());
+        assertTrue(spyNetwork.isDisabled());
 
         spyNetwork.removeExtract(mockSettings);
-        assertFalse(spyNetwork.isDisabled());
+        assertTrue(spyNetwork.isDisabled());
 
         spyNetwork.reCalculateAllPossibleSlots();
         assertFalse(spyNetwork.isDisabled());

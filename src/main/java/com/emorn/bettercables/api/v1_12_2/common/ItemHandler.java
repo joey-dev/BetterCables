@@ -41,4 +41,10 @@ public class ItemHandler implements IItemHandler
             this.forgeItemHandler.extractItem(slot, amount, simulate)
         );
     }
+
+    @Override
+    public int slotCount()
+    {
+        return this.forgeItemHandler.getSlots();
+    }
 }

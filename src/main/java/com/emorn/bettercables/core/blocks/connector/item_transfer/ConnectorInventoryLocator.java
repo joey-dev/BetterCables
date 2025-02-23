@@ -4,6 +4,7 @@ import com.emorn.bettercables.contract.common.IInventory;
 import com.emorn.bettercables.contract.common.IPositionInWorld;
 import com.emorn.bettercables.contract.common.ITileEntity;
 import com.emorn.bettercables.contract.common.IWorld;
+import com.emorn.bettercables.core.blocks.connector.settings.ConnectorSettings;
 import com.emorn.bettercables.core.common.Direction;
 import com.emorn.bettercables.core.blocks.connector.network.ConnectorNetwork;
 import com.emorn.bettercables.core.common.Logger;
@@ -21,7 +22,8 @@ public class ConnectorInventoryLocator
         Direction direction,
         ConnectorNetwork network,
         Integer nextIndex,
-        IWorld world
+        IWorld world,
+        ConnectorSettings inventorySettings
     )
     {
         IPositionInWorld inventoryPosition = network.findInventoryPositionBy(nextIndex);
@@ -34,6 +36,7 @@ public class ConnectorInventoryLocator
         IInventory importInventory = this.findInventoryEntityByPosition(world, inventoryPosition);
         if (importInventory == null) {
             Logger.error("Failed to get inventory for import.");
+            network.removeInsert(inventorySettings);
             return null;
         }
         return importInventory;
@@ -47,7 +50,7 @@ public class ConnectorInventoryLocator
     {
         ITileEntity tileEntity = world.getTileEntity(inventoryPosition);
         if (!tileEntity.isInventory()) {
-            Logger.error("No inventory found at: " + inventoryPosition);
+            Logger.error("No inventory found at: " + inventoryPosition); // here
             return null;
         }
 
@@ -58,7 +61,9 @@ public class ConnectorInventoryLocator
     public IInventory findExportInventory(
         Direction direction,
         IPositionInWorld positionInWorld,
-        IWorld world
+        IWorld world,
+        ConnectorNetwork network,
+        ConnectorSettings inventorySettings
     )
     {
         IPositionInWorld exportInventoryPosition = this.findPositionByDirection(
@@ -72,6 +77,7 @@ public class ConnectorInventoryLocator
         );
         if (exportInventory == null) {
             Logger.error("Failed to get inventory inventory for export.");
+            network.removeExtract(inventorySettings);
             return null;
         }
         return exportInventory;

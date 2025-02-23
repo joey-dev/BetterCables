@@ -1,5 +1,6 @@
 package com.emorn.bettercables.api.v1_12_2.blocks.connector;
 
+import com.emorn.bettercables.api.v1_12_2.asyncEventBus.AsyncEventBus;
 import com.emorn.bettercables.api.v1_12_2.common.PositionInWorld;
 import com.emorn.bettercables.contract.blocks.connector.IData;
 import com.emorn.bettercables.contract.blocks.connector.ITileEntityConnector;
@@ -109,7 +110,8 @@ public class ForgeTileEntityConnector extends TileEntity implements ITickable, I
 
         this.connectorSavedDataHandler.readFromNBT(
             new Data(compound),
-            positionInWorld
+            positionInWorld,
+            AsyncEventBus.getInstance()
         );
 
         if (compound.hasKey(CUSTOM_NAME, Constants.NBT.TAG_STRING)) {

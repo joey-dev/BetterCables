@@ -1,8 +1,18 @@
 package com.emorn.bettercables.core.blocks.connector.network;
 
+import com.emorn.bettercables.contract.asyncEventBus.IAsyncEventBus;
 import com.emorn.bettercables.contract.common.IPositionInWorld;
+import com.emorn.bettercables.core.asyncEventBus.connectorExtractDisabled.ConnectorExtractDisabled;
+import com.emorn.bettercables.core.asyncEventBus.connectorExtractDisabled.ConnectorExtractDisabledInput;
+import com.emorn.bettercables.core.asyncEventBus.connectorExtractEnabled.ConnectorExtractEnabled;
+import com.emorn.bettercables.core.asyncEventBus.connectorExtractEnabled.ConnectorExtractEnabledInput;
+import com.emorn.bettercables.core.asyncEventBus.connectorInsertDisabled.ConnectorInsertDisabled;
+import com.emorn.bettercables.core.asyncEventBus.connectorInsertDisabled.ConnectorInsertDisabledInput;
+import com.emorn.bettercables.core.asyncEventBus.connectorInsertEnabled.ConnectorInsertEnabled;
+import com.emorn.bettercables.core.asyncEventBus.connectorInsertEnabled.ConnectorInsertEnabledInput;
 import com.emorn.bettercables.core.blocks.connector.settings.ConnectorSettings;
 import mcp.MethodsReturnNonnullByDefault;
+
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.HashMap;
@@ -19,11 +29,21 @@ public class ConnectorNetwork
     private boolean isDisabled = false;
     private final ConnectorManager connectorManager = new ConnectorManager();
     private final PossibleSlotCalculator possibleSlotCalculator = new PossibleSlotCalculator();
+    private final IAsyncEventBus eventBus;
 
-    public ConnectorNetwork(int id)
+    public ConnectorNetwork(
+        int id,
+        IAsyncEventBus eventBus
+    )
     {
+        this.eventBus = eventBus;
         this.id = id;
         this.reCalculateAllPossibleSlots();
+    }
+
+    public void enableNetwork()
+    {
+        this.isDisabled = false;
     }
 
     @Nullable
@@ -64,6 +84,16 @@ public class ConnectorNetwork
     {
         this.shouldMerge = true;
         this.mergeToNetwork.put(null, newNetwork);
+
+        this.connectorManager.findAllExtractConnectors().forEach(
+            (connector, position) ->
+                newNetwork.addExtract(position, connector)
+        );
+
+        this.connectorManager.findAllInsertConnectors().forEach(
+            (connector, position) ->
+                newNetwork.addInsert(position, connector)
+        );
     }
 
     public void addInsert(
@@ -74,12 +104,32 @@ public class ConnectorNetwork
         this.isDisabled = true;
 
         this.connectorManager.addInsert(inventoryPosition, settings);
-        this.possibleSlotCalculator.addInsert(
-            settings,
-            this.connectorManager.findAllExtractConnectors()
+        this.eventBus.publish(
+            ConnectorInsertEnabled.class,
+            new ConnectorInsertEnabledInput(
+                settings,
+                this.possibleSlotCalculator,
+                this.connectorManager.findAllExtractConnectorSettings(),
+                this
+            )
         );
+    }
 
-        this.isDisabled = false;
+    public void insertSlotCountChanged(
+        ConnectorSettings settings
+    )
+    {
+        this.isDisabled = true;
+
+        this.eventBus.publish(
+            ConnectorInsertEnabled.class,
+            new ConnectorInsertEnabledInput(
+                settings,
+                this.possibleSlotCalculator,
+                this.connectorManager.findAllExtractConnectorSettings(),
+                this
+            )
+        );
     }
 
     public void addExtract(
@@ -90,28 +140,47 @@ public class ConnectorNetwork
         this.isDisabled = true;
 
         this.connectorManager.addExtract(inventoryPosition, settings);
-        this.possibleSlotCalculator.addExtract(
-            settings,
-            this.connectorManager.findAllInsertConnectors()
+        this.eventBus.publish(
+            ConnectorExtractEnabled.class,
+            new ConnectorExtractEnabledInput(
+                settings,
+                this.possibleSlotCalculator,
+                this.connectorManager.findAllInsertConnectorSettings(),
+                this
+            )
         );
-
-        this.isDisabled = false;
     }
 
-    public List<List<Integer>> getPossibleSlots(
-        ConnectorSettings exportSettings,
-        ConnectorSettings importSettings
+    public void extractSlotCountChanged(
+        ConnectorSettings settings
     )
     {
-        return this.possibleSlotCalculator.getPossibleSlots(exportSettings, importSettings);
+        this.isDisabled = true;
+
+        this.eventBus.publish(
+            ConnectorExtractEnabled.class,
+            new ConnectorExtractEnabledInput(
+                settings,
+                this.possibleSlotCalculator,
+                this.connectorManager.findAllInsertConnectorSettings(),
+                this
+            )
+        );
+    }
+
+    public List<ExtractSlot> getPossibleSlots(
+        ConnectorSettings exportSettings
+    )
+    {
+        return this.possibleSlotCalculator.getPossibleSlots(exportSettings);
     }
 
     public void reCalculateAllPossibleSlots()
     {
         this.isDisabled = true;
         this.possibleSlotCalculator.reCalculateAllPossibleSlots(
-            this.connectorManager.findAllInsertConnectors(),
-            this.connectorManager.findAllExtractConnectors()
+            this.connectorManager.findAllInsertConnectorSettings(),
+            this.connectorManager.findAllExtractConnectorSettings()
         );
 
         this.isDisabled = false;
@@ -124,9 +193,14 @@ public class ConnectorNetwork
         this.isDisabled = true;
 
         this.connectorManager.removeInsert(connectorSettings);
-        this.possibleSlotCalculator.removeInsert(connectorSettings);
-
-        this.isDisabled = false;
+        this.eventBus.publish(
+            ConnectorInsertDisabled.class,
+            new ConnectorInsertDisabledInput(
+                connectorSettings,
+                this.possibleSlotCalculator,
+                this
+            )
+        );
     }
 
     public void removeExtract(
@@ -136,9 +210,14 @@ public class ConnectorNetwork
         this.isDisabled = true;
 
         this.connectorManager.removeExtract(connectorSettings);
-        this.possibleSlotCalculator.removeExtract(connectorSettings);
-
-        this.isDisabled = false;
+        this.eventBus.publish(
+            ConnectorExtractDisabled.class,
+            new ConnectorExtractDisabledInput(
+                connectorSettings,
+                this.possibleSlotCalculator,
+                this
+            )
+        );
     }
 
     public boolean isDisabled()
@@ -164,11 +243,13 @@ public class ConnectorNetwork
     @Nullable
     public ConnectorNetwork mergeToNetwork(IPositionInWorld position)
     {
-        if (mergeToNetwork.containsKey(null)) {
-            return mergeToNetwork.get(null);
+        if (!mergeToNetwork.containsKey(null)) {
+            return mergeToNetwork.get(position);
         }
 
-        return mergeToNetwork.get(position);
+        ConnectorNetwork newNetwork = mergeToNetwork.get(null);
+
+        return newNetwork;
     }
 
     public void updateSlotCount(
@@ -177,10 +258,10 @@ public class ConnectorNetwork
     )
     {
         this.connectorManager.updateSlotCount(sizeInventory, connector);
-        this.possibleSlotCalculator.updateSlotCount(
+        this.possibleSlotCalculator.calculateForConnector(
             connector,
-            this.connectorManager.findAllInsertConnectors(),
-            this.connectorManager.findAllExtractConnectors()
+            this.connectorManager.findAllInsertConnectorSettings(),
+            this.connectorManager.findAllExtractConnectorSettings()
         );
     }
 }

@@ -5,6 +5,7 @@ import com.emorn.bettercables.contract.common.IPositionInWorld;
 import com.emorn.bettercables.contract.common.ITileEntity;
 import com.emorn.bettercables.contract.common.IWorld;
 import com.emorn.bettercables.core.blocks.connector.network.ConnectorNetwork;
+import com.emorn.bettercables.core.blocks.connector.settings.ConnectorSettings;
 import com.emorn.bettercables.core.common.Direction;
 import org.junit.Before;
 import org.junit.Test;
@@ -21,6 +22,7 @@ public class ConnectorInventoryLocatorTest
     private IPositionInWorld mockPosition;
     private ITileEntity mockTileEntity;
     private IInventory mockInventory;
+    private ConnectorSettings mockSettings;
 
     @Before
     public void setUp()
@@ -30,6 +32,7 @@ public class ConnectorInventoryLocatorTest
         mockPosition = mock(IPositionInWorld.class);
         mockTileEntity = mock(ITileEntity.class);
         mockInventory = mock(IInventory.class);
+        mockSettings = mock(ConnectorSettings.class);
 
         locator = new ConnectorInventoryLocator();
     }
@@ -42,7 +45,13 @@ public class ConnectorInventoryLocatorTest
         when(mockTileEntity.isInventory()).thenReturn(true);
         when(mockTileEntity.getInventory()).thenReturn(mockInventory);
 
-        IInventory result = locator.findImportInventory(Direction.NORTH, mockNetwork, 5, mockWorld);
+        IInventory result = locator.findImportInventory(
+            Direction.NORTH,
+            mockNetwork,
+            5,
+            mockWorld,
+            mockSettings
+        );
 
         assertEquals(mockInventory, result);
     }
@@ -52,7 +61,13 @@ public class ConnectorInventoryLocatorTest
     {
         when(mockNetwork.findInventoryPositionBy(5)).thenReturn(null);
 
-        IInventory result = locator.findImportInventory(Direction.NORTH, mockNetwork, 5, mockWorld);
+        IInventory result = locator.findImportInventory(
+            Direction.NORTH,
+            mockNetwork,
+            5,
+            mockWorld,
+            mockSettings
+        );
 
         assertNull(result);
         verify(mockNetwork).findInventoryPositionBy(5);
@@ -66,7 +81,13 @@ public class ConnectorInventoryLocatorTest
         when(mockWorld.getTileEntity(mockPosition)).thenReturn(mockTileEntity);
         when(mockTileEntity.isInventory()).thenReturn(false);
 
-        IInventory result = locator.findImportInventory(Direction.NORTH, mockNetwork, 5, mockWorld);
+        IInventory result = locator.findImportInventory(
+            Direction.NORTH,
+            mockNetwork,
+            5,
+            mockWorld,
+            mockSettings
+        );
 
         assertNull(result);
         verify(mockTileEntity, never()).getInventory();
@@ -80,7 +101,13 @@ public class ConnectorInventoryLocatorTest
         when(mockTileEntity.isInventory()).thenReturn(true);
         when(mockTileEntity.getInventory()).thenReturn(null);
 
-        IInventory result = locator.findImportInventory(Direction.NORTH, mockNetwork, 5, mockWorld);
+        IInventory result = locator.findImportInventory(
+            Direction.NORTH,
+            mockNetwork,
+            5,
+            mockWorld,
+            mockSettings
+        );
 
         assertNull(result);
     }
@@ -94,7 +121,13 @@ public class ConnectorInventoryLocatorTest
         when(mockTileEntity.isInventory()).thenReturn(true);
         when(mockTileEntity.getInventory()).thenReturn(mockInventory);
 
-        IInventory result = locator.findExportInventory(Direction.SOUTH, mockPosition, mockWorld);
+        IInventory result = locator.findExportInventory(
+            Direction.SOUTH,
+            mockPosition,
+            mockWorld,
+            mockNetwork,
+            mockSettings
+        );
 
         assertEquals(mockInventory, result);
     }
@@ -107,7 +140,13 @@ public class ConnectorInventoryLocatorTest
         when(mockWorld.getTileEntity(mockOffsetPosition)).thenReturn(mockTileEntity);
         when(mockTileEntity.isInventory()).thenReturn(false);
 
-        IInventory result = locator.findExportInventory(Direction.SOUTH, mockPosition, mockWorld);
+        IInventory result = locator.findExportInventory(
+            Direction.SOUTH,
+            mockPosition,
+            mockWorld,
+            mockNetwork,
+            mockSettings
+        );
 
         assertNull(result);
         verify(mockTileEntity, never()).getInventory();
@@ -122,7 +161,13 @@ public class ConnectorInventoryLocatorTest
         when(mockTileEntity.isInventory()).thenReturn(true);
         when(mockTileEntity.getInventory()).thenReturn(null);
 
-        IInventory result = locator.findExportInventory(Direction.SOUTH, mockPosition, mockWorld);
+        IInventory result = locator.findExportInventory(
+            Direction.SOUTH,
+            mockPosition,
+            mockWorld,
+            mockNetwork,
+            mockSettings
+        );
 
         assertNull(result);
     }
