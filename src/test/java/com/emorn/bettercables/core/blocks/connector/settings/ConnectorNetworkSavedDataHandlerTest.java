@@ -1,5 +1,6 @@
 package com.emorn.bettercables.core.blocks.connector.settings;
 
+import com.emorn.bettercables.contract.asyncEventBus.IAsyncEventBus;
 import com.emorn.bettercables.contract.blocks.connector.IData;
 import com.emorn.bettercables.contract.common.IPositionInWorld;
 import com.emorn.bettercables.core.blocks.connector.network.ConnectorNetwork;
@@ -16,6 +17,7 @@ public class ConnectorNetworkSavedDataHandlerTest {
     private IData mockCompound;
     private IPositionInWorld mockPosition;
     private ConnectorNetwork mockNetwork;
+    private IAsyncEventBus mockAsyncEventBus;
 
     @Before
     public void setUp() {
@@ -23,6 +25,7 @@ public class ConnectorNetworkSavedDataHandlerTest {
         mockCompound = mock(IData.class);
         mockPosition = mock(IPositionInWorld.class);
         mockNetwork = mock(ConnectorNetwork.class);
+        mockAsyncEventBus = mock(IAsyncEventBus.class);
 
         handler = new ConnectorNetworkSavedDataHandler(mockConnectorSides);
     }
@@ -31,7 +34,7 @@ public class ConnectorNetworkSavedDataHandlerTest {
     public void retrieveNetworkFromNBT_noNetworkId_returnsNull() {
         when(mockCompound.loadInteger(ConnectorNetworkSavedDataHandler.NETWORK_ID)).thenReturn(0);
 
-        ConnectorNetwork result = handler.retrieveNetworkFromNBT(mockCompound, mockPosition);
+        ConnectorNetwork result = handler.retrieveNetworkFromNBT(mockCompound, mockPosition, mockAsyncEventBus);
 
         assertNull(result);
     }

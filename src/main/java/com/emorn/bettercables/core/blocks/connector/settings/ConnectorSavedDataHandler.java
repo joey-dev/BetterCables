@@ -1,5 +1,6 @@
 package com.emorn.bettercables.core.blocks.connector.settings;
 
+import com.emorn.bettercables.contract.asyncEventBus.IAsyncEventBus;
 import com.emorn.bettercables.contract.blocks.connector.IData;
 import com.emorn.bettercables.contract.common.IPositionInWorld;
 import com.emorn.bettercables.core.blocks.connector.ConnectorNetworkHandler;
@@ -30,7 +31,8 @@ public class ConnectorSavedDataHandler
 
     public void readFromNBT(
         IData compound,
-        IPositionInWorld positionInWorld
+        IPositionInWorld positionInWorld,
+        IAsyncEventBus eventBus
     )
     {
         this.connectorSides.connectorSettings(Direction.NORTH).deserializeNBT(compound, "north");
@@ -43,7 +45,8 @@ public class ConnectorSavedDataHandler
         this.connectorNetworkHandler.setNetwork(
             this.connectorNetworkSavedDataHandler.retrieveNetworkFromNBT(
                 compound,
-                positionInWorld
+                positionInWorld,
+                eventBus
             )
         );
     }

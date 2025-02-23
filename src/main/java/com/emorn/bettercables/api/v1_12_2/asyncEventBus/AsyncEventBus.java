@@ -1,6 +1,12 @@
-package com.emorn.bettercables.core.jobs;
+package com.emorn.bettercables.api.v1_12_2.asyncEventBus;
 
-import com.emorn.bettercables.core.jobs.recalculatePossibleSlotsBasedOnInventoryChange.RecalculatePossibleSlotsBasedOnInventoryChange;
+import com.emorn.bettercables.contract.asyncEventBus.IAsyncEvent;
+import com.emorn.bettercables.contract.asyncEventBus.IAsyncEventBus;
+import com.emorn.bettercables.contract.asyncEventBus.IAsyncEventInput;
+import com.emorn.bettercables.core.asyncEventBus.connectorExtractDisabled.ConnectorExtractDisabled;
+import com.emorn.bettercables.core.asyncEventBus.connectorExtractEnabled.ConnectorExtractEnabled;
+import com.emorn.bettercables.core.asyncEventBus.connectorInsertDisabled.ConnectorInsertDisabled;
+import com.emorn.bettercables.core.asyncEventBus.connectorInsertEnabled.ConnectorInsertEnabled;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.FMLLog;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -9,25 +15,34 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 import java.util.Map;
 import java.util.concurrent.*;
 
-public class BackgroundJobQueue {
-
+public class AsyncEventBus implements IAsyncEventBus
+{
     private final ThreadPoolExecutor executor;
-    private final int maxConcurrentThreads;
-    private final Map<Class<? extends IJob>, IJob> jobInstances = new ConcurrentHashMap<>();
+    private final Map<Class<? extends IAsyncEvent>, IAsyncEvent> jobInstances = new ConcurrentHashMap<>();
+
     private long lastSecondTick = 0;
+    private static AsyncEventBus instance;
 
-    private static BackgroundJobQueue instance;
-
-    private static final Class<? extends IJob>[] JOB_CLASSES = new Class[]{
-        RecalculatePossibleSlotsBasedOnInventoryChange.class
+    private static final Class<? extends IAsyncEvent>[] JOB_CLASSES = new Class[]{
+        ConnectorInsertDisabled.class,
+        ConnectorInsertEnabled.class,
+        ConnectorExtractDisabled.class,
+        ConnectorExtractEnabled.class,
     };
 
-    private BackgroundJobQueue(int maxConcurrentThreads) {
+    public static synchronized AsyncEventBus getInstance() {
+        if (instance == null) {
+            instance = new AsyncEventBus(2);
+            MinecraftForge.EVENT_BUS.register(instance);
+            MinecraftForge.EVENT_BUS.register(new AsyncEventBus.MinecraftServerProxy());
+        }
+        return instance;
+    }
+
+    private AsyncEventBus(int maxConcurrentThreads) {
         if (maxConcurrentThreads <= 0) {
             throw new IllegalArgumentException("maxConcurrentThreads must be greater than 0");
         }
-        this.maxConcurrentThreads = maxConcurrentThreads;
-
         // Use ArrayBlockingQueue instead of LinkedBlockingQueue (reduces lock contention)
         this.executor = new ThreadPoolExecutor(
             maxConcurrentThreads,
@@ -39,7 +54,7 @@ public class BackgroundJobQueue {
         );
 
         // Instantiate all job classes at startup
-        for (Class<? extends IJob> jobClass : JOB_CLASSES) {
+        for (Class<? extends IAsyncEvent> jobClass : JOB_CLASSES) {
             try {
                 jobInstances.put(jobClass, jobClass.newInstance());
             } catch (InstantiationException | IllegalAccessException e) {
@@ -48,17 +63,8 @@ public class BackgroundJobQueue {
         }
     }
 
-    public static synchronized BackgroundJobQueue getInstance() {
-        if (instance == null) {
-            instance = new BackgroundJobQueue(2);
-            MinecraftForge.EVENT_BUS.register(instance);
-            MinecraftForge.EVENT_BUS.register(new MinecraftServerProxy());
-        }
-        return instance;
-    }
-
-    public <T extends IJob> void addToQueue(Class<T> jobClass, IJobInput input) {
-        IJob jobInstance = jobInstances.get(jobClass);
+    public <T extends IAsyncEvent> void publish(Class<T> jobClass, IAsyncEventInput input) {
+        IAsyncEvent jobInstance = jobInstances.get(jobClass);
         if (jobInstance == null) {
             throw new IllegalArgumentException("Job class not registered: " + jobClass.getName());
         }
@@ -72,10 +78,9 @@ public class BackgroundJobQueue {
         }
 
         try {
-            // Execute per-second jobs
             if (MinecraftServerProxy.currentTick - lastSecondTick >= 20) {
                 lastSecondTick = MinecraftServerProxy.currentTick;
-                for (IJob job : jobInstances.values()) {
+                for (IAsyncEvent job : jobInstances.values()) {
                     if (executor.getQueue().remainingCapacity() > 0) {
                         executor.execute(() -> {
                             try {

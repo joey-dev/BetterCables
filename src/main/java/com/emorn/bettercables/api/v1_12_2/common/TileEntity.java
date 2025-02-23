@@ -4,6 +4,8 @@ import com.emorn.bettercables.api.v1_12_2.blocks.connector.ForgeTileEntityConnec
 import com.emorn.bettercables.contract.common.IInventory;
 import com.emorn.bettercables.contract.common.ITileEntity;
 import com.emorn.bettercables.core.blocks.connector.network.ConnectorNetwork;
+import com.emorn.bettercables.core.blocks.connector.settings.ConnectorSettings;
+import com.emorn.bettercables.core.common.Direction;
 
 public class TileEntity implements ITileEntity
 {
@@ -35,6 +37,16 @@ public class TileEntity implements ITileEntity
         }
 
         return ((ForgeTileEntityConnector) this.forgeTileEntity).getNetwork();
+    }
+
+    @Override
+    public ConnectorSettings settings(Direction direction)
+    {
+        if (!(this.forgeTileEntity instanceof ForgeTileEntityConnector)) {
+            return null;
+        }
+
+        return ((ForgeTileEntityConnector) this.forgeTileEntity).settings(direction);
     }
 
     public <T> T getCapability(

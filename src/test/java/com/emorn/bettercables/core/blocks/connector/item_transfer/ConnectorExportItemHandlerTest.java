@@ -1,9 +1,6 @@
 package com.emorn.bettercables.core.blocks.connector.item_transfer;
 
-import com.emorn.bettercables.contract.common.IInventory;
-import com.emorn.bettercables.contract.common.IItemStack;
-import com.emorn.bettercables.contract.common.IPositionInWorld;
-import com.emorn.bettercables.contract.common.IWorld;
+import com.emorn.bettercables.contract.common.*;
 import com.emorn.bettercables.core.blocks.connector.IConnectorNetworkService;
 import com.emorn.bettercables.core.blocks.connector.network.ConnectorNetwork;
 import com.emorn.bettercables.core.blocks.connector.network.ExtractSlot;
@@ -16,7 +13,10 @@ import com.emorn.bettercables.core.common.Direction;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
@@ -33,7 +33,9 @@ public class ConnectorExportItemHandlerTest
     private ConnectorNetwork mockNetwork;
     private IPositionInWorld mockPositionInWorld;
     private IWorld mockWorld;
+    private IItemHandler mockImportInventoryHandler;
     private IInventory mockImportInventory;
+    private IItemHandler mockExportInventoryHandler;
     private IInventory mockExportInventory;
     private ConnectorSettings mockExportSettings;
     private ConnectorSettings mockImportSettings;
@@ -57,8 +59,10 @@ public class ConnectorExportItemHandlerTest
         mockNetwork = mock(ConnectorNetwork.class);
         mockPositionInWorld = mock(IPositionInWorld.class);
         mockWorld = mock(IWorld.class);
-        mockImportInventory = mock(IInventory.class);
-        mockExportInventory = mock(IInventory.class);
+        mockImportInventoryHandler = mock(IItemHandler.class);
+        mockImportInventory= mock(IInventory.class);
+        mockExportInventoryHandler = mock(IItemHandler.class);
+        mockExportInventory= mock(IInventory.class);
         mockExportSettings = mock(ConnectorSettings.class);
         mockImportSettings = mock(ConnectorSettings.class);
         mockConnectorSide = mock(ConnectorSide.class);
@@ -67,6 +71,13 @@ public class ConnectorExportItemHandlerTest
         when(mockConnectorSides.findConnectorByDirection(any())).thenReturn(mockConnectorSide);
         when(mockConnectorSide.connectorSettings()).thenReturn(mockExportSettings);
         when(mockConnectorNetworkSettingsService.settings(any())).thenReturn(mockExportSettings);
+        when(mockImportInventory.getItemHandler()).thenReturn(mockImportInventoryHandler);
+        when(mockExportInventory.getItemHandler()).thenReturn(mockExportInventoryHandler);
+
+        when(mockImportInventoryHandler.slotCount()).thenReturn(64);
+        when(mockExportInventoryHandler.slotCount()).thenReturn(64);
+        when(mockImportSettings.inventorySlotCount()).thenReturn(64);
+        when(mockExportSettings.inventorySlotCount()).thenReturn(64);
     }
 
     private void setInternalState(
@@ -128,6 +139,7 @@ public class ConnectorExportItemHandlerTest
             any(),
             any(),
             anyInt(),
+            any(),
             any()
         )).thenReturn(null);
 
@@ -135,7 +147,6 @@ public class ConnectorExportItemHandlerTest
 
         verify(mockConnectorNetworkService).getNetwork();
         verify(mockNetwork).findNextIndex(-1);
-        verify(mockConnectorInventoryLocator).findImportInventory(Direction.NORTH, mockNetwork, 0, mockWorld);
         verifyNoMoreInteractions(mockConnectorInventoryLocator, mockInventoryService);
     }
 
@@ -144,8 +155,15 @@ public class ConnectorExportItemHandlerTest
     {
         when(mockConnectorNetworkService.isNetworkDisabled()).thenReturn(false);
         when(mockNetwork.findNextIndex(anyInt())).thenReturn(0);
-        when(mockConnectorInventoryLocator.findImportInventory(any(), any(), anyInt(), any())).thenReturn(
-            mockImportInventory);
+        when(mockConnectorInventoryLocator.findImportInventory(
+            any(),
+            any(),
+            anyInt(),
+            any(),
+            any()
+        )).thenReturn(
+            mockImportInventory
+        );
         when(mockConnectorNetworkSettingsService.findImportSettings(
             any(Direction.class),
             any(ConnectorNetwork.class),
@@ -156,7 +174,6 @@ public class ConnectorExportItemHandlerTest
 
         verify(mockConnectorNetworkService).getNetwork();
         verify(mockNetwork).findNextIndex(-1);
-        verify(mockConnectorInventoryLocator).findImportInventory(Direction.NORTH, mockNetwork, 0, mockWorld);
         verify(mockConnectorNetworkSettingsService).findImportSettings(Direction.NORTH, mockNetwork, 0);
         verifyNoMoreInteractions(mockConnectorInventoryLocator, mockInventoryService);
     }
@@ -166,11 +183,20 @@ public class ConnectorExportItemHandlerTest
     {
         when(mockConnectorNetworkService.isNetworkDisabled()).thenReturn(false);
         when(mockNetwork.findNextIndex(anyInt())).thenReturn(0);
-        when(mockConnectorInventoryLocator.findImportInventory(any(), any(), anyInt(), any())).thenReturn(
-            mockImportInventory);
+        when(mockConnectorInventoryLocator.findImportInventory(
+            any(),
+            any(),
+            anyInt(),
+            any(),
+            any()
+        )).thenReturn(
+            mockImportInventory
+        );
         when(mockConnectorNetworkSettingsService.findImportSettings(any(), any(), anyInt())).thenReturn(
             mockImportSettings);
         when(mockConnectorInventoryLocator.findExportInventory(
+            any(),
+            any(),
             any(),
             any(),
             any()
@@ -178,7 +204,13 @@ public class ConnectorExportItemHandlerTest
 
         handler.invoke(Direction.NORTH, mockPositionInWorld, mockWorld);
 
-        verify(mockConnectorInventoryLocator).findExportInventory(Direction.NORTH, mockPositionInWorld, mockWorld);
+        verify(mockConnectorInventoryLocator).findExportInventory(
+            Direction.NORTH,
+            mockPositionInWorld,
+            mockWorld,
+            mockNetwork,
+            mockExportSettings
+        );
         verifyNoMoreInteractions(mockInventoryService);
     }
 
@@ -187,11 +219,26 @@ public class ConnectorExportItemHandlerTest
     {
         when(mockConnectorNetworkService.isNetworkDisabled()).thenReturn(false);
         when(mockNetwork.findNextIndex(anyInt())).thenReturn(0);
-        when(mockConnectorInventoryLocator.findImportInventory(any(), any(), anyInt(), any())).thenReturn(
-            mockImportInventory);
+        when(mockConnectorInventoryLocator.findImportInventory(
+            any(),
+            any(),
+            anyInt(),
+            any(),
+            any()
+        )).thenReturn(
+            mockImportInventory
+        );
         when(mockConnectorNetworkSettingsService.findImportSettings(any(), any(), anyInt())).thenReturn(
             mockImportSettings);
-        when(mockConnectorInventoryLocator.findExportInventory(any(), any(), any())).thenReturn(mockExportInventory);
+        when(mockConnectorInventoryLocator.findExportInventory(
+            any(),
+            any(),
+            any(),
+            any(),
+            any()
+        )).thenReturn(
+            mockExportInventory
+        );
         ConnectorSides connectorSides = new ConnectorSides();
         handler = new ConnectorExportItemHandler(connectorSides, mockConnectorNetworkService);
 
@@ -209,11 +256,26 @@ public class ConnectorExportItemHandlerTest
     {
         when(mockConnectorNetworkService.isNetworkDisabled()).thenReturn(false);
         when(mockNetwork.findNextIndex(anyInt())).thenReturn(0);
-        when(mockConnectorInventoryLocator.findImportInventory(any(), any(), anyInt(), any())).thenReturn(
-            mockImportInventory);
+        when(mockConnectorInventoryLocator.findImportInventory(
+            any(),
+            any(),
+            anyInt(),
+            any(),
+            any()
+        )).thenReturn(
+            mockImportInventory
+        );
         when(mockConnectorNetworkSettingsService.findImportSettings(any(), any(), anyInt())).thenReturn(
             mockImportSettings);
-        when(mockConnectorInventoryLocator.findExportInventory(any(), any(), any())).thenReturn(mockExportInventory);
+        when(mockConnectorInventoryLocator.findExportInventory(
+            any(),
+            any(),
+            any(),
+            any(),
+            any()
+        )).thenReturn(
+            mockExportInventory
+        );
         when(mockConnectorNetworkSettingsService.settings(any())).thenReturn(null);
 
         handler.invoke(Direction.NORTH, mockPositionInWorld, mockWorld);
@@ -227,9 +289,24 @@ public class ConnectorExportItemHandlerTest
     {
         when(mockConnectorNetworkService.isNetworkDisabled()).thenReturn(false);
         when(mockNetwork.findNextIndex(anyInt())).thenReturn(0);
-        when(mockConnectorInventoryLocator.findImportInventory(any(), any(), anyInt(), any())).thenReturn(
-            mockImportInventory);
-        when(mockConnectorInventoryLocator.findExportInventory(any(), any(), any())).thenReturn(mockExportInventory);
+        when(mockConnectorInventoryLocator.findImportInventory(
+            any(),
+            any(),
+            anyInt(),
+            any(),
+            any()
+        )).thenReturn(
+            mockImportInventory
+        );
+        when(mockConnectorInventoryLocator.findExportInventory(
+            any(),
+            any(),
+            any(),
+            any(),
+            any()
+        )).thenReturn(
+            mockExportInventory
+        );
         when(mockConnectorNetworkSettingsService.findImportSettings(any(), any(), anyInt())).thenReturn(
             mockImportSettings);
         List<ExtractSlot> slotPairs = new ArrayList<>();
@@ -243,17 +320,17 @@ public class ConnectorExportItemHandlerTest
 
         IItemStack mockItemStack = mock(IItemStack.class);
         when(mockItemStack.isEmpty()).thenReturn(false);
-        when(mockInventoryService.extractItemFromInventory(mockExportInventory, 0, 1)).thenReturn(mockItemStack);
-        when(mockInventoryService.insertItemIntoInventory(mockImportInventory, 0, mockItemStack)).thenReturn(mock(
+        when(mockInventoryService.extractItemFromInventory(mockExportInventoryHandler, 0, 1)).thenReturn(mockItemStack);
+        when(mockInventoryService.insertItemIntoInventory(mockImportInventoryHandler, 0, mockItemStack)).thenReturn(mock(
             IItemStack.class));
         when(mockItemStack.getCount()).thenReturn(1);
 
         handler.invoke(Direction.NORTH, mockPositionInWorld, mockWorld);
 
-        verify(mockInventoryService).extractItemFromInventory(mockExportInventory, 0, 1);
-        verify(mockInventoryService).insertItemIntoInventory(mockImportInventory, 0, mockItemStack);
+        verify(mockInventoryService).extractItemFromInventory(mockExportInventoryHandler, 0, 1);
+        verify(mockInventoryService).insertItemIntoInventory(mockImportInventoryHandler, 0, mockItemStack);
         verify(mockInventoryService).insertItemIntoInventory(
-            eq(mockExportInventory),
+            eq(mockExportInventoryHandler),
             eq(0),
             any(IItemStack.class)
         );
@@ -264,9 +341,24 @@ public class ConnectorExportItemHandlerTest
     {
         when(mockConnectorNetworkService.isNetworkDisabled()).thenReturn(false);
         when(mockNetwork.findNextIndex(anyInt())).thenReturn(0);
-        when(mockConnectorInventoryLocator.findImportInventory(any(), any(), anyInt(), any())).thenReturn(
-            mockImportInventory);
-        when(mockConnectorInventoryLocator.findExportInventory(any(), any(), any())).thenReturn(mockExportInventory);
+        when(mockConnectorInventoryLocator.findImportInventory(
+            any(),
+            any(),
+            anyInt(),
+            any(),
+            any()
+        )).thenReturn(
+            mockImportInventory
+        );
+        when(mockConnectorInventoryLocator.findExportInventory(
+            any(),
+            any(),
+            any(),
+            any(),
+            any()
+        )).thenReturn(
+            mockExportInventory
+        );
         when(mockConnectorNetworkSettingsService.findImportSettings(any(), any(), anyInt())).thenReturn(
             mockImportSettings);
         when(mockNetwork.getPossibleSlots(any())).thenReturn(Collections.emptyList());
@@ -282,9 +374,24 @@ public class ConnectorExportItemHandlerTest
     {
         when(mockConnectorNetworkService.isNetworkDisabled()).thenReturn(false);
         when(mockNetwork.findNextIndex(anyInt())).thenReturn(0);
-        when(mockConnectorInventoryLocator.findImportInventory(any(), any(), anyInt(), any())).thenReturn(
-            mockImportInventory);
-        when(mockConnectorInventoryLocator.findExportInventory(any(), any(), any())).thenReturn(mockExportInventory);
+        when(mockConnectorInventoryLocator.findImportInventory(
+            any(),
+            any(),
+            anyInt(),
+            any(),
+            any()
+        )).thenReturn(
+            mockImportInventory
+        );
+        when(mockConnectorInventoryLocator.findExportInventory(
+            any(),
+            any(),
+            any(),
+            any(),
+            any()
+        )).thenReturn(
+            mockExportInventory
+        );
         when(mockConnectorNetworkSettingsService.findImportSettings(any(), any(), anyInt())).thenReturn(
             mockImportSettings);
         List<ExtractSlot> slotPairs = new ArrayList<>();
@@ -297,11 +404,11 @@ public class ConnectorExportItemHandlerTest
         when(mockNetwork.getPossibleSlots(any())).thenReturn(slotPairs);
         IItemStack mockItemStack = mock(IItemStack.class);
         when(mockItemStack.isEmpty()).thenReturn(true);
-        when(mockInventoryService.extractItemFromInventory(mockExportInventory, 0, 1)).thenReturn(mockItemStack);
+        when(mockInventoryService.extractItemFromInventory(mockExportInventoryHandler, 0, 1)).thenReturn(mockItemStack);
 
         handler.invoke(Direction.NORTH, mockPositionInWorld, mockWorld);
 
-        verify(mockInventoryService).extractItemFromInventory(mockExportInventory, 0, 1);
+        verify(mockInventoryService).extractItemFromInventory(mockExportInventoryHandler, 0, 1);
         verifyNoMoreInteractions(mockInventoryService);
     }
 
@@ -310,9 +417,24 @@ public class ConnectorExportItemHandlerTest
     {
         when(mockConnectorNetworkService.isNetworkDisabled()).thenReturn(false);
         when(mockNetwork.findNextIndex(anyInt())).thenReturn(0);
-        when(mockConnectorInventoryLocator.findImportInventory(any(), any(), anyInt(), any())).thenReturn(
-            mockImportInventory);
-        when(mockConnectorInventoryLocator.findExportInventory(any(), any(), any())).thenReturn(mockExportInventory);
+        when(mockConnectorInventoryLocator.findImportInventory(
+            any(),
+            any(),
+            anyInt(),
+            any(),
+            any()
+        )).thenReturn(
+            mockImportInventory
+        );
+        when(mockConnectorInventoryLocator.findExportInventory(
+            any(),
+            any(),
+            any(),
+            any(),
+            any()
+        )).thenReturn(
+            mockExportInventory
+        );
         when(mockConnectorNetworkSettingsService.findImportSettings(any(), any(), anyInt())).thenReturn(
             mockImportSettings);
         List<ExtractSlot> slotPairs = new ArrayList<>();
@@ -327,19 +449,19 @@ public class ConnectorExportItemHandlerTest
         IItemStack mockItemStack = mock(IItemStack.class);
         when(mockItemStack.isEmpty()).thenReturn(false);
         when(mockItemStack.getCount()).thenReturn(5);
-        when(mockInventoryService.extractItemFromInventory(mockExportInventory, 0, 1)).thenReturn(mockItemStack);
+        when(mockInventoryService.extractItemFromInventory(mockExportInventoryHandler, 0, 1)).thenReturn(mockItemStack);
 
         IItemStack mockNotInserted = mock(IItemStack.class);
         when(mockNotInserted.isEmpty()).thenReturn(false);
         when(mockNotInserted.getCount()).thenReturn(2);
-        when(mockInventoryService.insertItemIntoInventory(mockImportInventory, 0, mockItemStack)).thenReturn(
+        when(mockInventoryService.insertItemIntoInventory(mockImportInventoryHandler, 0, mockItemStack)).thenReturn(
             mockNotInserted);
 
         handler.invoke(Direction.NORTH, mockPositionInWorld, mockWorld);
 
-        verify(mockInventoryService).extractItemFromInventory(mockExportInventory, 0, 1);
-        verify(mockInventoryService).insertItemIntoInventory(mockImportInventory, 0, mockItemStack);
-        verify(mockInventoryService).insertItemIntoInventory(mockExportInventory, 0, mockNotInserted);
+        verify(mockInventoryService).extractItemFromInventory(mockExportInventoryHandler, 0, 1);
+        verify(mockInventoryService).insertItemIntoInventory(mockImportInventoryHandler, 0, mockItemStack);
+        verify(mockInventoryService).insertItemIntoInventory(mockExportInventoryHandler, 0, mockNotInserted);
     }
 
     @Test
@@ -347,9 +469,24 @@ public class ConnectorExportItemHandlerTest
     {
         when(mockConnectorNetworkService.isNetworkDisabled()).thenReturn(false);
         when(mockNetwork.findNextIndex(anyInt())).thenReturn(0);
-        when(mockConnectorInventoryLocator.findImportInventory(any(), any(), anyInt(), any())).thenReturn(
-            mockImportInventory);
-        when(mockConnectorInventoryLocator.findExportInventory(any(), any(), any())).thenReturn(mockExportInventory);
+        when(mockConnectorInventoryLocator.findImportInventory(
+            any(),
+            any(),
+            anyInt(),
+            any(),
+            any()
+        )).thenReturn(
+            mockImportInventory
+        );
+        when(mockConnectorInventoryLocator.findExportInventory(
+            any(),
+            any(),
+            any(),
+            any(),
+            any()
+        )).thenReturn(
+            mockExportInventory
+        );
         when(mockConnectorNetworkSettingsService.findImportSettings(any(), any(), anyInt())).thenReturn(
             mockImportSettings);
         List<ExtractSlot> slotPairs = new ArrayList<>();
@@ -368,22 +505,22 @@ public class ConnectorExportItemHandlerTest
 
         IItemStack mockItemStack1 = mock(IItemStack.class);
         when(mockItemStack1.isEmpty()).thenReturn(false);
-        when(mockInventoryService.extractItemFromInventory(mockExportInventory, 0, 1)).thenReturn(mockItemStack1);
-        when(mockInventoryService.insertItemIntoInventory(mockImportInventory, 0, mockItemStack1)).thenReturn(mock(
+        when(mockInventoryService.extractItemFromInventory(mockExportInventoryHandler, 0, 1)).thenReturn(mockItemStack1);
+        when(mockInventoryService.insertItemIntoInventory(mockImportInventoryHandler, 0, mockItemStack1)).thenReturn(mock(
             IItemStack.class));
 
         IItemStack mockItemStack2 = mock(IItemStack.class);
         when(mockItemStack2.isEmpty()).thenReturn(false);
-        when(mockInventoryService.extractItemFromInventory(mockExportInventory, 1, 1)).thenReturn(mockItemStack2);
-        when(mockInventoryService.insertItemIntoInventory(mockImportInventory, 1, mockItemStack2)).thenReturn(mock(
+        when(mockInventoryService.extractItemFromInventory(mockExportInventoryHandler, 1, 1)).thenReturn(mockItemStack2);
+        when(mockInventoryService.insertItemIntoInventory(mockImportInventoryHandler, 1, mockItemStack2)).thenReturn(mock(
             IItemStack.class));
 
         handler.invoke(Direction.NORTH, mockPositionInWorld, mockWorld);
 
-        verify(mockInventoryService).extractItemFromInventory(mockExportInventory, 0, 1);
-        verify(mockInventoryService).insertItemIntoInventory(mockImportInventory, 0, mockItemStack1);
-        verify(mockInventoryService).extractItemFromInventory(mockExportInventory, 1, 1);
-        verify(mockInventoryService).insertItemIntoInventory(mockImportInventory, 1, mockItemStack2);
+        verify(mockInventoryService).extractItemFromInventory(mockExportInventoryHandler, 0, 1);
+        verify(mockInventoryService).insertItemIntoInventory(mockImportInventoryHandler, 0, mockItemStack1);
+        verify(mockInventoryService).extractItemFromInventory(mockExportInventoryHandler, 1, 1);
+        verify(mockInventoryService).insertItemIntoInventory(mockImportInventoryHandler, 1, mockItemStack2);
     }
 
     @Test
@@ -391,11 +528,31 @@ public class ConnectorExportItemHandlerTest
     {
         when(mockConnectorNetworkService.isNetworkDisabled()).thenReturn(false);
         when(mockNetwork.findNextIndex(anyInt())).thenReturn(0);
-        when(mockConnectorInventoryLocator.findImportInventory(any(), any(), anyInt(), any())).thenReturn(
-            mockImportInventory);
-        when(mockConnectorInventoryLocator.findExportInventory(any(), any(), any())).thenReturn(mockExportInventory);
-        when(mockConnectorNetworkSettingsService.findImportSettings(any(), any(), anyInt())).thenReturn(
-            mockImportSettings);
+        when(mockConnectorInventoryLocator.findImportInventory(
+            any(),
+            any(),
+            anyInt(),
+            any(),
+            any()
+        )).thenReturn(
+            mockImportInventory
+        );
+        when(mockConnectorInventoryLocator.findExportInventory(
+            any(),
+            any(),
+            any(),
+            any(),
+            any()
+        )).thenReturn(
+            mockExportInventory
+        );
+        when(mockConnectorNetworkSettingsService.findImportSettings(
+            any(),
+            any(),
+            anyInt()
+        )).thenReturn(
+            mockImportSettings
+        );
         List<ExtractSlot> slotPairs = new ArrayList<>();
         List<InsertSlot> insertSlots1 = new ArrayList<>();
         List<InsertSlot> insertSlots2 = new ArrayList<>();
@@ -412,12 +569,12 @@ public class ConnectorExportItemHandlerTest
 
         IItemStack mockItemStack1 = mock(IItemStack.class);
         when(mockItemStack1.isEmpty()).thenReturn(true);
-        when(mockInventoryService.extractItemFromInventory(mockExportInventory, 0, 1)).thenReturn(mockItemStack1);
-        when(mockInventoryService.extractItemFromInventory(mockExportInventory, 1, 1)).thenReturn(mockItemStack1);
+        when(mockInventoryService.extractItemFromInventory(mockExportInventoryHandler, 0, 1)).thenReturn(mockItemStack1);
+        when(mockInventoryService.extractItemFromInventory(mockExportInventoryHandler, 1, 1)).thenReturn(mockItemStack1);
 
         handler.invoke(Direction.NORTH, mockPositionInWorld, mockWorld);
 
-        verify(mockInventoryService).extractItemFromInventory(mockExportInventory, 0, 1);
+        verify(mockInventoryService).extractItemFromInventory(mockExportInventoryHandler, 0, 1);
         verify(mockInventoryService, never()).insertItemIntoInventory(any(), anyInt(), any());
     }
 
@@ -425,9 +582,24 @@ public class ConnectorExportItemHandlerTest
     public void invoke_directionToIndexMap_updatesCorrectly()
     {
         when(mockConnectorNetworkService.isNetworkDisabled()).thenReturn(false);
-        when(mockConnectorInventoryLocator.findImportInventory(any(), any(), anyInt(), any())).thenReturn(
-            mockImportInventory);
-        when(mockConnectorInventoryLocator.findExportInventory(any(), any(), any())).thenReturn(mockExportInventory);
+        when(mockConnectorInventoryLocator.findImportInventory(
+            any(),
+            any(),
+            anyInt(),
+            any(),
+            any()
+        )).thenReturn(
+            mockImportInventory
+        );
+        when(mockConnectorInventoryLocator.findExportInventory(
+            any(),
+            any(),
+            any(),
+            any(),
+            any()
+        )).thenReturn(
+            mockExportInventory
+        );
         when(mockConnectorNetworkSettingsService.findImportSettings(any(), any(), anyInt())).thenReturn(
             mockImportSettings);
         List<ExtractSlot> slotPairs = new ArrayList<>();
@@ -441,11 +613,11 @@ public class ConnectorExportItemHandlerTest
         IItemStack mockItemStack = mock(IItemStack.class);
         when(mockItemStack.isEmpty()).thenReturn(false);
         when(mockItemStack.getCount()).thenReturn(5);
-        when(mockInventoryService.extractItemFromInventory(mockExportInventory, 0, 1)).thenReturn(mockItemStack);
+        when(mockInventoryService.extractItemFromInventory(mockExportInventoryHandler, 0, 1)).thenReturn(mockItemStack);
         IItemStack mockNotInserted = mock(IItemStack.class);
         when(mockNotInserted.isEmpty()).thenReturn(false);
         when(mockNotInserted.getCount()).thenReturn(2);
-        when(mockInventoryService.insertItemIntoInventory(mockImportInventory, 0, mockItemStack)).thenReturn(
+        when(mockInventoryService.insertItemIntoInventory(mockImportInventoryHandler, 0, mockItemStack)).thenReturn(
             mockNotInserted);
 
 
@@ -480,9 +652,24 @@ public class ConnectorExportItemHandlerTest
     {
         when(mockConnectorNetworkService.isNetworkDisabled()).thenReturn(false);
         when(mockNetwork.findNextIndex(anyInt())).thenReturn(0);
-        when(mockConnectorInventoryLocator.findImportInventory(any(), any(), anyInt(), any())).thenReturn(
-            mockImportInventory);
-        when(mockConnectorInventoryLocator.findExportInventory(any(), any(), any())).thenReturn(mockExportInventory);
+        when(mockConnectorInventoryLocator.findImportInventory(
+            any(),
+            any(),
+            anyInt(),
+            any(),
+            any()
+        )).thenReturn(
+            mockImportInventory
+        );
+        when(mockConnectorInventoryLocator.findExportInventory(
+            any(),
+            any(),
+            any(),
+            any(),
+            any()
+        )).thenReturn(
+            mockExportInventory
+        );
         when(mockConnectorNetworkSettingsService.findImportSettings(any(), any(), anyInt())).thenReturn(
             mockImportSettings);
         List<ExtractSlot> slotPairs = new ArrayList<>();
@@ -497,21 +684,21 @@ public class ConnectorExportItemHandlerTest
         IItemStack mockItemStack = mock(IItemStack.class);
         when(mockItemStack.isEmpty()).thenReturn(false);
         when(mockItemStack.getCount()).thenReturn(5);
-        when(mockInventoryService.extractItemFromInventory(mockExportInventory, 0, 1)).thenReturn(mockItemStack);
+        when(mockInventoryService.extractItemFromInventory(mockExportInventoryHandler, 0, 1)).thenReturn(mockItemStack);
 
         IItemStack mockNotInserted = mock(IItemStack.class);
         when(mockNotInserted.isEmpty()).thenReturn(false);
         when(mockNotInserted.getCount()).thenReturn(2);
-        when(mockInventoryService.insertItemIntoInventory(mockImportInventory, 0, mockItemStack)).thenReturn(
+        when(mockInventoryService.insertItemIntoInventory(mockImportInventoryHandler, 0, mockItemStack)).thenReturn(
             mockNotInserted);
 
-        when(mockInventoryService.insertItemIntoInventory(eq(mockExportInventory), eq(0), any())).thenReturn(
+        when(mockInventoryService.insertItemIntoInventory(eq(mockExportInventoryHandler), eq(0), any())).thenReturn(
             mockNotInserted);
 
         handler.invoke(Direction.NORTH, mockPositionInWorld, mockWorld);
 
-        verify(mockInventoryService).extractItemFromInventory(mockExportInventory, 0, 1);
-        verify(mockInventoryService).insertItemIntoInventory(mockImportInventory, 0, mockItemStack);
-        verify(mockInventoryService).insertItemIntoInventory(mockExportInventory, 0, mockNotInserted);
+        verify(mockInventoryService).extractItemFromInventory(mockExportInventoryHandler, 0, 1);
+        verify(mockInventoryService).insertItemIntoInventory(mockImportInventoryHandler, 0, mockItemStack);
+        verify(mockInventoryService).insertItemIntoInventory(mockExportInventoryHandler, 0, mockNotInserted);
     }
 }

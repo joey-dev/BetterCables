@@ -1,5 +1,6 @@
 package com.emorn.bettercables.core.blocks.connector.settings;
 
+import com.emorn.bettercables.contract.asyncEventBus.IAsyncEventBus;
 import com.emorn.bettercables.contract.blocks.connector.IData;
 import com.emorn.bettercables.contract.common.IPositionInWorld;
 import com.emorn.bettercables.core.blocks.connector.network.NetworkManager;
@@ -27,7 +28,8 @@ public class ConnectorNetworkSavedDataHandler
     @Nullable
     public ConnectorNetwork retrieveNetworkFromNBT(
         IData compound,
-        IPositionInWorld positionInWorld
+        IPositionInWorld positionInWorld,
+        IAsyncEventBus eventBus
     )
     {
         int networkId = compound.loadInteger(NETWORK_ID);
@@ -35,7 +37,10 @@ public class ConnectorNetworkSavedDataHandler
             return null;
         }
 
-        ConnectorNetwork foundNetwork = NetworkManager.createNewNetwork(compound.loadInteger(NETWORK_ID));
+        ConnectorNetwork foundNetwork = NetworkManager.createNewNetwork(
+            compound.loadInteger(NETWORK_ID),
+            eventBus
+        );
 
         this.addInsertConnectorInformationToNetwork(
             foundNetwork,

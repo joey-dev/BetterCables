@@ -1,9 +1,6 @@
 package com.emorn.bettercables.core.blocks.connector.item_transfer;
 
-import com.emorn.bettercables.contract.common.IInventory;
-import com.emorn.bettercables.contract.common.IItemStack;
-import com.emorn.bettercables.contract.common.IPositionInWorld;
-import com.emorn.bettercables.contract.common.IWorld;
+import com.emorn.bettercables.contract.common.*;
 import com.emorn.bettercables.core.blocks.connector.IConnectorNetworkService;
 import com.emorn.bettercables.core.blocks.connector.network.ConnectorNetwork;
 import com.emorn.bettercables.core.blocks.connector.network.ExtractSlot;
@@ -14,6 +11,7 @@ import com.emorn.bettercables.core.blocks.connector.settings.ConnectorSettings;
 import com.emorn.bettercables.core.blocks.connector.settings.ConnectorSide;
 import com.emorn.bettercables.core.blocks.connector.settings.ConnectorSides;
 import com.emorn.bettercables.core.common.Direction;
+import com.emorn.bettercables.core.common.Logger;
 import mcp.MethodsReturnNonnullByDefault;
 
 import javax.annotation.Nullable;
@@ -62,16 +60,6 @@ public class ConnectorExportItemHandler
             return;
         }
 
-        IInventory importInventory = this.connectorInventoryLocator.findImportInventory(
-            direction,
-            network,
-            nextIndex,
-            world
-        );
-        if (importInventory == null) {
-            return;
-        }
-
         ConnectorSettings inventorySettings = this.connectorNetworkSettingsService.findImportSettings(
             direction,
             network,
@@ -82,17 +70,15 @@ public class ConnectorExportItemHandler
             return;
         }
 
-        IInventory exportInventory = this.connectorInventoryLocator.findExportInventory(
+        IInventory importInventory = this.connectorInventoryLocator.findImportInventory(
             direction,
-            positionInWorld,
-            world
+            network,
+            nextIndex,
+            world,
+            inventorySettings
         );
-        if (exportInventory == null) {
-            return;
-        }
 
-        ConnectorSide connectorSide = connectorSides.findConnectorByDirection(direction);
-        if (connectorSide == null) {
+        if (importInventory == null) {
             return;
         }
 
@@ -102,11 +88,52 @@ public class ConnectorExportItemHandler
             return;
         }
 
+        IInventory exportInventory = this.connectorInventoryLocator.findExportInventory(
+            direction,
+            positionInWorld,
+            world,
+            network,
+            exportConnectorSettings
+        );
+        if (exportInventory == null) {
+            return;
+        }
+        ConnectorSide connectorSide = connectorSides.findConnectorByDirection(direction);
+        if (connectorSide == null) {
+            return;
+        }
+
+        IItemHandler importInventoryHandler = importInventory.getItemHandler();
+        IItemHandler exportInventoryHandler = exportInventory.getItemHandler();
+        boolean didSlotCountChange = false;
+
+        if (importInventoryHandler.slotCount() != inventorySettings.inventorySlotCount()) {
+            Logger.error("inventory changed...");
+            inventorySettings.changeInventorySlotCount(importInventoryHandler.slotCount());
+            network.insertSlotCountChanged(inventorySettings);
+            didSlotCountChange = true;
+        }
+
+        if (exportInventoryHandler.slotCount() != exportConnectorSettings.inventorySlotCount()) {
+            exportConnectorSettings.changeInventorySlotCount(exportInventoryHandler.slotCount());
+            network.extractSlotCountChanged(exportConnectorSettings);
+            didSlotCountChange = true;
+        }
+
+        if (didSlotCountChange) {
+            return;
+        }
+
         List<ExtractSlot> possibleIndexes = network.getPossibleSlots(
             connectorSide.connectorSettings()
         );
 
-        exportItemFromSlots(possibleIndexes, exportInventory, importInventory, inventorySettings);
+        this.exportItemFromSlots(
+            possibleIndexes,
+            exportInventoryHandler,
+            importInventoryHandler,
+            inventorySettings
+        );
     }
 
     @Nullable
@@ -129,8 +156,8 @@ public class ConnectorExportItemHandler
 
     private void exportItemFromSlots(
         List<ExtractSlot> possibleIndexes,
-        IInventory exportInventory,
-        IInventory importInventory,
+        IItemHandler exportInventory,
+        IItemHandler importInventory,
         ConnectorSettings importSettings
     )
     {
@@ -159,7 +186,11 @@ public class ConnectorExportItemHandler
                     continue;
                 }
 
-                IItemStack items = this.inventoryService.extractItemFromInventory(exportInventory, exportSlot, 1);
+                IItemStack items = this.inventoryService.extractItemFromInventory(
+                    exportInventory,
+                    exportSlot,
+                    1
+                );
                 if (items.isEmpty()) {
                     cannotExtractPositions.add(exportSlot);
                     continue;

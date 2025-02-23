@@ -5,11 +5,9 @@ import com.emorn.bettercables.contract.common.IItemHandler;
 import com.emorn.bettercables.contract.common.IItemStack;
 import com.emorn.bettercables.core.common.EmptyItemStack;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 public class InventoryServiceTest {
@@ -28,49 +26,37 @@ public class InventoryServiceTest {
     }
 
     @Test
-    @Ignore
     public void extractItemFromInventory_successfulExtraction() {
         // Arrange
         when(mockInventory.getItemHandler()).thenReturn(mockItemHandler);
-        when(mockItemHandler.extractItem(5, 10, false)).thenReturn(mockItemStack);
+        when(mockItemHandler.extractItem(5, 10, true)).thenReturn(mockItemStack);
         when(mockItemStack.isEmpty()).thenReturn(false); // Simulate a successful extraction
+        when(mockItemHandler.extractItem(5, 10, false)).thenReturn(mockItemStack);
 
         // Act
-        IItemStack result = service.extractItemFromInventory(mockInventory, 5, 10);
+        IItemStack result = service.extractItemFromInventory(
+            mockItemHandler,
+            5,
+            10
+        );
 
         // Assert
         assertEquals(mockItemStack, result);
-        verify(mockInventory).markDirty(); // markDirty should be called
     }
 
     @Test
-    @Ignore
     public void extractItemFromInventory_emptyExtraction() {
         // Arrange
         when(mockInventory.getItemHandler()).thenReturn(mockItemHandler);
-        when(mockItemHandler.extractItem(5, 10, false)).thenReturn(mockItemStack);
+        when(mockItemHandler.extractItem(5, 10, true)).thenReturn(mockItemStack);
         when(mockItemStack.isEmpty()).thenReturn(true); // Simulate a successful extraction
 
         // Act
-        IItemStack result = service.extractItemFromInventory(mockInventory, 5, 10);
+        IItemStack result = service.extractItemFromInventory(mockItemHandler, 5, 10);
 
         // Assert
-        assertEquals(mockItemStack, result);
-        verify(mockInventory, never()).markDirty(); // markDirty should not be called
-    }
-
-    @Test
-    public void extractItemFromInventory_nullItemHandler_returnsEmptyStack() {
-        // Arrange: Inventory returns a null item handler
-        when(mockInventory.getItemHandler()).thenReturn(null);
-
-        // Act
-        IItemStack result = service.extractItemFromInventory(mockInventory, 5, 10);
-
-        // Assert
-        assertTrue(result instanceof EmptyItemStack);
-        verify(mockInventory, never()).markDirty();
-        verifyNoInteractions(mockItemHandler); // No interaction with the (null) handler
+        assertNotEquals(mockItemStack, result);
+        assertTrue(result.isEmpty());
     }
 
     @Test
@@ -81,7 +67,7 @@ public class InventoryServiceTest {
         when(mockItemHandler.extractItem(anyInt(), anyInt(), anyBoolean())).thenThrow(new ArrayIndexOutOfBoundsException());
 
         // Act
-        IItemStack result = service.extractItemFromInventory(mockInventory, 5, 10);
+        IItemStack result = service.extractItemFromInventory(mockItemHandler, 5, 10);
 
         // Assert
         assertTrue(result instanceof EmptyItemStack);
@@ -98,12 +84,12 @@ public class InventoryServiceTest {
         when(returnedMockItemStack.getCount()).thenReturn(2); // 3 items were inserted
 
         // Act
-        IItemStack result = service.insertItemIntoInventory(mockInventory, 3, mockItemStack);
+        IItemStack result = service.insertItemIntoInventory(mockItemHandler, 3, mockItemStack);
 
         // Assert
         assertEquals(returnedMockItemStack, result); // Should return the remaining items
-        verify(mockInventory).markDirty(); // markDirty should be called
     }
+
     @Test
     public void insertItemIntoInventory_noItemsInserted() {
         // Arrange
@@ -114,25 +100,11 @@ public class InventoryServiceTest {
         when(returnedMockItemStack.getCount()).thenReturn(5);
 
         // Act
-        IItemStack result = service.insertItemIntoInventory(mockInventory, 3, mockItemStack);
+        IItemStack result = service.insertItemIntoInventory(mockItemHandler, 3, mockItemStack);
 
         // Assert
         assertEquals(returnedMockItemStack, result);
         verify(mockInventory, never()).markDirty();
-    }
-
-    @Test
-    public void insertItemIntoInventory_nullItemHandler_returnsEmptyStack() {
-        // Arrange: Inventory returns a null item handler
-        when(mockInventory.getItemHandler()).thenReturn(null);
-
-        // Act
-        IItemStack result = service.insertItemIntoInventory(mockInventory, 3, mockItemStack);
-
-        // Assert
-        assertTrue(result instanceof EmptyItemStack);
-        verify(mockInventory, never()).markDirty();
-        verifyNoInteractions(mockItemHandler); // No interaction with (null) handler
     }
 
     @Test
@@ -143,7 +115,7 @@ public class InventoryServiceTest {
         when(mockItemHandler.insertItem(anyInt(), any(IItemStack.class), anyBoolean())).thenThrow(new ArrayIndexOutOfBoundsException());
 
         // Act
-        IItemStack result = service.insertItemIntoInventory(mockInventory, 3, mockItemStack);
+        IItemStack result = service.insertItemIntoInventory(mockItemHandler, 3, mockItemStack);
 
         // Assert
         assertEquals(mockItemStack, result); // Should return the *original* stack

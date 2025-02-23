@@ -2,20 +2,19 @@ package com.emorn.bettercables.api.v1_12_2.blocks.connector;
 
 import com.emorn.bettercables.Main;
 import com.emorn.bettercables.api.v1_12_2.IHasModel;
+import com.emorn.bettercables.api.v1_12_2.asyncEventBus.AsyncEventBus;
 import com.emorn.bettercables.api.v1_12_2.blocks.AxisAlignedBoundingBoxConverter;
 import com.emorn.bettercables.api.v1_12_2.blocks.BaseCable;
 import com.emorn.bettercables.api.v1_12_2.blocks.cable.BlockCable;
 import com.emorn.bettercables.api.v1_12_2.common.PositionInWorld;
 import com.emorn.bettercables.api.v1_12_2.init.BlockInit;
+import com.emorn.bettercables.contract.asyncEventBus.IAsyncEventBus;
 import com.emorn.bettercables.core.blocks.cable.CableAxisAlignedBoundingBox;
 import com.emorn.bettercables.core.blocks.connector.ConnectorAxisAlignedBoundingBox;
 import com.emorn.bettercables.core.blocks.connector.network.ConnectorNetwork;
 import com.emorn.bettercables.core.blocks.connector.network.NetworkManager;
 import com.emorn.bettercables.core.common.Direction;
 import com.emorn.bettercables.core.common.Reference;
-import com.emorn.bettercables.core.jobs.BackgroundJobQueue;
-import com.emorn.bettercables.core.jobs.recalculatePossibleSlotsBasedOnInventoryChange.RecalculatePossibleSlotsBasedOnInventoryChange;
-import com.emorn.bettercables.core.jobs.recalculatePossibleSlotsBasedOnInventoryChange.RecalculatePossibleSlotsBasedOnInventoryChangeInput;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockAir;
@@ -140,14 +139,13 @@ public class BlockConnector extends BaseCable implements IHasModel
         IBlockState state
     )
     {
-
         boolean didMergeCurrentNetwork = NetworkManager.mergeNetworks(
             new com.emorn.bettercables.api.v1_12_2.common.World(worldIn),
             new PositionInWorld(pos.getX(), pos.getY(), pos.getZ()),
             findTotalConnections(getActualState(state, worldIn, pos))
         );
         if (!didMergeCurrentNetwork) {
-            this.addNetwork(worldIn, pos);
+            this.addNetwork(worldIn, pos, AsyncEventBus.getInstance());
         }
         if (!worldIn.isRemote) {
             worldIn.setBlockState(pos, state, 2);
@@ -456,36 +454,6 @@ public class BlockConnector extends BaseCable implements IHasModel
         }
 
         TileEntity tileEntity = world.getTileEntity(pos);
-        if (neighborTileEntity instanceof IInventory) {
-            if (tileEntity instanceof ForgeTileEntityConnector) {
-                BackgroundJobQueue.getInstance().addToQueue(
-                    RecalculatePossibleSlotsBasedOnInventoryChange.class,
-                    new RecalculatePossibleSlotsBasedOnInventoryChangeInput(
-                        (ForgeTileEntityConnector) tileEntity,
-                        (IInventory) neighborTileEntity,
-                        direction,
-                        world,
-                        neighbor
-                    )
-                );
-
-//                ForgeTileEntityConnector connector = (ForgeTileEntityConnector) tileEntity;
-//                ConnectorNetwork network = connector.getNetwork();
-//                int slotCount = ((IInventory) neighborTileEntity).getSizeInventory();
-//
-//                if (neighborTileEntity instanceof TileEntityChest) {
-//                    for (EnumFacing facing : EnumFacing.HORIZONTALS) {
-//                        TileEntity chestNeighbor = world.getTileEntity(neighbor.offset(facing));
-//                        if (chestNeighbor instanceof TileEntityChest) {
-//                            slotCount += ((TileEntityChest) chestNeighbor).getSizeInventory();
-//                            break; // Only add once, since there should be one extra chest max
-//                        }
-//                    }
-//                }
-//
-//                network.updateSlotCount(slotCount, connector.settings(direction));
-            }
-        }
 
         if (!(neighborBlock.getBlock() instanceof BlockAir)) {
             return;
@@ -499,17 +467,12 @@ public class BlockConnector extends BaseCable implements IHasModel
             network.removeInsert(
                 connector.settings(direction)
             );
-
-            // todo also remove extract...
+            network.removeExtract(
+                connector.settings(direction)
+            );
 
             connector.settings(direction).changeInsertEnabled(false);
-
-            //network.reCalculateAllPossibleSlots(); // todo, this has to happen more often, as inventories can change
-            /**
-             * have another list, with the BlockPos and as value the inventory count
-             * than compare the 2 inventory counts
-             * when not equal, reCalculate possible slots
-             */
+            connector.settings(direction).changeExtractEnabled(false);
         }
     }
 
@@ -666,7 +629,8 @@ public class BlockConnector extends BaseCable implements IHasModel
 
     private void addNetwork(
         World worldIn,
-        BlockPos pos
+        BlockPos pos,
+        IAsyncEventBus eventBus
     )
     {
         this.foundCablePositions.clear();
@@ -679,7 +643,7 @@ public class BlockConnector extends BaseCable implements IHasModel
 
         ConnectorNetwork network = this.findNetwork(worldIn, pos);
         if (network == null) {
-            connector.setNetwork(NetworkManager.createNewNetwork());
+            connector.setNetwork(NetworkManager.createNewNetwork(eventBus));
             this.foundCablePositions.clear();
             return;
         }

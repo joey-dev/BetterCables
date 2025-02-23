@@ -1,8 +1,12 @@
 package com.emorn.bettercables.core.blocks.connector.network;
 
+import com.emorn.bettercables.contract.asyncEventBus.IAsyncEventBus;
 import com.emorn.bettercables.contract.common.IBlock;
 import com.emorn.bettercables.contract.common.IPositionInWorld;
+import com.emorn.bettercables.contract.common.ITileEntity;
 import com.emorn.bettercables.contract.common.IWorld;
+import com.emorn.bettercables.core.blocks.connector.settings.ConnectorSettings;
+import com.emorn.bettercables.core.common.Direction;
 import com.emorn.bettercables.core.common.Logger;
 import mcp.MethodsReturnNonnullByDefault;
 
@@ -21,7 +25,10 @@ public class NetworkManager
     {
     }
 
-    public static ConnectorNetwork createNewNetwork(int savedId)
+    public static ConnectorNetwork createNewNetwork(
+        int savedId,
+        IAsyncEventBus eventBus
+    )
     {
         if (createdNetworksById.containsKey(savedId)) {
             return createdNetworksById.get(savedId);
@@ -31,16 +38,18 @@ public class NetworkManager
             lastId = savedId + 1;
         }
 
-        ConnectorNetwork network = new ConnectorNetwork(savedId);
+        ConnectorNetwork network = new ConnectorNetwork(savedId, eventBus);
         createdNetworksById.put(savedId, network);
         return network;
     }
 
-    public static ConnectorNetwork createNewNetwork()
+    public static ConnectorNetwork createNewNetwork(
+        IAsyncEventBus eventBus
+    )
     {
         lastId++;
         int id = lastId;
-        ConnectorNetwork network = new ConnectorNetwork(id);
+        ConnectorNetwork network = new ConnectorNetwork(id, eventBus);
         createdNetworksById.put(id, network);
         return network;
     }
@@ -91,7 +100,8 @@ public class NetworkManager
 
     public static void reCalculateNetworksAround(
         IPositionInWorld position,
-        IWorld worldIn
+        IWorld worldIn,
+        IAsyncEventBus eventBus
     )
     {
         foundCablePositions.clear();
@@ -115,7 +125,7 @@ public class NetworkManager
         }
 
         for (IPositionInWorld neighborIPositionInWorldPosition : actualNeighborIPositionInWorldPositions) {
-            ConnectorNetwork newNetwork = NetworkManager.createNewNetwork();
+            ConnectorNetwork newNetwork = NetworkManager.createNewNetwork(eventBus);
             reCalculateNetworkFrom(neighborIPositionInWorldPosition, worldIn, newNetwork);
         }
 
@@ -129,6 +139,7 @@ public class NetworkManager
     )
     {
         List<IPositionInWorld> neighborIPositionInWorldPositions = getPossibleConnectedBlocks(position);
+        neighborIPositionInWorldPositions.add(position);
 
         for (IPositionInWorld neighborIPositionInWorldPosition : neighborIPositionInWorldPositions) {
             if (foundCablePositions.containsKey(neighborIPositionInWorldPosition.toKey())) {
@@ -143,7 +154,8 @@ public class NetworkManager
             }
 
             if (neighborBlock.isBlockConnector()) {
-                ConnectorNetwork oldNetwork = worldIn.getTileEntity(neighborIPositionInWorldPosition).getNetworkIfConnector();
+                ITileEntity neighborBlockEntity = worldIn.getTileEntity(neighborIPositionInWorldPosition);
+                ConnectorNetwork oldNetwork = neighborBlockEntity.getNetworkIfConnector();
 
                 if (oldNetwork == null) {
                     Logger.error("Connector has no network");
@@ -155,9 +167,70 @@ public class NetworkManager
                 }
 
                 oldNetwork.remove(neighborIPositionInWorldPosition, network);
+                addConnectorToNetwork(neighborBlockEntity, network, neighborIPositionInWorldPosition);
             }
 
             reCalculateNetworkFrom(neighborIPositionInWorldPosition, worldIn, network);
+        }
+    }
+
+    private static void addConnectorToNetwork(
+        ITileEntity neighborBlockEntity,
+        ConnectorNetwork network,
+        IPositionInWorld position
+    )
+    {
+        addConnectorToNetworkForDirection(
+            Direction.NORTH,
+            neighborBlockEntity,
+            network,
+            position.north()
+        );
+        addConnectorToNetworkForDirection(
+            Direction.EAST,
+            neighborBlockEntity,
+            network,
+            position.east()
+        );
+        addConnectorToNetworkForDirection(
+            Direction.SOUTH,
+            neighborBlockEntity,
+            network,
+            position.south()
+        );
+        addConnectorToNetworkForDirection(
+            Direction.WEST,
+            neighborBlockEntity,
+            network,
+            position.west()
+        );
+        addConnectorToNetworkForDirection(
+            Direction.UP,
+            neighborBlockEntity,
+            network,
+            position.up()
+        );
+        addConnectorToNetworkForDirection(
+            Direction.DOWN,
+            neighborBlockEntity,
+            network,
+            position.down()
+        );
+    }
+
+    private static void addConnectorToNetworkForDirection(
+        Direction direction,
+        ITileEntity neighborBlockEntity,
+        ConnectorNetwork network,
+        IPositionInWorld position
+    )
+    {
+        ConnectorSettings settings = neighborBlockEntity.settings(direction);
+        if (settings.isInsertEnabled()) {
+            network.addInsert(position, settings);
+        }
+        if (settings.isExtractEnabled()) {
+            network.addExtract(position, settings);
         }
     }
 

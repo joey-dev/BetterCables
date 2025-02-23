@@ -1,5 +1,6 @@
 package com.emorn.bettercables.core.blocks.connector.settings;
 
+import com.emorn.bettercables.contract.asyncEventBus.IAsyncEventBus;
 import com.emorn.bettercables.contract.blocks.connector.IData;
 import com.emorn.bettercables.contract.common.IPositionInWorld;
 import com.emorn.bettercables.core.blocks.connector.ConnectorNetworkHandler;
@@ -25,10 +26,12 @@ public class ConnectorSavedDataHandlerTest
     private ConnectorSettings mockSettingsUp;
     private ConnectorSettings mockSettingsDown;
     private ConnectorNetwork mockNetwork;
+    private IAsyncEventBus mockAsyncEventBus;
 
     @Before
     public void setUp()
     {
+        mockAsyncEventBus = mock(IAsyncEventBus.class);
         mockConnectorSides = mock(ConnectorSides.class);
         mockNetworkHandler = mock(ConnectorNetworkHandler.class);
         mockCompound = mock(IData.class);
@@ -73,10 +76,14 @@ public class ConnectorSavedDataHandlerTest
     @Test
     public void readFromNBT_deserializesSettingsAndRetrievesNetwork()
     {
-        when(mockNetworkSavedDataHandler.retrieveNetworkFromNBT(mockCompound, mockPosition))
+        when(mockNetworkSavedDataHandler.retrieveNetworkFromNBT(
+            mockCompound,
+            mockPosition,
+            mockAsyncEventBus
+        ))
             .thenReturn(mockNetwork);
 
-        handler.readFromNBT(mockCompound, mockPosition);
+        handler.readFromNBT(mockCompound, mockPosition, mockAsyncEventBus);
 
         verify(mockSettingsNorth).deserializeNBT(mockCompound, "north");
         verify(mockSettingsEast).deserializeNBT(mockCompound, "east");
@@ -85,17 +92,21 @@ public class ConnectorSavedDataHandlerTest
         verify(mockSettingsUp).deserializeNBT(mockCompound, "up");
         verify(mockSettingsDown).deserializeNBT(mockCompound, "down");
 
-        verify(mockNetworkSavedDataHandler).retrieveNetworkFromNBT(mockCompound, mockPosition);
+        verify(mockNetworkSavedDataHandler).retrieveNetworkFromNBT(mockCompound, mockPosition, mockAsyncEventBus);
         verify(mockNetworkHandler).setNetwork(mockNetwork);
     }
 
     @Test
     public void readFromNBT_deserializesSettingsAndRetrievesNullNetwork()
     {
-        when(mockNetworkSavedDataHandler.retrieveNetworkFromNBT(mockCompound, mockPosition))
+        when(mockNetworkSavedDataHandler.retrieveNetworkFromNBT(
+            mockCompound,
+            mockPosition,
+            mockAsyncEventBus
+        ))
             .thenReturn(null);
 
-        handler.readFromNBT(mockCompound, mockPosition);
+        handler.readFromNBT(mockCompound, mockPosition, mockAsyncEventBus);
 
         verify(mockSettingsNorth).deserializeNBT(mockCompound, "north");
         verify(mockSettingsEast).deserializeNBT(mockCompound, "east");
@@ -104,7 +115,7 @@ public class ConnectorSavedDataHandlerTest
         verify(mockSettingsUp).deserializeNBT(mockCompound, "up");
         verify(mockSettingsDown).deserializeNBT(mockCompound, "down");
 
-        verify(mockNetworkSavedDataHandler).retrieveNetworkFromNBT(mockCompound, mockPosition);
+        verify(mockNetworkSavedDataHandler).retrieveNetworkFromNBT(mockCompound, mockPosition, mockAsyncEventBus);
         verify(mockNetworkHandler).setNetwork(null);
     }
 

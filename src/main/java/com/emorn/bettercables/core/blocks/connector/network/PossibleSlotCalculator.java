@@ -43,7 +43,7 @@ public class PossibleSlotCalculator
             int insertSlotCount = insertSettings.inventorySlotCount();
             int extractSlotCount = extractSettings.inventorySlotCount();
 
-            List<InsertSlot> insertSlots = new ArrayList<>();
+            Set<InsertSlot> insertSlots = new HashSet<>();
             List<Integer> extractSlotIndices = new ArrayList<>();
 
             for (int extractIndex = 0; extractIndex < extractSlotCount; extractIndex++) {
@@ -56,10 +56,10 @@ public class PossibleSlotCalculator
             this.slotsPerExtractSetting.get(extractSettings).addInsert(
                 SlotCache.DEFAULT,
                 insertSettings,
-                insertSlots,
+                new ArrayList<>(insertSlots),
                 extractSlotIndices
             );
-        };
+        }
     }
 
     public void addExtract(
@@ -78,7 +78,8 @@ public class PossibleSlotCalculator
         List<ConnectorSettings> insertConnectorSettings
     )
     {
-        this.slotsPerExtractSetting.putIfAbsent(extractSettings, new SlotCache());
+        this.slotsPerExtractSetting.remove(extractSettings);
+        this.slotsPerExtractSetting.put(extractSettings, new SlotCache());
 
         int extractSlotCount = extractSettings.inventorySlotCount();
 
@@ -138,7 +139,7 @@ public class PossibleSlotCalculator
         this.slotsPerExtractSetting.remove(extractSettings);
     }
 
-    public void updateSlotCount(
+    public void calculateForConnector(
         ConnectorSettings connector,
         List<ConnectorSettings> insertConnectorSettings,
         List<ConnectorSettings> extractConnectorSettings

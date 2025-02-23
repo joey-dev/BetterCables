@@ -3,7 +3,7 @@ package com.emorn.bettercables;
 import com.emorn.bettercables.api.v1_12_2.proxy.CommonProxy;
 import com.emorn.bettercables.api.v1_12_2.proxy.ModNetworkHandler;
 import com.emorn.bettercables.core.common.Reference;
-import com.emorn.bettercables.core.jobs.BackgroundJobQueue;
+import com.emorn.bettercables.api.v1_12_2.asyncEventBus.AsyncEventBus;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.Mod.Instance;
@@ -26,7 +26,7 @@ public class Main
     public static void preInit(FMLPreInitializationEvent event)
     {
         ModNetworkHandler.registerMessages();
-        BackgroundJobQueue.getInstance();
+        AsyncEventBus.getInstance();
     }
 
     @EventHandler
@@ -41,6 +41,6 @@ public class Main
 
     @EventHandler
     public void onServerStopping(FMLServerStoppingEvent event) {
-        BackgroundJobQueue.getInstance().shutdown();
+        AsyncEventBus.getInstance().shutdown();
     }
 }

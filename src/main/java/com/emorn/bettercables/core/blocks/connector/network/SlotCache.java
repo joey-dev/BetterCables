@@ -56,6 +56,11 @@ public class SlotCache
     )
     {
         List<ExtractSlot> extractSlots = this.slotsPerItemName.get(itemName);
+        if (extractSlots == null)
+        {
+            return;
+        }
+
         for (ExtractSlot extractSlot : extractSlots)
         {
             extractSlot.removeInsert(insertSettings);
