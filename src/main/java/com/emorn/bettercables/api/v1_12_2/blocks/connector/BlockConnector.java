@@ -13,11 +13,9 @@ import com.emorn.bettercables.core.blocks.cable.CableAxisAlignedBoundingBox;
 import com.emorn.bettercables.core.blocks.connector.ConnectorAxisAlignedBoundingBox;
 import com.emorn.bettercables.core.blocks.connector.network.ConnectorNetwork;
 import com.emorn.bettercables.core.blocks.connector.network.NetworkManager;
-import com.emorn.bettercables.core.common.Direction;
 import com.emorn.bettercables.core.common.Reference;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockAir;
 import net.minecraft.block.properties.PropertyEnum;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
@@ -387,93 +385,6 @@ public class BlockConnector extends BaseCable implements IHasModel
     )
     {
         return new ForgeTileEntityConnector();
-    }
-
-    public void onNeighborChangea(
-        IBlockAccess world,
-        BlockPos pos,
-        BlockPos neighbor
-    )
-    {
-        // takes ~0.00014 seconds everytime an inventory changes
-        super.onNeighborChange(world, pos, neighbor);
-        IBlockState neighborBlock = world.getBlockState(neighbor);
-
-        TileEntity neighborTileEntity = world.getTileEntity(neighbor);
-
-        if (neighborTileEntity instanceof IInventory) {
-            /**
-             * todo
-             * when the neighbor changes, it will change the tile entity of the connector
-             * to say that the inventory has been changed
-             *
-             * the connector, on a tick, if it cannot extract anything, it will enable:
-             * couldNotExtract
-             *
-             * this tick from above, will change that to true
-             *
-             * this might need to be in the background, unsure how heavy retrieving the tileEntity is
-             *
-             * ALL, might want to move this all to the background
-             */
-
-            /**
-             * might be overkill, but we can also change the possible slots, depending on if there's something in it
-             * this could be in a different list, so it does not have to fully recalculate everything
-             * this than can be compared, when retrieving possible slots, before even trying to extract
-             *
-             * overkill version 2
-             * find out which slots depending on the filters, and add those to the possible slots
-             * this can also be more dynamic, so we do not have to recalculate everything
-             *
-             * can have an inventory map, with all the items in the inventory.
-             * this might be too much data in memory. can also just do the item name, that's just a string
-             * or char, of the first letter of the item, that's even less (check)
-             * this way we do not need the expensive call, of checking the inventory per slot
-             *
-             * prob better to do this all, before any settings
-             */
-        }
-
-        Direction direction;
-
-        if (neighbor.getX() == pos.getX() + 1) {
-            direction = Direction.EAST;
-        } else if (neighbor.getX() + 1 == pos.getX()) {
-            direction = Direction.WEST;
-        } else if (neighbor.getY() + 1 == pos.getY()) {
-            direction = Direction.DOWN;
-        } else if (neighbor.getY() == pos.getY() + 1) {
-            direction = Direction.UP;
-        } else if (neighbor.getZ() == pos.getZ() + 1) {
-            direction = Direction.SOUTH;
-        } else if (neighbor.getZ() + 1 == pos.getZ()) {
-            direction = Direction.NORTH;
-        } else {
-            return;
-        }
-
-        TileEntity tileEntity = world.getTileEntity(pos);
-
-        if (!(neighborBlock.getBlock() instanceof BlockAir)) {
-            return;
-        }
-
-        if (tileEntity instanceof ForgeTileEntityConnector) {
-            ForgeTileEntityConnector connector = (ForgeTileEntityConnector) tileEntity;
-
-            ConnectorNetwork network = connector.getNetwork();
-
-            network.removeInsert(
-                connector.settings(direction)
-            );
-            network.removeExtract(
-                connector.settings(direction)
-            );
-
-            connector.settings(direction).changeInsertEnabled(false);
-            connector.settings(direction).changeExtractEnabled(false);
-        }
     }
 
     private ConnectionType getConnectionType(
