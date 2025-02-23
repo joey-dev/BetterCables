@@ -84,6 +84,16 @@ public class ConnectorNetwork
     {
         this.shouldMerge = true;
         this.mergeToNetwork.put(null, newNetwork);
+
+        this.connectorManager.findAllExtractConnectors().forEach(
+            (connector, position) ->
+                newNetwork.addExtract(position, connector)
+        );
+
+        this.connectorManager.findAllInsertConnectors().forEach(
+            (connector, position) ->
+                newNetwork.addInsert(position, connector)
+        );
     }
 
     public void addInsert(
