@@ -33,6 +33,7 @@ public class GuiDurability extends GuiButton implements AbleToChangeDisabledStat
             "Durability%",
             comparisonOperator,
             initialValue,
+            100,
             disable
         );
     }

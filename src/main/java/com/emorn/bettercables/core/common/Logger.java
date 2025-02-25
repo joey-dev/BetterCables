@@ -8,6 +8,8 @@ import javax.annotation.ParametersAreNonnullByDefault;
 @ParametersAreNonnullByDefault
 public class Logger
 {
+    public static final boolean DEBUG = Boolean.parseBoolean(System.getProperty("DEBUG_MODE", "false"));
+
     private Logger()
     {
 
@@ -18,8 +20,10 @@ public class Logger
         System.err.println(message);
     }
 
-    public static void info(String message)
+    public static void debug(String message)
     {
-        System.out.println(message);
+        if (DEBUG) {
+            System.out.println(message);
+        }
     }
 }

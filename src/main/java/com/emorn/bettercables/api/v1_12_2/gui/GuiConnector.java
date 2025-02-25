@@ -240,6 +240,7 @@ public class GuiConnector extends GuiContainer
             TextPosition.RIGHT,
             "Channel",
             0,
+            999,
             false
         );
 
@@ -349,6 +350,7 @@ public class GuiConnector extends GuiContainer
             TextPosition.TOP,
             this.isExtractSettingsOpen ? "Min item count" : "Max item count",
             0,
+            999,
             disable
         );
 
@@ -393,6 +395,7 @@ public class GuiConnector extends GuiContainer
             TextPosition.RIGHT,
             "Priority",
             -99,
+            999,
             false
         );
 
@@ -410,6 +413,7 @@ public class GuiConnector extends GuiContainer
             TextPosition.RIGHT,
             "Tick rate",
             1,
+            999,
             false
         );
 
@@ -465,6 +469,7 @@ public class GuiConnector extends GuiContainer
             TextPosition.TOP,
             "Items per action",
             1,
+            999,
             false
         );
 

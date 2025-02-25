@@ -29,6 +29,7 @@ public class GuiComparisonOperatorButton extends GuiButton
         String buttonText,
         ComparisonOperator comparisonOperator,
         int initialValue,
+        int maximumValue,
         boolean disable
     )
     {
@@ -44,6 +45,7 @@ public class GuiComparisonOperatorButton extends GuiButton
             TextPosition.RIGHT,
             "",
             -1,
+            maximumValue,
             disable
         );
     }

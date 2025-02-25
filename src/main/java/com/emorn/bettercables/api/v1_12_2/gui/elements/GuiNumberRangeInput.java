@@ -40,6 +40,7 @@ public class GuiNumberRangeInput extends GuiButton implements AbleToChangeDisabl
             TextPosition.RIGHT,
             "Min",
             minimumValue,
+            999,
             disabled
         );
 
@@ -51,6 +52,7 @@ public class GuiNumberRangeInput extends GuiButton implements AbleToChangeDisabl
             TextPosition.RIGHT,
             "Max",
             minimumValue,
+            999,
             disabled
         );
     }
