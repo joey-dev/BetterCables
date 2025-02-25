@@ -19,6 +19,7 @@ public class AsyncEventBus implements IAsyncEventBus
 {
     private final ThreadPoolExecutor executor;
     private final Map<Class<? extends IAsyncEvent>, IAsyncEvent> jobInstances = new ConcurrentHashMap<>();
+    private final ConcurrentLinkedQueue<Class<? extends IAsyncEvent>> jobQueue = new ConcurrentLinkedQueue<>();
 
     private long lastSecondTick = 0;
     private static AsyncEventBus instance;
@@ -57,6 +58,7 @@ public class AsyncEventBus implements IAsyncEventBus
         for (Class<? extends IAsyncEvent> jobClass : JOB_CLASSES) {
             try {
                 jobInstances.put(jobClass, jobClass.newInstance());
+                jobQueue.add(jobClass);
             } catch (InstantiationException | IllegalAccessException e) {
                 FMLLog.log.error("Failed to create instance of job class: " + jobClass.getName(), e);
             }
@@ -80,16 +82,22 @@ public class AsyncEventBus implements IAsyncEventBus
         try {
             if (MinecraftServerProxy.currentTick - lastSecondTick >= 20) {
                 lastSecondTick = MinecraftServerProxy.currentTick;
-                for (IAsyncEvent job : jobInstances.values()) {
-                    if (executor.getQueue().remainingCapacity() > 0) {
-                        executor.execute(() -> {
-                            try {
-                                job.executeEverySecond();
-                            } catch (Throwable t) {
-                                FMLLog.log.error("Error executing per-second job", t);
-                            }
-                        });
+                while (!jobQueue.isEmpty()) {
+                    Class<? extends IAsyncEvent> jobClass = jobQueue.poll();
+                    jobQueue.add(jobClass);
+
+                    if (executor.getQueue().remainingCapacity() <= 0) {
+                        break;
                     }
+
+                    IAsyncEvent job = jobInstances.get(jobClass);
+                    executor.execute(() -> {
+                        try {
+                            job.executeEverySecond();
+                        } catch (Throwable t) {
+                            FMLLog.log.error("Error executing per-second job", t);
+                        }
+                    });
                 }
             }
         } catch (RejectedExecutionException e) {
