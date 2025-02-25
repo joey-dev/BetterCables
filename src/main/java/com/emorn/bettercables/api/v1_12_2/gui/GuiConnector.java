@@ -538,9 +538,57 @@ public class GuiConnector extends GuiContainer
     ) throws IOException
     {
         for (GuiNumberInput numberInput : this.numberInputs) {
-            numberInput.keyTyped(typedChar, keyCode);
+            if (!numberInput.keyTyped(typedChar, keyCode)) {
+                continue;
+            }
+
+            this.typeActionPerformed(numberInput);
         }
         super.keyTyped(typedChar, keyCode);
+    }
+
+    private void typeActionPerformed(GuiNumberInput numberInput)
+    {
+        int id = numberInput.id;
+        int value = numberInput.value();
+        ConnectorSettings tileSettings = this.tileEntity.settings(this.direction);
+
+        switch (id) {
+            case DURABILITY_INPUT_ID:
+                this.filter.changeDurabilityPercentage(value);
+                break;
+            case MIN_SLOT_RANGE_INPUT_ID:
+                this.filter.changeMinSlotRange(value);
+                break;
+            case MAX_SLOT_RANGE_INPUT_ID:
+                this.filter.changeMaxSlotRange(value);
+                break;
+            case MIN_DYNAMIC_TICK_RATE_RANGE_INPUT_ID:
+                tileSettings.changeDynamicTickRateMinimum(value);
+                break;
+            case MAX_DYNAMIC_TICK_RATE_RANGE_INPUT_ID:
+                tileSettings.changeDynamicTickRateMaximum(value);
+                break;
+            case CHANNEL_INPUT_ID:
+                if (this.isExtractSettingsOpen) {
+                    tileSettings.changeExtractChannelId(numberInput.value());
+                } else {
+                    tileSettings.changeInsertChannelId(numberInput.value());
+                }
+                break;
+            case ITEM_COUNT_INPUT_ID:
+                this.filter.changeItemCount(value);
+                break;
+            case PRIORITY_INPUT_ID:
+                tileSettings.changePriority(value);
+                break;
+            case TICK_RATE_INPUT_ID:
+                tileSettings.changeTickRate(value);
+                break;
+            case ITEMS_PER_EXTRACT_INPUT_ID:
+                tileSettings.changeItemsPerExtract(numberInput.value());
+                break;
+        }
     }
 
     @Override

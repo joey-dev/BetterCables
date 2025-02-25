@@ -187,13 +187,13 @@ public class GuiNumberInput extends GuiButton implements AbleToChangeDisabledSta
             ;
     }
 
-    public void keyTyped(
+    public boolean keyTyped(
         char typedChar,
         int keyCode
     )
     {
         if (!this.visible || !this.enabled || !this.isFocused || this.disabled) {
-            return;
+            return false;
         }
 
         if (keyCode == BACK_SPACE_CODE && !this.valueString.isEmpty()) {
@@ -202,19 +202,26 @@ public class GuiNumberInput extends GuiButton implements AbleToChangeDisabledSta
                 this.valueString = "";
             }
             this.value = this.valueString.isEmpty() ? 0 : Integer.parseInt(this.valueString);
-            return;
+            return true;
         }
 
         if (!Character.isDigit(typedChar)) {
-            return;
+            return false;
         }
 
         if (this.valueString.length() < MAXIMUM_CHARACTER_LENGTH) {
             this.valueString += typedChar;
-            int newValue = Math.min(Integer.parseInt(this.valueString), maximumValue);
+            int newValue = Math.max(
+                Math.min(Integer.parseInt(this.valueString), maximumValue),
+                this.minimumValue
+            );
             this.valueString = Integer.toString(newValue);
             this.value = newValue;
+
+            return true;
         }
+
+        return false;
     }
 
     public int value()
