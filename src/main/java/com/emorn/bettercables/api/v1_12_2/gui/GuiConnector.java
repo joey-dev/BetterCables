@@ -9,12 +9,14 @@ import com.emorn.bettercables.contract.common.IItemStack;
 import com.emorn.bettercables.core.blocks.connector.settings.ConnectorSettings;
 import com.emorn.bettercables.core.blocks.connector.settings.ConnectorSettingsFilter;
 import com.emorn.bettercables.core.common.Direction;
+import com.emorn.bettercables.core.common.EmptyItemStack;
 import com.emorn.bettercables.core.common.Reference;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.util.ResourceLocation;
 
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -187,11 +189,12 @@ public class GuiConnector extends GuiContainer
                     item = tileSettings.extractFilter(iteration).itemStack();
                 }
 
-                if (!(item instanceof ItemStack)) {
-                    continue;
+                net.minecraft.item.ItemStack itemStack;
+                if (item instanceof EmptyItemStack) {
+                    itemStack = new net.minecraft.item.ItemStack(Blocks.AIR);
+                } else {
+                    itemStack = ((ItemStack) item).getForgeItemStack();
                 }
-
-                net.minecraft.item.ItemStack itemStack = ((ItemStack) item).getForgeItemStack();
 
                 GuiFilter guiFilter = new GuiFilter(
                     FILTER_START_ID + iteration,
