@@ -24,6 +24,7 @@ public class ConnectorDataConstants
     public static final String DYNAMIC_TICK_RATE_MAXIMUM = "dynamicTickRateMaximum";
     public static final String EXTRACT_TYPE = "extractType";
     public static final String ITEMS_PER_EXTRACT = "itemsPerExtract";
+    public static final String POWER_SAVING = "powerSavings";
 
     // filters
     public static final String DEFAULT_INSERT_FILTER = "defaultInsertFilter";

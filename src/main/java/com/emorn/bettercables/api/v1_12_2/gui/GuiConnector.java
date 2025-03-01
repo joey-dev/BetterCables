@@ -68,8 +68,9 @@ public class GuiConnector extends GuiContainer
     private static final int MAX_DYNAMIC_TICK_RATE_RANGE_INPUT_ID = 21;
     private static final int EXTRACT_TYPE_BUTTON_ID = 22;
     private static final int ITEMS_PER_EXTRACT_INPUT_ID = 23;
+    private static final int POWER_SAVING_INPUT_ID = 24;
 
-    private static final int FILTER_START_ID = 24;
+    private static final int FILTER_START_ID = 25;
     private ConnectorSettingsFilter filter;
 
     public GuiConnector(
@@ -478,6 +479,21 @@ public class GuiConnector extends GuiContainer
 
         this.buttonList.add(itemsPerExtract);
         this.numberInputs.add(itemsPerExtract);
+
+        GuiNumberInput powerSaving = new GuiNumberInput(
+            POWER_SAVING_INPUT_ID,
+            this.guiLeft + 180,
+            this.guiTop + 140,
+            tileSettings.powerSavingsSlotDisableTicks(),
+            TextPosition.TOP,
+            "Power savings",
+            -1,
+            999,
+            false
+        );
+
+        this.buttonList.add(powerSaving);
+        this.numberInputs.add(powerSaving);
     }
 
     @Override
@@ -591,6 +607,9 @@ public class GuiConnector extends GuiContainer
             case ITEMS_PER_EXTRACT_INPUT_ID:
                 tileSettings.changeItemsPerExtract(numberInput.value());
                 break;
+            case POWER_SAVING_INPUT_ID:
+                tileSettings.changePowerSavingsSlotDisableTicks(numberInput.value());
+                break;
         }
     }
 
@@ -702,6 +721,9 @@ public class GuiConnector extends GuiContainer
                 break;
             case ITEMS_PER_EXTRACT_INPUT_ID:
                 tileSettings.changeItemsPerExtract(numberInput.value());
+                break;
+            case POWER_SAVING_INPUT_ID:
+                tileSettings.changePowerSavingsSlotDisableTicks(numberInput.value());
                 break;
             case DURABILITY_INPUT_ID:
             case ITEM_COUNT_INPUT_ID:

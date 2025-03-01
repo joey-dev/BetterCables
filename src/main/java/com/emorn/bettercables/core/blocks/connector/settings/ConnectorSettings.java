@@ -26,6 +26,10 @@ public class ConnectorSettings
     private int dynamicTickRateMaximum = 999;
     private ExtractType extractType = ExtractType.ROUND_ROBIN;
     private int itemsPerExtract = 1;
+    /**
+     * when it cannot extract from a given slot, it will wait for x amount of ticks to enable again
+     */
+    private int powerSavingsSlotDisableTicks = -1;
 
     // filters
     private final ConnectorSettingsDefaultFilter defaultInsertFilter = new ConnectorSettingsDefaultFilter();
@@ -151,6 +155,16 @@ public class ConnectorSettings
     public void changeItemsPerExtract(int itemsPerExtract)
     {
         this.itemsPerExtract = itemsPerExtract;
+    }
+
+    public int powerSavingsSlotDisableTicks()
+    {
+        return powerSavingsSlotDisableTicks;
+    }
+
+    public void changePowerSavingsSlotDisableTicks(int powerSavingsSlotDisableTicks)
+    {
+        this.powerSavingsSlotDisableTicks = powerSavingsSlotDisableTicks ;
     }
 
     public ConnectorSettingsDefaultFilter defaultInsertFilter()

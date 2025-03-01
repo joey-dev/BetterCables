@@ -41,6 +41,7 @@ public class ConnectorSettingsSerializer
         nbt.save(key + "-" + ConnectorDataConstants.DYNAMIC_TICK_RATE_MAXIMUM, settings.dynamicTickRateMaximum());
         nbt.save(key + "-" + ConnectorDataConstants.EXTRACT_TYPE, settings.extractType().name());
         nbt.save(key + "-" + ConnectorDataConstants.ITEMS_PER_EXTRACT, settings.itemsPerExtract());
+        nbt.save(key + "-" + ConnectorDataConstants.POWER_SAVING, settings.powerSavingsSlotDisableTicks());
     }
 
     private void serializeFilters(
@@ -146,6 +147,9 @@ public class ConnectorSettingsSerializer
         }
         if (nbt.hasKey(key + "-" + ConnectorDataConstants.ITEMS_PER_EXTRACT, DataType.INTEGER)) {
             settings.changeItemsPerExtract(nbt.loadInteger(key + "-" + ConnectorDataConstants.ITEMS_PER_EXTRACT));
+        }
+        if (nbt.hasKey(key + "-" + ConnectorDataConstants.POWER_SAVING, DataType.INTEGER)) {
+            settings.changePowerSavingsSlotDisableTicks(nbt.loadInteger(key + "-" + ConnectorDataConstants.POWER_SAVING));
         }
     }
 

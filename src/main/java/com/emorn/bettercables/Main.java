@@ -41,6 +41,6 @@ public class Main
 
     @EventHandler
     public void onServerStopping(FMLServerStoppingEvent event) {
-        AsyncEventBus.getInstance().shutdown();
+        AsyncEventBus.getInstance().shutdownNow();
     }
 }
