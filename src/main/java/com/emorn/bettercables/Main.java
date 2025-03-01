@@ -26,6 +26,10 @@ public class Main
     public static void preInit(FMLPreInitializationEvent event)
     {
         ModNetworkHandler.registerMessages();
+    }
+
+    @EventHandler
+    public void onServerStarting(net.minecraftforge.fml.common.event.FMLServerStartingEvent event) {
         AsyncEventBus.getInstance();
     }
 

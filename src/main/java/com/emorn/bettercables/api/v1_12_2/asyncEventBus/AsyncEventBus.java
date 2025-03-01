@@ -32,10 +32,13 @@ public class AsyncEventBus implements IAsyncEventBus
     };
 
     public static synchronized AsyncEventBus getInstance() {
+        System.out.println("getInstance() called. Current instance: " + instance);
+
         if (instance == null) {
             instance = new AsyncEventBus(2);
             MinecraftForge.EVENT_BUS.register(instance);
             MinecraftForge.EVENT_BUS.register(new AsyncEventBus.MinecraftServerProxy());
+            System.out.println("AsyncEventBus initialized.");
         }
         return instance;
     }
@@ -121,7 +124,22 @@ public class AsyncEventBus implements IAsyncEventBus
     }
 
     public void shutdownNow() {
+        System.out.println("Shutting down AsyncEventBus...");
         executor.shutdownNow();
+        jobQueue.clear();
+        jobInstances.clear();
+        instance = null;
+    }
+
+    @SubscribeEvent
+    public static void onWorldUnload(net.minecraftforge.event.world.WorldEvent.Unload event) {
+        if (instance != null) {
+            instance.shutdownNow();
+            MinecraftForge.EVENT_BUS.unregister(instance);
+            MinecraftForge.EVENT_BUS.unregister(MinecraftServerProxy.class);
+            instance = null;
+            System.out.println("AsyncEventBus shut down on world unload.");
+        }
     }
 
     private static class MinecraftThreadFactory implements ThreadFactory {
