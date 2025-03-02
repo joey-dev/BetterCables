@@ -29,7 +29,7 @@ public class ConnectorNetwork
     private boolean isDisabled = false;
     private final ConnectorManager connectorManager = new ConnectorManager();
     private final PossibleSlotCalculator possibleSlotCalculator = new PossibleSlotCalculator();
-    private final IAsyncEventBus eventBus;
+    private IAsyncEventBus eventBus;
 
     public ConnectorNetwork(
         int id,
@@ -263,5 +263,10 @@ public class ConnectorNetwork
             this.connectorManager.findAllInsertConnectorSettings(),
             this.connectorManager.findAllExtractConnectorSettings()
         );
+    }
+
+    public void updateEventBus(IAsyncEventBus eventBus)
+    {
+        this.eventBus = eventBus;
     }
 }

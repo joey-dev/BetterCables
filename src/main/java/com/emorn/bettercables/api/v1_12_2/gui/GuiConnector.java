@@ -9,12 +9,14 @@ import com.emorn.bettercables.contract.common.IItemStack;
 import com.emorn.bettercables.core.blocks.connector.settings.ConnectorSettings;
 import com.emorn.bettercables.core.blocks.connector.settings.ConnectorSettingsFilter;
 import com.emorn.bettercables.core.common.Direction;
+import com.emorn.bettercables.core.common.EmptyItemStack;
 import com.emorn.bettercables.core.common.Reference;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.util.ResourceLocation;
 
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -37,6 +39,7 @@ public class GuiConnector extends GuiContainer
     private final ArrayList<GuiNumberInput> numberInputs = new ArrayList<>();
     private boolean isInsertSettingsOpen = false;
     private boolean isExtractSettingsOpen = false;
+    private boolean isCopyFiltersOpen = false;
     // key contains changeDisabledStateBasedOnChecked, value = GuiToggle
     private final Map<GuiButton, GuiButton> dynamicEnableOnChecked = new HashMap<>();
     private final Map<GuiButton, GuiButton> dynamicDisableOnChecked = new HashMap<>();
@@ -66,8 +69,16 @@ public class GuiConnector extends GuiContainer
     private static final int MAX_DYNAMIC_TICK_RATE_RANGE_INPUT_ID = 21;
     private static final int EXTRACT_TYPE_BUTTON_ID = 22;
     private static final int ITEMS_PER_EXTRACT_INPUT_ID = 23;
+    private static final int POWER_SAVING_INPUT_ID = 24;
+    private static final int COPY_FILTERS_BUTTON = 25;
+    private static final int COPY_ORE_DICTIONARY_BUTTON = 26;
+    private static final int COPY_NBT_DATA_BUTTON = 27;
+    private static final int COPY_BLACK_LIST_BUTTON = 28;
+    private static final int COPY_SLOT_RANGE_BUTTON = 29;
+    private static final int COPY_ITEM_COUNT_BUTTON = 30;
+    private static final int COPY_DURABILITY_BUTTON = 31;
 
-    private static final int FILTER_START_ID = 24;
+    private static final int FILTER_START_ID = 32;
     private ConnectorSettingsFilter filter;
 
     public GuiConnector(
@@ -99,6 +110,11 @@ public class GuiConnector extends GuiContainer
 
         if (this.isInsertSettingsOpen || this.isExtractSettingsOpen) {
             this.settingsMenu(tileSettings);
+
+            if (this.isCopyFiltersOpen) {
+                this.copyFiltersMenu(tileSettings);
+            }
+
             return;
         }
 
@@ -136,6 +152,71 @@ public class GuiConnector extends GuiContainer
         this.buttonList.add(insertSettings);
         this.buttonList.add(extractCheckbox);
         this.buttonList.add(extractSettings);
+    }
+
+    private void copyFiltersMenu(ConnectorSettings tileSettings)
+    {
+        GuiOreDictionaryBox oreDictionaryBox = new GuiOreDictionaryBox(
+            COPY_ORE_DICTIONARY_BUTTON,
+            this.guiLeft + 88,
+            this.guiTop + 19,
+            this.filter.isOreDictEnabled(),
+            false
+        );
+
+        this.buttonList.add(oreDictionaryBox);
+
+        GuiNbtDataBox nbtDataBox = new GuiNbtDataBox(
+            COPY_NBT_DATA_BUTTON,
+            this.guiLeft + 88,
+            this.guiTop + 19 + 18,
+            this.filter.isNbtDataEnabled(),
+            false
+        );
+
+        this.buttonList.add(nbtDataBox);
+        GuiBlackListBox blackListBox = new GuiBlackListBox(
+            COPY_BLACK_LIST_BUTTON,
+            this.guiLeft + 88,
+            this.guiTop + 19 + 18 + 18,
+            this.filter.isBlackListEnabled(),
+            false
+        );
+
+        this.buttonList.add(blackListBox);
+
+        GuiCheckbox durability = new GuiCheckbox(
+            COPY_DURABILITY_BUTTON,
+            this.guiLeft + 10,
+            this.guiTop + 19,
+            "Durability",
+            tileSettings.isDynamicTickRateEnabled(),
+            false
+        );
+
+        this.buttonList.add(durability);
+
+        GuiCheckbox slotRange = new GuiCheckbox(
+            COPY_SLOT_RANGE_BUTTON,
+            this.guiLeft + 10,
+            this.guiTop + 39,
+            "Slot Range",
+            tileSettings.isDynamicTickRateEnabled(),
+            false
+        );
+
+        this.buttonList.add(slotRange);
+
+        GuiCheckbox itemCount = new GuiCheckbox(
+            COPY_ITEM_COUNT_BUTTON,
+            this.guiLeft + 10,
+            this.guiTop + 59,
+            "Item count",
+            tileSettings.isDynamicTickRateEnabled(),
+            false
+        );
+
+        this.buttonList.add(itemCount);
     }
 
     private void onSettingsClicked(Integer buttonId)
@@ -177,6 +258,10 @@ public class GuiConnector extends GuiContainer
 
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < filtersPerRow; j++) {
+                if (this.isCopyFiltersOpen && j < 6) {
+                    iteration++;
+                    continue;
+                }
                 int x = j * 18;
                 int y = i * 18;
 
@@ -187,11 +272,12 @@ public class GuiConnector extends GuiContainer
                     item = tileSettings.extractFilter(iteration).itemStack();
                 }
 
-                if (!(item instanceof ItemStack)) {
-                    continue;
+                net.minecraft.item.ItemStack itemStack;
+                if (item instanceof EmptyItemStack) {
+                    itemStack = new net.minecraft.item.ItemStack(Blocks.AIR);
+                } else {
+                    itemStack = ((ItemStack) item).getForgeItemStack();
                 }
-
-                net.minecraft.item.ItemStack itemStack = ((ItemStack) item).getForgeItemStack();
 
                 GuiFilter guiFilter = new GuiFilter(
                     FILTER_START_ID + iteration,
@@ -205,8 +291,6 @@ public class GuiConnector extends GuiContainer
                 iteration++;
             }
         }
-
-
     }
 
     private void onFilterSettingsClicked(Integer id)
@@ -223,8 +307,24 @@ public class GuiConnector extends GuiContainer
         this.initGui();
     }
 
+    private void onCopyFiltersClicked(Integer id)
+    {
+        this.isCopyFiltersOpen = true;
+        this.initGui();
+    }
+
     private void drawSettings(ConnectorSettings tileSettings)
     {
+        GuiCopyButton copyFiltersButton = new GuiCopyButton(
+            COPY_FILTERS_BUTTON,
+            this.guiLeft + 155,
+            this.guiTop + 3,
+            this::onCopyFiltersClicked,
+            this.isCopyFiltersOpen
+        );
+
+        this.buttonList.add(copyFiltersButton);
+
         int channelId;
         if (this.isInsertSettingsOpen) {
             channelId = tileSettings.insertChannelId();
@@ -240,6 +340,7 @@ public class GuiConnector extends GuiContainer
             TextPosition.RIGHT,
             "Channel",
             0,
+            999,
             false
         );
 
@@ -349,6 +450,7 @@ public class GuiConnector extends GuiContainer
             TextPosition.TOP,
             this.isExtractSettingsOpen ? "Min item count" : "Max item count",
             0,
+            999,
             disable
         );
 
@@ -393,6 +495,7 @@ public class GuiConnector extends GuiContainer
             TextPosition.RIGHT,
             "Priority",
             -99,
+            999,
             false
         );
 
@@ -410,6 +513,7 @@ public class GuiConnector extends GuiContainer
             TextPosition.RIGHT,
             "Tick rate",
             1,
+            999,
             false
         );
 
@@ -465,11 +569,27 @@ public class GuiConnector extends GuiContainer
             TextPosition.TOP,
             "Items per action",
             1,
+            999,
             false
         );
 
         this.buttonList.add(itemsPerExtract);
         this.numberInputs.add(itemsPerExtract);
+
+        GuiNumberInput powerSaving = new GuiNumberInput(
+            POWER_SAVING_INPUT_ID,
+            this.guiLeft + 180,
+            this.guiTop + 140,
+            tileSettings.powerSavingsSlotDisableTicks(),
+            TextPosition.TOP,
+            "Power savings",
+            -1,
+            999,
+            false
+        );
+
+        this.buttonList.add(powerSaving);
+        this.numberInputs.add(powerSaving);
     }
 
     @Override
@@ -484,7 +604,7 @@ public class GuiConnector extends GuiContainer
         this.fontRenderer.drawString(
             tileName,
             (this.xSize / 2 - this.fontRenderer.getStringWidth(tileName) / 2) + 3,
-            8,
+            6,
             Reference.TEXT_COLOR
         );
         this.fontRenderer.drawString(
@@ -511,6 +631,10 @@ public class GuiConnector extends GuiContainer
         if (this.isInsertSettingsOpen || this.isExtractSettingsOpen) {
             this.drawSettingsBackground();
         }
+
+        if (this.isCopyFiltersOpen) {
+            this.drawCopyFiltersBackground();
+        }
     }
 
     private void drawSettingsBackground()
@@ -526,6 +650,15 @@ public class GuiConnector extends GuiContainer
         this.drawTexturedModalRect(this.guiLeft + 176, this.guiTop + 163, 88, 163, 88, 3);
     }
 
+    private void drawCopyFiltersBackground()
+    {
+        this.drawTexturedModalRect(this.guiLeft + 5, this.guiTop + 14, 0, 0, 105, 65);
+        this.drawTexturedModalRect(this.guiLeft + 5 + 105, this.guiTop + 14, 173, 0, 3, 65);
+        this.drawTexturedModalRect(this.guiLeft + 5, this.guiTop + 14 + 65, 0, 163, 105, 3);
+        this.drawTexturedModalRect(this.guiLeft + 5 + 105, this.guiTop + 14 + 65, 173, 163, 3, 3);
+    }
+
+
     @Override
     public void keyTyped(
         char typedChar,
@@ -533,9 +666,60 @@ public class GuiConnector extends GuiContainer
     ) throws IOException
     {
         for (GuiNumberInput numberInput : this.numberInputs) {
-            numberInput.keyTyped(typedChar, keyCode);
+            if (!numberInput.keyTyped(typedChar, keyCode)) {
+                continue;
+            }
+
+            this.typeActionPerformed(numberInput);
         }
         super.keyTyped(typedChar, keyCode);
+    }
+
+    private void typeActionPerformed(GuiNumberInput numberInput)
+    {
+        int id = numberInput.id;
+        int value = numberInput.value();
+        ConnectorSettings tileSettings = this.tileEntity.settings(this.direction);
+
+        switch (id) {
+            case DURABILITY_INPUT_ID:
+                this.filter.changeDurabilityPercentage(value);
+                break;
+            case MIN_SLOT_RANGE_INPUT_ID:
+                this.filter.changeMinSlotRange(value);
+                break;
+            case MAX_SLOT_RANGE_INPUT_ID:
+                this.filter.changeMaxSlotRange(value);
+                break;
+            case MIN_DYNAMIC_TICK_RATE_RANGE_INPUT_ID:
+                tileSettings.changeDynamicTickRateMinimum(value);
+                break;
+            case MAX_DYNAMIC_TICK_RATE_RANGE_INPUT_ID:
+                tileSettings.changeDynamicTickRateMaximum(value);
+                break;
+            case CHANNEL_INPUT_ID:
+                if (this.isExtractSettingsOpen) {
+                    tileSettings.changeExtractChannelId(numberInput.value());
+                } else {
+                    tileSettings.changeInsertChannelId(numberInput.value());
+                }
+                break;
+            case ITEM_COUNT_INPUT_ID:
+                this.filter.changeItemCount(value);
+                break;
+            case PRIORITY_INPUT_ID:
+                tileSettings.changePriority(value);
+                break;
+            case TICK_RATE_INPUT_ID:
+                tileSettings.changeTickRate(value);
+                break;
+            case ITEMS_PER_EXTRACT_INPUT_ID:
+                tileSettings.changeItemsPerExtract(numberInput.value());
+                break;
+            case POWER_SAVING_INPUT_ID:
+                tileSettings.changePowerSavingsSlotDisableTicks(numberInput.value());
+                break;
+        }
     }
 
     @Override
@@ -646,6 +830,9 @@ public class GuiConnector extends GuiContainer
                 break;
             case ITEMS_PER_EXTRACT_INPUT_ID:
                 tileSettings.changeItemsPerExtract(numberInput.value());
+                break;
+            case POWER_SAVING_INPUT_ID:
+                tileSettings.changePowerSavingsSlotDisableTicks(numberInput.value());
                 break;
             case DURABILITY_INPUT_ID:
             case ITEM_COUNT_INPUT_ID:

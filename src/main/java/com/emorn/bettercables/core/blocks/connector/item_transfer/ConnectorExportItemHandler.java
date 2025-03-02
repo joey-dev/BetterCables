@@ -165,6 +165,9 @@ public class ConnectorExportItemHandler
         Set<Integer> cannotInsertPositions = new HashSet<>();
 
         for (ExtractSlot possibleIndex : possibleIndexes) {
+            if (possibleIndex == null) {
+                return;
+            }
             int exportSlot = possibleIndex.extractIndex();
 
             if (cannotExtractPositions.contains(exportSlot)) {

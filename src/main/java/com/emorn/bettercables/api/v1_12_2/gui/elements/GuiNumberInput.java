@@ -23,8 +23,8 @@ public class GuiNumberInput extends GuiButton implements AbleToChangeDisabledSta
     private static final int MINUS_BUTTON_WIDTH = 5;
     private static final int MINUS_BUTTON_HEIGHT = 5;
     private static final int BACK_SPACE_CODE = 14;
-    private int minimumValue = 0;
-    private static final int MAXIMUM_VALUE = 999;
+    private final int minimumValue;
+    private final int maximumValue;
     private static final int MAXIMUM_CHARACTER_LENGTH = 3;
     private int value;
     private String valueString;
@@ -43,6 +43,7 @@ public class GuiNumberInput extends GuiButton implements AbleToChangeDisabledSta
         TextPosition textPosition,
         String text,
         int minimumValue,
+        int maximumValue,
         boolean disabled
     )
     {
@@ -52,6 +53,7 @@ public class GuiNumberInput extends GuiButton implements AbleToChangeDisabledSta
         this.textPosition = textPosition;
 
         this.minimumValue = minimumValue;
+        this.maximumValue = maximumValue;
         this.valueString = Integer.toString(initialValue);
         this.plusButtonY = this.y + 1;
         this.minusButtonY = this.y + 6;
@@ -138,7 +140,7 @@ public class GuiNumberInput extends GuiButton implements AbleToChangeDisabledSta
         }
 
         if (this.isPlusButtonPressed(mouseX, mouseY)) {
-            this.value = Math.min(this.value + 1, MAXIMUM_VALUE);
+            this.value = Math.min(this.value + 1, this.maximumValue);
             this.updateValue();
             this.isFocused = false;
             return true;
@@ -185,13 +187,13 @@ public class GuiNumberInput extends GuiButton implements AbleToChangeDisabledSta
             ;
     }
 
-    public void keyTyped(
+    public boolean keyTyped(
         char typedChar,
         int keyCode
     )
     {
         if (!this.visible || !this.enabled || !this.isFocused || this.disabled) {
-            return;
+            return false;
         }
 
         if (keyCode == BACK_SPACE_CODE && !this.valueString.isEmpty()) {
@@ -200,19 +202,26 @@ public class GuiNumberInput extends GuiButton implements AbleToChangeDisabledSta
                 this.valueString = "";
             }
             this.value = this.valueString.isEmpty() ? 0 : Integer.parseInt(this.valueString);
-            return;
+            return true;
         }
 
         if (!Character.isDigit(typedChar)) {
-            return;
+            return false;
         }
 
         if (this.valueString.length() < MAXIMUM_CHARACTER_LENGTH) {
             this.valueString += typedChar;
-            int newValue = Math.min(Integer.parseInt(this.valueString), MAXIMUM_VALUE);
+            int newValue = Math.max(
+                Math.min(Integer.parseInt(this.valueString), this.maximumValue),
+                this.minimumValue
+            );
             this.valueString = Integer.toString(newValue);
             this.value = newValue;
+
+            return true;
         }
+
+        return false;
     }
 
     public int value()

@@ -13,9 +13,12 @@ import com.emorn.bettercables.core.blocks.cable.CableAxisAlignedBoundingBox;
 import com.emorn.bettercables.core.blocks.connector.ConnectorAxisAlignedBoundingBox;
 import com.emorn.bettercables.core.blocks.connector.network.ConnectorNetwork;
 import com.emorn.bettercables.core.blocks.connector.network.NetworkManager;
+import com.emorn.bettercables.core.blocks.connector.settings.ConnectorSettings;
+import com.emorn.bettercables.core.common.Direction;
 import com.emorn.bettercables.core.common.Reference;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockAir;
 import net.minecraft.block.properties.PropertyEnum;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
@@ -217,6 +220,49 @@ public class BlockConnector extends BaseCable implements IHasModel
             pos,
             playerIn
         );
+    }
+
+    @Override
+    public void onNeighborChange(IBlockAccess world, BlockPos pos, BlockPos neighbor)
+    {
+        super.onNeighborChange(world, pos, neighbor);
+        Block neighborBlock = world.getBlockState(neighbor).getBlock();
+
+        if (!(neighborBlock instanceof BlockAir)) {
+            return;
+        }
+
+        TileEntity tileEntity = world.getTileEntity(pos);
+        if (!(tileEntity instanceof ForgeTileEntityConnector)) {
+            return;
+        }
+
+        Direction direction;
+        if (neighbor.getX() == pos.getX() + 1) {
+            direction = Direction.EAST;
+        } else if (neighbor.getX() + 1 == pos.getX()) {
+            direction = Direction.WEST;
+        } else if (neighbor.getY() + 1 == pos.getY()) {
+            direction = Direction.DOWN;
+        } else if (neighbor.getY() == pos.getY() + 1) {
+            direction = Direction.UP;
+        } else if (neighbor.getZ() == pos.getZ() + 1) {
+            direction = Direction.SOUTH;
+        } else if (neighbor.getZ() + 1 == pos.getZ()) {
+            direction = Direction.NORTH;
+        } else {
+            return;
+        }
+
+        ForgeTileEntityConnector connector = (ForgeTileEntityConnector) tileEntity;
+        ConnectorNetwork network = connector.getNetwork();
+        ConnectorSettings connectorSettings = connector.settings(direction);
+
+        connectorSettings.changeExtractEnabled(false);
+        network.removeExtract(connectorSettings);
+
+        connectorSettings.changeInsertEnabled(false);
+        network.removeInsert(connectorSettings);
     }
 
     private boolean openGui(

@@ -31,7 +31,9 @@ public class NetworkManager
     )
     {
         if (createdNetworksById.containsKey(savedId)) {
-            return createdNetworksById.get(savedId);
+            ConnectorNetwork network = createdNetworksById.get(savedId);
+            network.updateEventBus(eventBus);
+            return network;
         }
 
         if (savedId >= lastId) {

@@ -19,6 +19,7 @@ public class AsyncEventBus implements IAsyncEventBus
 {
     private final ThreadPoolExecutor executor;
     private final Map<Class<? extends IAsyncEvent>, IAsyncEvent> jobInstances = new ConcurrentHashMap<>();
+    private final ConcurrentLinkedQueue<Class<? extends IAsyncEvent>> jobQueue = new ConcurrentLinkedQueue<>();
 
     private long lastSecondTick = 0;
     private static AsyncEventBus instance;
@@ -34,7 +35,7 @@ public class AsyncEventBus implements IAsyncEventBus
         if (instance == null) {
             instance = new AsyncEventBus(2);
             MinecraftForge.EVENT_BUS.register(instance);
-            MinecraftForge.EVENT_BUS.register(new AsyncEventBus.MinecraftServerProxy());
+            MinecraftForge.EVENT_BUS.register(MinecraftServerProxy.class);
         }
         return instance;
     }
@@ -57,6 +58,7 @@ public class AsyncEventBus implements IAsyncEventBus
         for (Class<? extends IAsyncEvent> jobClass : JOB_CLASSES) {
             try {
                 jobInstances.put(jobClass, jobClass.newInstance());
+                jobQueue.add(jobClass);
             } catch (InstantiationException | IllegalAccessException e) {
                 FMLLog.log.error("Failed to create instance of job class: " + jobClass.getName(), e);
             }
@@ -80,16 +82,22 @@ public class AsyncEventBus implements IAsyncEventBus
         try {
             if (MinecraftServerProxy.currentTick - lastSecondTick >= 20) {
                 lastSecondTick = MinecraftServerProxy.currentTick;
-                for (IAsyncEvent job : jobInstances.values()) {
-                    if (executor.getQueue().remainingCapacity() > 0) {
-                        executor.execute(() -> {
-                            try {
-                                job.executeEverySecond();
-                            } catch (Throwable t) {
-                                FMLLog.log.error("Error executing per-second job", t);
-                            }
-                        });
+                while (!jobQueue.isEmpty()) {
+                    Class<? extends IAsyncEvent> jobClass = jobQueue.poll();
+                    jobQueue.add(jobClass);
+
+                    if (executor.getQueue().remainingCapacity() <= 0) {
+                        break;
                     }
+
+                    IAsyncEvent job = jobInstances.get(jobClass);
+                    executor.execute(() -> {
+                        try {
+                            job.executeEverySecond();
+                        } catch (Throwable t) {
+                            FMLLog.log.error("Error executing per-second job", t);
+                        }
+                    });
                 }
             }
         } catch (RejectedExecutionException e) {
@@ -113,7 +121,22 @@ public class AsyncEventBus implements IAsyncEventBus
     }
 
     public void shutdownNow() {
+        System.out.println("Shutting down AsyncEventBus...");
         executor.shutdownNow();
+        jobQueue.clear();
+        jobInstances.clear();
+        instance = null;
+    }
+
+    @SubscribeEvent
+    public static void onWorldUnload(net.minecraftforge.event.world.WorldEvent.Unload event) {
+        if (instance != null) {
+            instance.shutdownNow();
+            MinecraftForge.EVENT_BUS.unregister(instance);
+            MinecraftForge.EVENT_BUS.unregister(MinecraftServerProxy.class);
+            instance = null;
+            System.out.println("AsyncEventBus shut down on world unload.");
+        }
     }
 
     private static class MinecraftThreadFactory implements ThreadFactory {
