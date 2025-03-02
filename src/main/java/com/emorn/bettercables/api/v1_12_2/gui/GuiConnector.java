@@ -71,14 +71,14 @@ public class GuiConnector extends GuiContainer
     private static final int ITEMS_PER_EXTRACT_INPUT_ID = 23;
     private static final int POWER_SAVING_INPUT_ID = 24;
     private static final int COPY_FILTERS_BUTTON = 25;
-    private static final int COPY_ORE_DICTIONARY_BUTTON = 25;
-    private static final int COPY_NBT_DATA_BUTTON = 25;
-    private static final int COPY_BLACK_LIST_BUTTON = 25;
-    private static final int COPY_SLOT_RANGE_BUTTON = 25;
-    private static final int COPY_ITEM_COUNT_BUTTON = 25;
-    private static final int COPY_DURABILITY_BUTTON = 25;
+    private static final int COPY_ORE_DICTIONARY_BUTTON = 26;
+    private static final int COPY_NBT_DATA_BUTTON = 27;
+    private static final int COPY_BLACK_LIST_BUTTON = 28;
+    private static final int COPY_SLOT_RANGE_BUTTON = 29;
+    private static final int COPY_ITEM_COUNT_BUTTON = 30;
+    private static final int COPY_DURABILITY_BUTTON = 31;
 
-    private static final int FILTER_START_ID = 30;
+    private static final int FILTER_START_ID = 32;
     private ConnectorSettingsFilter filter;
 
     public GuiConnector(
