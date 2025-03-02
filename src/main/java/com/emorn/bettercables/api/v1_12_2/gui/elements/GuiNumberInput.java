@@ -140,7 +140,7 @@ public class GuiNumberInput extends GuiButton implements AbleToChangeDisabledSta
         }
 
         if (this.isPlusButtonPressed(mouseX, mouseY)) {
-            this.value = Math.min(this.value + 1, maximumValue);
+            this.value = Math.min(this.value + 1, this.maximumValue);
             this.updateValue();
             this.isFocused = false;
             return true;
@@ -212,7 +212,7 @@ public class GuiNumberInput extends GuiButton implements AbleToChangeDisabledSta
         if (this.valueString.length() < MAXIMUM_CHARACTER_LENGTH) {
             this.valueString += typedChar;
             int newValue = Math.max(
-                Math.min(Integer.parseInt(this.valueString), maximumValue),
+                Math.min(Integer.parseInt(this.valueString), this.maximumValue),
                 this.minimumValue
             );
             this.valueString = Integer.toString(newValue);

@@ -32,13 +32,10 @@ public class AsyncEventBus implements IAsyncEventBus
     };
 
     public static synchronized AsyncEventBus getInstance() {
-        System.out.println("getInstance() called. Current instance: " + instance);
-
         if (instance == null) {
             instance = new AsyncEventBus(2);
             MinecraftForge.EVENT_BUS.register(instance);
-            MinecraftForge.EVENT_BUS.register(new AsyncEventBus.MinecraftServerProxy());
-            System.out.println("AsyncEventBus initialized.");
+            MinecraftForge.EVENT_BUS.register(MinecraftServerProxy.class);
         }
         return instance;
     }

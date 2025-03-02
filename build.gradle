@@ -65,18 +65,6 @@ minecraft {
     }
 }
 
-ext.debugMode = project.hasProperty('debugMode') ? project.debugMode.toBoolean() : false
-
-tasks.register('buildDebug', JavaCompile) {
-    options.compilerArgs << "-DDEBUG_MODE=true"
-    dependsOn 'build'
-}
-
-tasks.register('buildLive', JavaCompile) {
-    options.compilerArgs << "-DDEBUG_MODE=false"
-    dependsOn 'build'
-}
-
 sourceSets.configureEach {
     it.output.resourcesDir = it.output.classesDirs.getFiles().iterator().next()
 }

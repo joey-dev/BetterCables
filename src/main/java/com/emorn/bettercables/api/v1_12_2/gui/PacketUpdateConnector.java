@@ -122,7 +122,6 @@ public class PacketUpdateConnector implements IMessage
 
                     if (message.didInsertChange) {
                         if (settings.isInsertEnabled()) {
-                            System.out.println("Insert operation performed for " + message);
                             network.addInsert(message.inventoryPosition, settings);
                         } else {
                             network.removeInsert(settings);
