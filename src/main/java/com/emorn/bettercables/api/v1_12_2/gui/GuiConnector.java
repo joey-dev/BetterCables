@@ -39,6 +39,7 @@ public class GuiConnector extends GuiContainer
     private final ArrayList<GuiNumberInput> numberInputs = new ArrayList<>();
     private boolean isInsertSettingsOpen = false;
     private boolean isExtractSettingsOpen = false;
+    private boolean isCopyFiltersOpen = false;
     // key contains changeDisabledStateBasedOnChecked, value = GuiToggle
     private final Map<GuiButton, GuiButton> dynamicEnableOnChecked = new HashMap<>();
     private final Map<GuiButton, GuiButton> dynamicDisableOnChecked = new HashMap<>();
@@ -69,8 +70,15 @@ public class GuiConnector extends GuiContainer
     private static final int EXTRACT_TYPE_BUTTON_ID = 22;
     private static final int ITEMS_PER_EXTRACT_INPUT_ID = 23;
     private static final int POWER_SAVING_INPUT_ID = 24;
+    private static final int COPY_FILTERS_BUTTON = 25;
+    private static final int COPY_ORE_DICTIONARY_BUTTON = 25;
+    private static final int COPY_NBT_DATA_BUTTON = 25;
+    private static final int COPY_BLACK_LIST_BUTTON = 25;
+    private static final int COPY_SLOT_RANGE_BUTTON = 25;
+    private static final int COPY_ITEM_COUNT_BUTTON = 25;
+    private static final int COPY_DURABILITY_BUTTON = 25;
 
-    private static final int FILTER_START_ID = 25;
+    private static final int FILTER_START_ID = 30;
     private ConnectorSettingsFilter filter;
 
     public GuiConnector(
@@ -102,6 +110,11 @@ public class GuiConnector extends GuiContainer
 
         if (this.isInsertSettingsOpen || this.isExtractSettingsOpen) {
             this.settingsMenu(tileSettings);
+
+            if (this.isCopyFiltersOpen) {
+                this.copyFiltersMenu(tileSettings);
+            }
+
             return;
         }
 
@@ -139,6 +152,71 @@ public class GuiConnector extends GuiContainer
         this.buttonList.add(insertSettings);
         this.buttonList.add(extractCheckbox);
         this.buttonList.add(extractSettings);
+    }
+
+    private void copyFiltersMenu(ConnectorSettings tileSettings)
+    {
+        GuiOreDictionaryBox oreDictionaryBox = new GuiOreDictionaryBox(
+            COPY_ORE_DICTIONARY_BUTTON,
+            this.guiLeft + 88,
+            this.guiTop + 19,
+            this.filter.isOreDictEnabled(),
+            false
+        );
+
+        this.buttonList.add(oreDictionaryBox);
+
+        GuiNbtDataBox nbtDataBox = new GuiNbtDataBox(
+            COPY_NBT_DATA_BUTTON,
+            this.guiLeft + 88,
+            this.guiTop + 19 + 18,
+            this.filter.isNbtDataEnabled(),
+            false
+        );
+
+        this.buttonList.add(nbtDataBox);
+        GuiBlackListBox blackListBox = new GuiBlackListBox(
+            COPY_BLACK_LIST_BUTTON,
+            this.guiLeft + 88,
+            this.guiTop + 19 + 18 + 18,
+            this.filter.isBlackListEnabled(),
+            false
+        );
+
+        this.buttonList.add(blackListBox);
+
+        GuiCheckbox durability = new GuiCheckbox(
+            COPY_DURABILITY_BUTTON,
+            this.guiLeft + 10,
+            this.guiTop + 19,
+            "Durability",
+            tileSettings.isDynamicTickRateEnabled(),
+            false
+        );
+
+        this.buttonList.add(durability);
+
+        GuiCheckbox slotRange = new GuiCheckbox(
+            COPY_SLOT_RANGE_BUTTON,
+            this.guiLeft + 10,
+            this.guiTop + 39,
+            "Slot Range",
+            tileSettings.isDynamicTickRateEnabled(),
+            false
+        );
+
+        this.buttonList.add(slotRange);
+
+        GuiCheckbox itemCount = new GuiCheckbox(
+            COPY_ITEM_COUNT_BUTTON,
+            this.guiLeft + 10,
+            this.guiTop + 59,
+            "Item count",
+            tileSettings.isDynamicTickRateEnabled(),
+            false
+        );
+
+        this.buttonList.add(itemCount);
     }
 
     private void onSettingsClicked(Integer buttonId)
@@ -180,6 +258,10 @@ public class GuiConnector extends GuiContainer
 
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < filtersPerRow; j++) {
+                if (this.isCopyFiltersOpen && j < 6) {
+                    iteration++;
+                    continue;
+                }
                 int x = j * 18;
                 int y = i * 18;
 
@@ -209,8 +291,6 @@ public class GuiConnector extends GuiContainer
                 iteration++;
             }
         }
-
-
     }
 
     private void onFilterSettingsClicked(Integer id)
@@ -227,8 +307,24 @@ public class GuiConnector extends GuiContainer
         this.initGui();
     }
 
+    private void onCopyFiltersClicked(Integer id)
+    {
+        this.isCopyFiltersOpen = true;
+        this.initGui();
+    }
+
     private void drawSettings(ConnectorSettings tileSettings)
     {
+        GuiCopyButton copyFiltersButton = new GuiCopyButton(
+            COPY_FILTERS_BUTTON,
+            this.guiLeft + 155,
+            this.guiTop + 3,
+            this::onCopyFiltersClicked,
+            this.isCopyFiltersOpen
+        );
+
+        this.buttonList.add(copyFiltersButton);
+
         int channelId;
         if (this.isInsertSettingsOpen) {
             channelId = tileSettings.insertChannelId();
@@ -508,7 +604,7 @@ public class GuiConnector extends GuiContainer
         this.fontRenderer.drawString(
             tileName,
             (this.xSize / 2 - this.fontRenderer.getStringWidth(tileName) / 2) + 3,
-            8,
+            6,
             Reference.TEXT_COLOR
         );
         this.fontRenderer.drawString(
@@ -535,6 +631,10 @@ public class GuiConnector extends GuiContainer
         if (this.isInsertSettingsOpen || this.isExtractSettingsOpen) {
             this.drawSettingsBackground();
         }
+
+        if (this.isCopyFiltersOpen) {
+            this.drawCopyFiltersBackground();
+        }
     }
 
     private void drawSettingsBackground()
@@ -549,6 +649,15 @@ public class GuiConnector extends GuiContainer
         this.drawTexturedModalRect(this.guiLeft + 176, this.guiTop + 160, 88, 4, 88, 3);
         this.drawTexturedModalRect(this.guiLeft + 176, this.guiTop + 163, 88, 163, 88, 3);
     }
+
+    private void drawCopyFiltersBackground()
+    {
+        this.drawTexturedModalRect(this.guiLeft + 5, this.guiTop + 14, 0, 0, 105, 65);
+        this.drawTexturedModalRect(this.guiLeft + 5 + 105, this.guiTop + 14, 173, 0, 3, 65);
+        this.drawTexturedModalRect(this.guiLeft + 5, this.guiTop + 14 + 65, 0, 163, 105, 3);
+        this.drawTexturedModalRect(this.guiLeft + 5 + 105, this.guiTop + 14 + 65, 173, 163, 3, 3);
+    }
+
 
     @Override
     public void keyTyped(
