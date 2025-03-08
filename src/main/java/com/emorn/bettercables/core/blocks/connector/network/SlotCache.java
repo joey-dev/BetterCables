@@ -34,7 +34,7 @@ public class SlotCache
         Map<Integer, ExtractSlot> extractSlotMap = new HashMap<>();
         for (ExtractSlot extractSlot : extractSlots)
         {
-            extractSlotMap.put(extractSlot.extractIndex(), extractSlot);
+            extractSlotMap.put(extractSlot.extractIndex(), extractSlot); // null pointer exception
         }
 
         for (Integer extractSlotIndex : extractSlotIndices)
@@ -63,7 +63,7 @@ public class SlotCache
 
         for (ExtractSlot extractSlot : extractSlots)
         {
-            extractSlot.removeInsert(insertSettings);
+            extractSlot.removeInsert(insertSettings); // null pointer exception (sometimes happens when i remove the insert + inventory quickly
         }
     }
 }

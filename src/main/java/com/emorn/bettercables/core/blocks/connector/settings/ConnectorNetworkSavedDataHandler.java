@@ -17,12 +17,15 @@ public class ConnectorNetworkSavedDataHandler
 {
     public static final String NETWORK_ID = "NetworkId";
     private final ConnectorSides connectorSides;
+    private final NetworkManager networkManager;
+
 
     public ConnectorNetworkSavedDataHandler(
         ConnectorSides connectorSides
     )
     {
         this.connectorSides = connectorSides;
+        this.networkManager = NetworkManager.getInstance();
     }
 
     @Nullable
@@ -37,7 +40,7 @@ public class ConnectorNetworkSavedDataHandler
             return null;
         }
 
-        ConnectorNetwork foundNetwork = NetworkManager.createNewNetwork(
+        ConnectorNetwork foundNetwork = this.networkManager.createNewNetwork(
             compound.loadInteger(NETWORK_ID),
             eventBus
         );

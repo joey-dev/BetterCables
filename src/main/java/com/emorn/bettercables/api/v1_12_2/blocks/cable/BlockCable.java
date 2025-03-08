@@ -55,10 +55,12 @@ public class BlockCable extends BaseCable implements IHasModel
     private static final AxisAlignedBB DOWN_CABLE_AABB = AxisAlignedBoundingBoxConverter.from(
         CableAxisAlignedBoundingBox.DOWN
     );
+    private final NetworkManager networkManager;
 
     public BlockCable(String name)
     {
         super(name);
+        this.networkManager = NetworkManager.getInstance();
     }
 
     @Override
@@ -97,7 +99,7 @@ public class BlockCable extends BaseCable implements IHasModel
     )
     {
         IBlockState actualState = getActualState(state, worldIn, pos);
-        NetworkManager.mergeNetworks(
+        this.networkManager.mergeNetworks(
             new com.emorn.bettercables.api.v1_12_2.common.World(worldIn),
             new PositionInWorld(pos.getX(), pos.getY(), pos.getZ()),
             findTotalConnections(actualState)
