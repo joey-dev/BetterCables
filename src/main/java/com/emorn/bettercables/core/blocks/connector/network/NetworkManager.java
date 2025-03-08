@@ -20,6 +20,7 @@ public class NetworkManager
     private final Map<String, Boolean> foundCablePositions = new HashMap<>();
     private final Map<Integer, ConnectorNetwork> createdNetworksById = new HashMap<>();
     private int lastId = 1;
+    private static NetworkManager instance;
 
     private NetworkManager()
     {
@@ -27,10 +28,19 @@ public class NetworkManager
 
     public static NetworkManager getInstance()
     {
-        return new NetworkManager();
+        if (instance == null) {
+            instance = new NetworkManager();
+        }
+
+        return instance;
     }
 
-    public ConnectorNetwork createNewNetwork(
+    public void shutdown()
+    {
+        instance = null;
+    }
+
+    public synchronized ConnectorNetwork createNewNetwork(
         int savedId,
         IAsyncEventBus eventBus
     )

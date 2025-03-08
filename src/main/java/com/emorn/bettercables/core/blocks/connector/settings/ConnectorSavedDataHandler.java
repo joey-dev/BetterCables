@@ -32,7 +32,8 @@ public class ConnectorSavedDataHandler
     public void readFromNBT(
         IData compound,
         IPositionInWorld positionInWorld,
-        IAsyncEventBus eventBus
+        IAsyncEventBus eventBus,
+        boolean isClient
     )
     {
         this.connectorSides.connectorSettings(Direction.NORTH).deserializeNBT(compound, "north");
@@ -46,7 +47,8 @@ public class ConnectorSavedDataHandler
             this.connectorNetworkSavedDataHandler.retrieveNetworkFromNBT(
                 compound,
                 positionInWorld,
-                eventBus
+                eventBus,
+                isClient
             )
         );
     }

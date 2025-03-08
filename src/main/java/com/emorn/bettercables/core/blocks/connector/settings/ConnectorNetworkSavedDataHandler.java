@@ -32,7 +32,8 @@ public class ConnectorNetworkSavedDataHandler
     public ConnectorNetwork retrieveNetworkFromNBT(
         IData compound,
         IPositionInWorld positionInWorld,
-        IAsyncEventBus eventBus
+        IAsyncEventBus eventBus,
+        boolean isClient
     )
     {
         int networkId = compound.loadInteger(NETWORK_ID);
@@ -45,14 +46,16 @@ public class ConnectorNetworkSavedDataHandler
             eventBus
         );
 
-        this.addInsertConnectorInformationToNetwork(
-            foundNetwork,
-            positionInWorld
-        );
-        this.addExtractConnectorInformationToNetwork(
-            foundNetwork,
-            positionInWorld
-        );
+        if (!isClient) {
+            this.addInsertConnectorInformationToNetwork(
+                foundNetwork,
+                positionInWorld
+            );
+            this.addExtractConnectorInformationToNetwork(
+                foundNetwork,
+                positionInWorld
+            );
+        }
 
         return foundNetwork;
     }
