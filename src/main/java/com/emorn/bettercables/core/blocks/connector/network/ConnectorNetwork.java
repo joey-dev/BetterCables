@@ -47,7 +47,7 @@ public class ConnectorNetwork
     }
 
     @Nullable
-    public Integer findNextIndex(int index)
+    public Integer findNextIndex(int index, ConnectorSettings settings)
     {
         int totalItems = this.connectorManager.totalInsertConnections();
         if (totalItems == 0) {
@@ -58,6 +58,10 @@ public class ConnectorNetwork
 
         if (index >= totalItems) {
             index = 0;
+        }
+
+        if (this.connectorManager.isCurrentIndexSelfFeed(index, settings)) {
+            index++;
         }
 
         return index;

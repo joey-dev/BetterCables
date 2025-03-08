@@ -53,9 +53,15 @@ public class ConnectorExportItemHandler
             return;
         }
 
+        ConnectorSettings exportConnectorSettings = this.connectorNetworkSettingsService.settings(direction);
+
+        if (exportConnectorSettings == null) {
+            return;
+        }
+
         ConnectorNetwork network = this.connectorNetworkService.getNetwork();
 
-        Integer nextIndex = findNextInsertInventoryIndex(direction, network);
+        Integer nextIndex = findNextInsertInventoryIndex(direction, network, exportConnectorSettings);
         if (nextIndex == null) {
             return;
         }
@@ -79,12 +85,6 @@ public class ConnectorExportItemHandler
         );
 
         if (importInventory == null) {
-            return;
-        }
-
-        ConnectorSettings exportConnectorSettings = this.connectorNetworkSettingsService.settings(direction);
-
-        if (exportConnectorSettings == null) {
             return;
         }
 
@@ -139,13 +139,14 @@ public class ConnectorExportItemHandler
     @Nullable
     private Integer findNextInsertInventoryIndex(
         Direction direction,
-        ConnectorNetwork network
+        ConnectorNetwork network,
+        ConnectorSettings settings
     )
     {
         this.directionToIndexMap.putIfAbsent(direction, -1);
 
         int currentIndex = this.directionToIndexMap.get(direction);
-        Integer nextIndex = network.findNextIndex(currentIndex);
+        Integer nextIndex = network.findNextIndex(currentIndex, settings);
         if (nextIndex == null) {
             return null;
         }

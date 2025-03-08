@@ -63,7 +63,18 @@ public class ConnectorNetworkTest
     public void findNextIndex_noConnections_returnsNull()
     {
         when(mockConnectorManager.totalInsertConnections()).thenReturn(0);
-        assertNull(network.findNextIndex(5));
+        when(mockConnectorManager.isCurrentIndexSelfFeed(eq(0), any())).thenReturn(false);
+        assertNull(network.findNextIndex(5, new ConnectorSettings()));
+    }
+
+    @Test
+    public void findNextIndex_no_self_feed()
+    {
+        ConnectorSettings settings = new ConnectorSettings();
+
+        when(mockConnectorManager.totalInsertConnections()).thenReturn(5);
+        when(mockConnectorManager.isCurrentIndexSelfFeed(eq(0), eq(settings))).thenReturn(true);
+        assertEquals((Integer) 1, network.findNextIndex(5, settings));
     }
 
     @Test
@@ -71,11 +82,13 @@ public class ConnectorNetworkTest
     {
         when(mockConnectorManager.totalInsertConnections()).thenReturn(3);
 
-        assertEquals((Integer) 0, network.findNextIndex(-1));
-        assertEquals((Integer) 1, network.findNextIndex(0));
-        assertEquals((Integer) 2, network.findNextIndex(1));
-        assertEquals((Integer) 0, network.findNextIndex(2));
-        assertEquals((Integer) 1, network.findNextIndex(0));
+        ConnectorSettings settings = new ConnectorSettings();
+
+        assertEquals((Integer) 0, network.findNextIndex(-1, settings));
+        assertEquals((Integer) 1, network.findNextIndex(0, settings));
+        assertEquals((Integer) 2, network.findNextIndex(1, settings));
+        assertEquals((Integer) 0, network.findNextIndex(2, settings));
+        assertEquals((Integer) 1, network.findNextIndex(0, settings));
     }
 
     @Test

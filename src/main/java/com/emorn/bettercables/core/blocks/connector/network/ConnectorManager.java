@@ -151,4 +151,12 @@ public class ConnectorManager
     {
         return this.extractConnectorSettings;
     }
+
+    public boolean isCurrentIndexSelfFeed(
+        int index,
+        ConnectorSettings settings
+    )
+    {
+        return this.insertConnectorSettings.get(index) == settings;
+    }
 }
