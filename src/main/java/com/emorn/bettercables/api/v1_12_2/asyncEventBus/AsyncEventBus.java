@@ -35,7 +35,7 @@ public class AsyncEventBus implements IAsyncEventBus
         if (instance == null) {
             instance = new AsyncEventBus(2);
             MinecraftForge.EVENT_BUS.register(instance);
-            MinecraftForge.EVENT_BUS.register(MinecraftServerProxy.class);
+            MinecraftForge.EVENT_BUS.register(new MinecraftServerProxy());
         }
         return instance;
     }
