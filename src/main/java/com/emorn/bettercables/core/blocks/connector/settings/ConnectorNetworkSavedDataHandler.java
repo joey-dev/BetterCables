@@ -17,19 +17,23 @@ public class ConnectorNetworkSavedDataHandler
 {
     public static final String NETWORK_ID = "NetworkId";
     private final ConnectorSides connectorSides;
+    private final NetworkManager networkManager;
+
 
     public ConnectorNetworkSavedDataHandler(
         ConnectorSides connectorSides
     )
     {
         this.connectorSides = connectorSides;
+        this.networkManager = NetworkManager.getInstance();
     }
 
     @Nullable
     public ConnectorNetwork retrieveNetworkFromNBT(
         IData compound,
         IPositionInWorld positionInWorld,
-        IAsyncEventBus eventBus
+        IAsyncEventBus eventBus,
+        boolean isClient
     )
     {
         int networkId = compound.loadInteger(NETWORK_ID);
@@ -37,19 +41,21 @@ public class ConnectorNetworkSavedDataHandler
             return null;
         }
 
-        ConnectorNetwork foundNetwork = NetworkManager.createNewNetwork(
+        ConnectorNetwork foundNetwork = this.networkManager.createNewNetwork(
             compound.loadInteger(NETWORK_ID),
             eventBus
         );
 
-        this.addInsertConnectorInformationToNetwork(
-            foundNetwork,
-            positionInWorld
-        );
-        this.addExtractConnectorInformationToNetwork(
-            foundNetwork,
-            positionInWorld
-        );
+        if (!isClient) {
+            this.addInsertConnectorInformationToNetwork(
+                foundNetwork,
+                positionInWorld
+            );
+            this.addExtractConnectorInformationToNetwork(
+                foundNetwork,
+                positionInWorld
+            );
+        }
 
         return foundNetwork;
     }

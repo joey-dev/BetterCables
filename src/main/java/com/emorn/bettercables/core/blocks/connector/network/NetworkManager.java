@@ -17,15 +17,30 @@ import java.util.*;
 @ParametersAreNonnullByDefault
 public class NetworkManager
 {
-    private static final Map<String, Boolean> foundCablePositions = new HashMap<>();
-    private static final Map<Integer, ConnectorNetwork> createdNetworksById = new HashMap<>();
-    private static int lastId = 1;
+    private final Map<String, Boolean> foundCablePositions = new HashMap<>();
+    private final Map<Integer, ConnectorNetwork> createdNetworksById = new HashMap<>();
+    private int lastId = 1;
+    private static NetworkManager instance;
 
     private NetworkManager()
     {
     }
 
-    public static ConnectorNetwork createNewNetwork(
+    public static NetworkManager getInstance()
+    {
+        if (instance == null) {
+            instance = new NetworkManager();
+        }
+
+        return instance;
+    }
+
+    public void shutdown()
+    {
+        instance = null;
+    }
+
+    public synchronized ConnectorNetwork createNewNetwork(
         int savedId,
         IAsyncEventBus eventBus
     )
@@ -45,7 +60,7 @@ public class NetworkManager
         return network;
     }
 
-    public static ConnectorNetwork createNewNetwork(
+    public ConnectorNetwork createNewNetwork(
         IAsyncEventBus eventBus
     )
     {
@@ -56,7 +71,7 @@ public class NetworkManager
         return network;
     }
 
-    public static boolean mergeNetworks(
+    public boolean mergeNetworks(
         IWorld worldIn,
         IPositionInWorld pos,
         int totalConnections
@@ -100,7 +115,7 @@ public class NetworkManager
         return isRemovingANetwork;
     }
 
-    public static void reCalculateNetworksAround(
+    public void reCalculateNetworksAround(
         IPositionInWorld position,
         IWorld worldIn,
         IAsyncEventBus eventBus
@@ -127,14 +142,14 @@ public class NetworkManager
         }
 
         for (IPositionInWorld neighborIPositionInWorldPosition : actualNeighborIPositionInWorldPositions) {
-            ConnectorNetwork newNetwork = NetworkManager.createNewNetwork(eventBus);
+            ConnectorNetwork newNetwork = this.createNewNetwork(eventBus);
             reCalculateNetworkFrom(neighborIPositionInWorldPosition, worldIn, newNetwork);
         }
 
         foundCablePositions.clear();
     }
 
-    private static void reCalculateNetworkFrom(
+    private void reCalculateNetworkFrom(
         IPositionInWorld position,
         IWorld worldIn,
         ConnectorNetwork network
@@ -176,7 +191,7 @@ public class NetworkManager
         }
     }
 
-    private static void addConnectorToNetwork(
+    private void addConnectorToNetwork(
         ITileEntity neighborBlockEntity,
         ConnectorNetwork network,
         IPositionInWorld position
@@ -220,7 +235,7 @@ public class NetworkManager
         );
     }
 
-    private static void addConnectorToNetworkForDirection(
+    private void addConnectorToNetworkForDirection(
         Direction direction,
         ITileEntity neighborBlockEntity,
         ConnectorNetwork network,
@@ -236,7 +251,7 @@ public class NetworkManager
         }
     }
 
-    private static Map<Integer, ConnectorNetwork> findNetworks(
+    private Map<Integer, ConnectorNetwork> findNetworks(
         IWorld worldIn,
         IPositionInWorld pos,
         int totalConnections,
@@ -285,7 +300,7 @@ public class NetworkManager
         return networks;
     }
 
-    private static List<IPositionInWorld> getPossibleConnectedBlocks(
+    private List<IPositionInWorld> getPossibleConnectedBlocks(
         IPositionInWorld pos
     )
     {

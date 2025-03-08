@@ -79,11 +79,12 @@ public class ConnectorSavedDataHandlerTest
         when(mockNetworkSavedDataHandler.retrieveNetworkFromNBT(
             mockCompound,
             mockPosition,
-            mockAsyncEventBus
+            mockAsyncEventBus,
+            false
         ))
             .thenReturn(mockNetwork);
 
-        handler.readFromNBT(mockCompound, mockPosition, mockAsyncEventBus);
+        handler.readFromNBT(mockCompound, mockPosition, mockAsyncEventBus, false);
 
         verify(mockSettingsNorth).deserializeNBT(mockCompound, "north");
         verify(mockSettingsEast).deserializeNBT(mockCompound, "east");
@@ -92,7 +93,35 @@ public class ConnectorSavedDataHandlerTest
         verify(mockSettingsUp).deserializeNBT(mockCompound, "up");
         verify(mockSettingsDown).deserializeNBT(mockCompound, "down");
 
-        verify(mockNetworkSavedDataHandler).retrieveNetworkFromNBT(mockCompound, mockPosition, mockAsyncEventBus);
+        verify(mockNetworkSavedDataHandler).retrieveNetworkFromNBT(mockCompound, mockPosition, mockAsyncEventBus,
+            false
+        );
+        verify(mockNetworkHandler).setNetwork(mockNetwork);
+    }
+
+    @Test
+    public void readFromNBT_deserializesSettingsAndRetrievesNetwork_fromClient()
+    {
+        when(mockNetworkSavedDataHandler.retrieveNetworkFromNBT(
+            mockCompound,
+            mockPosition,
+            mockAsyncEventBus,
+            true
+        ))
+            .thenReturn(mockNetwork);
+
+        handler.readFromNBT(mockCompound, mockPosition, mockAsyncEventBus, true);
+
+        verify(mockSettingsNorth).deserializeNBT(mockCompound, "north");
+        verify(mockSettingsEast).deserializeNBT(mockCompound, "east");
+        verify(mockSettingsSouth).deserializeNBT(mockCompound, "south");
+        verify(mockSettingsWest).deserializeNBT(mockCompound, "west");
+        verify(mockSettingsUp).deserializeNBT(mockCompound, "up");
+        verify(mockSettingsDown).deserializeNBT(mockCompound, "down");
+
+        verify(mockNetworkSavedDataHandler).retrieveNetworkFromNBT(mockCompound, mockPosition, mockAsyncEventBus,
+            true
+        );
         verify(mockNetworkHandler).setNetwork(mockNetwork);
     }
 
@@ -102,11 +131,12 @@ public class ConnectorSavedDataHandlerTest
         when(mockNetworkSavedDataHandler.retrieveNetworkFromNBT(
             mockCompound,
             mockPosition,
-            mockAsyncEventBus
+            mockAsyncEventBus,
+            false
         ))
             .thenReturn(null);
 
-        handler.readFromNBT(mockCompound, mockPosition, mockAsyncEventBus);
+        handler.readFromNBT(mockCompound, mockPosition, mockAsyncEventBus, false);
 
         verify(mockSettingsNorth).deserializeNBT(mockCompound, "north");
         verify(mockSettingsEast).deserializeNBT(mockCompound, "east");
@@ -115,7 +145,9 @@ public class ConnectorSavedDataHandlerTest
         verify(mockSettingsUp).deserializeNBT(mockCompound, "up");
         verify(mockSettingsDown).deserializeNBT(mockCompound, "down");
 
-        verify(mockNetworkSavedDataHandler).retrieveNetworkFromNBT(mockCompound, mockPosition, mockAsyncEventBus);
+        verify(mockNetworkSavedDataHandler).retrieveNetworkFromNBT(mockCompound, mockPosition, mockAsyncEventBus,
+            false
+        );
         verify(mockNetworkHandler).setNetwork(null);
     }
 

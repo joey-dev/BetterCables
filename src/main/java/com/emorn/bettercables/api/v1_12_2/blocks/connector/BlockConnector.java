@@ -99,10 +99,12 @@ public class BlockConnector extends BaseCable implements IHasModel
     private static final PropertyEnum<ConnectionType> DOWN = PropertyEnum.create("down", ConnectionType.class);
 
     private final Map<BlockPos, Boolean> foundCablePositions = new HashMap<>();
+    private final NetworkManager networkManager;
 
     public BlockConnector(String name)
     {
         super(name);
+        this.networkManager = NetworkManager.getInstance();
     }
 
     @Override
@@ -140,7 +142,7 @@ public class BlockConnector extends BaseCable implements IHasModel
         IBlockState state
     )
     {
-        boolean didMergeCurrentNetwork = NetworkManager.mergeNetworks(
+        boolean didMergeCurrentNetwork = this.networkManager.mergeNetworks(
             new com.emorn.bettercables.api.v1_12_2.common.World(worldIn),
             new PositionInWorld(pos.getX(), pos.getY(), pos.getZ()),
             findTotalConnections(getActualState(state, worldIn, pos))
@@ -600,7 +602,7 @@ public class BlockConnector extends BaseCable implements IHasModel
 
         ConnectorNetwork network = this.findNetwork(worldIn, pos);
         if (network == null) {
-            connector.setNetwork(NetworkManager.createNewNetwork(eventBus));
+            connector.setNetwork(this.networkManager.createNewNetwork(eventBus));
             this.foundCablePositions.clear();
             return;
         }

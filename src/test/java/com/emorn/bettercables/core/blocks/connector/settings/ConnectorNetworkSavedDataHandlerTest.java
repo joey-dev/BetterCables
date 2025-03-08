@@ -34,7 +34,9 @@ public class ConnectorNetworkSavedDataHandlerTest {
     public void retrieveNetworkFromNBT_noNetworkId_returnsNull() {
         when(mockCompound.loadInteger(ConnectorNetworkSavedDataHandler.NETWORK_ID)).thenReturn(0);
 
-        ConnectorNetwork result = handler.retrieveNetworkFromNBT(mockCompound, mockPosition, mockAsyncEventBus);
+        ConnectorNetwork result = handler.retrieveNetworkFromNBT(mockCompound, mockPosition, mockAsyncEventBus,
+            false
+        );
 
         assertNull(result);
     }

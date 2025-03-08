@@ -2,6 +2,7 @@ package com.emorn.bettercables;
 
 import com.emorn.bettercables.api.v1_12_2.proxy.CommonProxy;
 import com.emorn.bettercables.api.v1_12_2.proxy.ModNetworkHandler;
+import com.emorn.bettercables.core.blocks.connector.network.NetworkManager;
 import com.emorn.bettercables.core.common.Reference;
 import com.emorn.bettercables.api.v1_12_2.asyncEventBus.AsyncEventBus;
 import net.minecraftforge.fml.common.Mod;
@@ -42,5 +43,6 @@ public class Main
     @EventHandler
     public void onServerStopping(FMLServerStoppingEvent event) {
         AsyncEventBus.getInstance().shutdownNow();
+        NetworkManager.getInstance().shutdown();
     }
 }

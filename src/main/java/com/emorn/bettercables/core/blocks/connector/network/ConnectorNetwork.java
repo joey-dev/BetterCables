@@ -60,7 +60,20 @@ public class ConnectorNetwork
             index = 0;
         }
 
-        if (this.connectorManager.isCurrentIndexSelfFeed(index, settings)) {
+        boolean isSelfFeed = this.connectorManager.isCurrentIndexSelfFeed(index, settings);
+        if (isSelfFeed) {
+            totalItems--;
+        }
+
+        if (totalItems == 0) {
+            return null;
+        }
+
+        if (index >= totalItems) {
+            index = 0;
+        }
+
+        if (isSelfFeed) {
             index++;
         }
 

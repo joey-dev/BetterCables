@@ -31,9 +31,12 @@ import java.util.Random;
 @ParametersAreNonnullByDefault
 public abstract class BaseCable extends BlockBase implements IHasModel
 {
+    private final NetworkManager networkManager;
+
     protected BaseCable(String name)
     {
         super(name, Material.IRON);
+        this.networkManager = NetworkManager.getInstance();
         setSoundType(SoundType.METAL);
     }
 
@@ -129,7 +132,7 @@ public abstract class BaseCable extends BlockBase implements IHasModel
     {
         super.onBlockDestroyedByPlayer(worldIn, pos, state);
         if (!worldIn.isRemote) {
-            NetworkManager.reCalculateNetworksAround(
+            this.networkManager.reCalculateNetworksAround(
                 new PositionInWorld(pos.getX(), pos.getY(), pos.getZ()),
                 new com.emorn.bettercables.api.v1_12_2.common.World(worldIn),
                 AsyncEventBus.getInstance()
@@ -158,7 +161,7 @@ public abstract class BaseCable extends BlockBase implements IHasModel
     {
         super.onBlockDestroyedByExplosion(worldIn, pos, explosionIn);
         if (!worldIn.isRemote) {
-            NetworkManager.reCalculateNetworksAround(
+            this.networkManager.reCalculateNetworksAround(
                 new PositionInWorld(pos.getX(), pos.getY(), pos.getZ()),
                 new com.emorn.bettercables.api.v1_12_2.common.World(worldIn),
                 AsyncEventBus.getInstance()

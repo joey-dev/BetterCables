@@ -107,11 +107,21 @@ public class ForgeTileEntityConnector extends TileEntity implements ITickable, I
             position.getY(),
             position.getZ()
         );
+        boolean isRemote;
+
+        if (this.world == null) {
+            isRemote = false;
+        } else {
+            isRemote = this.world.isRemote;
+        }
+
+        boolean isClient = isRemote;
 
         this.connectorSavedDataHandler.readFromNBT(
             new Data(compound),
             positionInWorld,
-            AsyncEventBus.getInstance()
+            AsyncEventBus.getInstance(),
+            isClient
         );
 
         if (compound.hasKey(CUSTOM_NAME, Constants.NBT.TAG_STRING)) {
