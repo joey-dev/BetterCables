@@ -3,7 +3,6 @@ package com.emorn.bettercables.core.blocks.connector.network;
 import com.emorn.bettercables.contract.common.IPositionInWorld;
 import com.emorn.bettercables.core.blocks.connector.settings.ConnectorSettings;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Map;
@@ -126,9 +125,7 @@ public class ConnectorManagerTest {
         assertNull(manager.findInsertSettingsBy(2));
     }
 
-    // IMPORTANT: This test might be failing as a hashmap order is not always the same
     @Test
-    @Ignore
     public void findInventoryPositionBy_validIndex_returnsPosition() {
         manager.addInsert(mockPosition1, mockSettings1);
         manager.addInsert(mockPosition2, mockSettings2);
@@ -138,9 +135,7 @@ public class ConnectorManagerTest {
         assertSame(mockPosition1, result);
     }
 
-    // IMPORTANT: This test might be failing as a hashmap order is not always the same
     @Test
-    @Ignore
     public void findInsertSettingsBy_validIndex_returnsSettings() {
         manager.addInsert(mockPosition1, mockSettings1);
         manager.addInsert(mockPosition2, mockSettings2);

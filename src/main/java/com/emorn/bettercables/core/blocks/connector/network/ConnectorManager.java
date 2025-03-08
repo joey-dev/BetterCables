@@ -16,10 +16,10 @@ import java.util.Map;
 @ParametersAreNonnullByDefault
 public class ConnectorManager
 {
-    // key = settings, value = inventory
-    private final Map<ConnectorSettings, IPositionInWorld> insertConnectorSettings = new HashMap<>();
-    // key = settings, value = inventory
-    private final Map<ConnectorSettings, IPositionInWorld> extractConnectorSettings = new HashMap<>();
+    private final Map<ConnectorSettings, IPositionInWorld> insertConnectorPositionBySettings = new HashMap<>();
+    private final List<ConnectorSettings> insertConnectorSettings = new ArrayList<>();
+    private final Map<ConnectorSettings, IPositionInWorld> extractConnectorPositionBySettings = new HashMap<>();
+    private final List<ConnectorSettings> extractConnectorSettings = new ArrayList<>();
 
     public int totalInsertConnections()
     {
@@ -35,13 +35,14 @@ public class ConnectorManager
             return null;
         }
 
-        if (this.insertConnectorSettings.keySet().toArray()[index] == null) {
+        ConnectorSettings settings = this.insertConnectorSettings.get(index);
+
+        if (settings == null) {
             Logger.error("Tried to get empty");
             return null;
         }
 
-        // no pos (value)
-        return (IPositionInWorld) this.insertConnectorSettings.values().toArray()[index];
+        return this.insertConnectorPositionBySettings.get(settings);
     }
 
     @Nullable
@@ -53,7 +54,7 @@ public class ConnectorManager
             return null;
         }
 
-        ConnectorSettings settings = (ConnectorSettings) this.insertConnectorSettings.keySet().toArray()[index];
+        ConnectorSettings settings = this.insertConnectorSettings.get(index);
 
         if (settings == null) {
             Logger.error("Tried to get empty");
@@ -68,12 +69,15 @@ public class ConnectorManager
         ConnectorSettings settings
     )
     {
-        if (this.insertConnectorSettings.containsKey(settings) &&
-            this.insertConnectorSettings.get(settings).equals(inventoryPosition)) {
+        if (this.insertConnectorPositionBySettings.containsKey(settings) &&
+            this.insertConnectorPositionBySettings.get(settings).equals(inventoryPosition)) {
             return;
         }
+        if (!this.insertConnectorPositionBySettings.containsKey(settings)) {
+            this.insertConnectorSettings.add(settings);
+        }
 
-        this.insertConnectorSettings.put(settings, inventoryPosition);
+        this.insertConnectorPositionBySettings.put(settings, inventoryPosition);
     }
 
     public void addExtract(
@@ -81,34 +85,39 @@ public class ConnectorManager
         ConnectorSettings settings
     )
     {
-        if (this.extractConnectorSettings.containsKey(settings) &&
-            this.extractConnectorSettings.get(settings).equals(inventoryPosition)) {
+        if (this.extractConnectorPositionBySettings.containsKey(settings) &&
+            this.extractConnectorPositionBySettings.get(settings).equals(inventoryPosition)) {
             return;
         }
+        if (!this.extractConnectorPositionBySettings.containsKey(settings)) {
+            this.extractConnectorSettings.add(settings);
+        }
 
-        this.extractConnectorSettings.put(settings, inventoryPosition);
+        this.extractConnectorPositionBySettings.put(settings, inventoryPosition);
     }
 
     public void removeInsert(
         ConnectorSettings connectorSettings
     )
     {
-        if (!this.insertConnectorSettings.containsKey(connectorSettings)) {
+        if (!this.insertConnectorPositionBySettings.containsKey(connectorSettings)) {
             return;
         }
 
         this.insertConnectorSettings.remove(connectorSettings);
+        this.insertConnectorPositionBySettings.remove(connectorSettings);
     }
 
     public void removeExtract(
         ConnectorSettings connectorSettings
     )
     {
-        if (!this.extractConnectorSettings.containsKey(connectorSettings)) {
+        if (!this.extractConnectorPositionBySettings.containsKey(connectorSettings)) {
             return;
         }
 
         this.extractConnectorSettings.remove(connectorSettings);
+        this.extractConnectorPositionBySettings.remove(connectorSettings);
     }
 
     public void updateSlotCount(
@@ -125,21 +134,21 @@ public class ConnectorManager
 
     public Map<ConnectorSettings, IPositionInWorld> findAllInsertConnectors()
     {
-        return this.insertConnectorSettings;
+        return this.insertConnectorPositionBySettings;
     }
 
     public Map<ConnectorSettings, IPositionInWorld> findAllExtractConnectors()
     {
-        return this.extractConnectorSettings;
+        return this.extractConnectorPositionBySettings;
     }
 
     public List<ConnectorSettings> findAllInsertConnectorSettings()
     {
-        return new ArrayList<>(this.insertConnectorSettings.keySet());
+        return this.insertConnectorSettings;
     }
 
     public List<ConnectorSettings> findAllExtractConnectorSettings()
     {
-        return new ArrayList<>(this.extractConnectorSettings.keySet());
+        return this.extractConnectorSettings;
     }
 }
