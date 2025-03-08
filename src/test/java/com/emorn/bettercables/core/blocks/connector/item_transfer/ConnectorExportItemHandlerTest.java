@@ -114,14 +114,16 @@ public class ConnectorExportItemHandlerTest
     @Test
     public void invoke_noNextIndex_doesNothing()
     {
+        ConnectorSettings settings = new ConnectorSettings();
         when(mockConnectorNetworkService.isNetworkDisabled()).thenReturn(false);
-        when(mockNetwork.findNextIndex(anyInt())).thenReturn(null);
+        when(mockNetwork.findNextIndex(anyInt(), eq(settings))).thenReturn(null);
+        when(mockConnectorNetworkSettingsService.settings(Direction.NORTH)).thenReturn(settings);
 
         handler.invoke(Direction.NORTH, mockPositionInWorld, mockWorld);
 
         verify(mockConnectorNetworkService).isNetworkDisabled();
         verify(mockConnectorNetworkService).getNetwork();
-        verify(mockNetwork).findNextIndex(-1);
+        verify(mockNetwork).findNextIndex(-1, settings);
         verifyNoMoreInteractions(
             mockConnectorNetworkService,
             mockNetwork,
@@ -133,8 +135,9 @@ public class ConnectorExportItemHandlerTest
     @Test
     public void invoke_noImportInventory_doesNothing()
     {
+        ConnectorSettings settings = new ConnectorSettings();
         when(mockConnectorNetworkService.isNetworkDisabled()).thenReturn(false);
-        when(mockNetwork.findNextIndex(anyInt())).thenReturn(0);
+        when(mockNetwork.findNextIndex(anyInt(), eq(settings))).thenReturn(0);
         when(mockConnectorInventoryLocator.findImportInventory(
             any(),
             any(),
@@ -142,19 +145,22 @@ public class ConnectorExportItemHandlerTest
             any(),
             any()
         )).thenReturn(null);
+        when(mockConnectorNetworkSettingsService.settings(Direction.NORTH)).thenReturn(settings);
 
         handler.invoke(Direction.NORTH, mockPositionInWorld, mockWorld);
 
         verify(mockConnectorNetworkService).getNetwork();
-        verify(mockNetwork).findNextIndex(-1);
+        verify(mockNetwork).findNextIndex(-1, settings);
         verifyNoMoreInteractions(mockConnectorInventoryLocator, mockInventoryService);
     }
 
     @Test
     public void invoke_noInventorySettings_doesNothing()
     {
+        ConnectorSettings settings = new ConnectorSettings();
+
         when(mockConnectorNetworkService.isNetworkDisabled()).thenReturn(false);
-        when(mockNetwork.findNextIndex(anyInt())).thenReturn(0);
+        when(mockNetwork.findNextIndex(anyInt(), eq(settings))).thenReturn(0);
         when(mockConnectorInventoryLocator.findImportInventory(
             any(),
             any(),
@@ -170,10 +176,12 @@ public class ConnectorExportItemHandlerTest
             anyInt()
         )).thenReturn(null);
 
+        when(mockConnectorNetworkSettingsService.settings(Direction.NORTH)).thenReturn(settings);
+
         handler.invoke(Direction.NORTH, mockPositionInWorld, mockWorld);
 
         verify(mockConnectorNetworkService).getNetwork();
-        verify(mockNetwork).findNextIndex(-1);
+        verify(mockNetwork).findNextIndex(-1, settings);
         verify(mockConnectorNetworkSettingsService).findImportSettings(Direction.NORTH, mockNetwork, 0);
         verifyNoMoreInteractions(mockConnectorInventoryLocator, mockInventoryService);
     }
@@ -182,7 +190,7 @@ public class ConnectorExportItemHandlerTest
     public void invoke_noExportInventory_doesNothing()
     {
         when(mockConnectorNetworkService.isNetworkDisabled()).thenReturn(false);
-        when(mockNetwork.findNextIndex(anyInt())).thenReturn(0);
+        when(mockNetwork.findNextIndex(anyInt(), any())).thenReturn(0);
         when(mockConnectorInventoryLocator.findImportInventory(
             any(),
             any(),
@@ -218,7 +226,7 @@ public class ConnectorExportItemHandlerTest
     public void invoke_noConnectorSide_doesNothing()
     {
         when(mockConnectorNetworkService.isNetworkDisabled()).thenReturn(false);
-        when(mockNetwork.findNextIndex(anyInt())).thenReturn(0);
+        when(mockNetwork.findNextIndex(anyInt(), any())).thenReturn(0);
         when(mockConnectorInventoryLocator.findImportInventory(
             any(),
             any(),
@@ -255,7 +263,7 @@ public class ConnectorExportItemHandlerTest
     public void invoke_noConnectorSettings_doesNothing()
     {
         when(mockConnectorNetworkService.isNetworkDisabled()).thenReturn(false);
-        when(mockNetwork.findNextIndex(anyInt())).thenReturn(0);
+        when(mockNetwork.findNextIndex(anyInt(), any())).thenReturn(0);
         when(mockConnectorInventoryLocator.findImportInventory(
             any(),
             any(),
@@ -288,7 +296,7 @@ public class ConnectorExportItemHandlerTest
     public void invoke_successfulTransfer_singleSlotPair()
     {
         when(mockConnectorNetworkService.isNetworkDisabled()).thenReturn(false);
-        when(mockNetwork.findNextIndex(anyInt())).thenReturn(0);
+        when(mockNetwork.findNextIndex(anyInt(), any())).thenReturn(0);
         when(mockConnectorInventoryLocator.findImportInventory(
             any(),
             any(),
@@ -340,7 +348,7 @@ public class ConnectorExportItemHandlerTest
     public void invoke_exportItemFromSlots_noPossibleIndexes()
     {
         when(mockConnectorNetworkService.isNetworkDisabled()).thenReturn(false);
-        when(mockNetwork.findNextIndex(anyInt())).thenReturn(0);
+        when(mockNetwork.findNextIndex(anyInt(), any())).thenReturn(0);
         when(mockConnectorInventoryLocator.findImportInventory(
             any(),
             any(),
@@ -373,7 +381,7 @@ public class ConnectorExportItemHandlerTest
     public void invoke_exportItemFromSlots_itemsIsEmpty()
     {
         when(mockConnectorNetworkService.isNetworkDisabled()).thenReturn(false);
-        when(mockNetwork.findNextIndex(anyInt())).thenReturn(0);
+        when(mockNetwork.findNextIndex(anyInt(), any())).thenReturn(0);
         when(mockConnectorInventoryLocator.findImportInventory(
             any(),
             any(),
@@ -416,7 +424,7 @@ public class ConnectorExportItemHandlerTest
     public void invoke_exportItemFromSlots_itemsNotInserted_reinserts()
     {
         when(mockConnectorNetworkService.isNetworkDisabled()).thenReturn(false);
-        when(mockNetwork.findNextIndex(anyInt())).thenReturn(0);
+        when(mockNetwork.findNextIndex(anyInt(), any())).thenReturn(0);
         when(mockConnectorInventoryLocator.findImportInventory(
             any(),
             any(),
@@ -468,7 +476,7 @@ public class ConnectorExportItemHandlerTest
     public void invoke_multipleSlotPairs_iteratesCorrectly()
     {
         when(mockConnectorNetworkService.isNetworkDisabled()).thenReturn(false);
-        when(mockNetwork.findNextIndex(anyInt())).thenReturn(0);
+        when(mockNetwork.findNextIndex(anyInt(), any())).thenReturn(0);
         when(mockConnectorInventoryLocator.findImportInventory(
             any(),
             any(),
@@ -527,7 +535,7 @@ public class ConnectorExportItemHandlerTest
     public void invoke_multipleSlotPairs_stopsOnCannotExtract()
     {
         when(mockConnectorNetworkService.isNetworkDisabled()).thenReturn(false);
-        when(mockNetwork.findNextIndex(anyInt())).thenReturn(0);
+        when(mockNetwork.findNextIndex(anyInt(), any())).thenReturn(0);
         when(mockConnectorInventoryLocator.findImportInventory(
             any(),
             any(),
@@ -581,6 +589,7 @@ public class ConnectorExportItemHandlerTest
     @Test
     public void invoke_directionToIndexMap_updatesCorrectly()
     {
+        ConnectorSettings settings = new ConnectorSettings();
         when(mockConnectorNetworkService.isNetworkDisabled()).thenReturn(false);
         when(mockConnectorInventoryLocator.findImportInventory(
             any(),
@@ -620,15 +629,16 @@ public class ConnectorExportItemHandlerTest
         when(mockInventoryService.insertItemIntoInventory(mockImportInventoryHandler, 0, mockItemStack)).thenReturn(
             mockNotInserted);
 
+        when(mockConnectorNetworkSettingsService.settings(Direction.NORTH)).thenReturn(settings);
 
-        when(mockNetwork.findNextIndex(-1)).thenReturn(0);
-        when(mockNetwork.findNextIndex(0)).thenReturn(1);
+        when(mockNetwork.findNextIndex(-1, settings)).thenReturn(0);
+        when(mockNetwork.findNextIndex(0, settings)).thenReturn(1);
 
         handler.invoke(Direction.NORTH, mockPositionInWorld, mockWorld);
         handler.invoke(Direction.NORTH, mockPositionInWorld, mockWorld);
 
-        verify(mockNetwork).findNextIndex(-1);
-        verify(mockNetwork).findNextIndex(0);
+        verify(mockNetwork).findNextIndex(-1, settings);
+        verify(mockNetwork).findNextIndex(0, settings);
 
         Map<Direction, Integer> map = (Map<Direction, Integer>) getInternalState(handler, "directionToIndexMap");
         Integer expected = 1;
@@ -639,19 +649,20 @@ public class ConnectorExportItemHandlerTest
     public void invoke_findNextInsertInventoryIndex_nullCheck()
     {
         when(mockConnectorNetworkService.isNetworkDisabled()).thenReturn(false);
-        when(mockNetwork.findNextIndex(-1)).thenReturn(null);
+        ConnectorSettings settings = new ConnectorSettings();
+        when(mockNetwork.findNextIndex(-1, settings)).thenReturn(null);
+        when(mockConnectorNetworkSettingsService.settings(Direction.NORTH)).thenReturn(settings);
 
         handler.invoke(Direction.NORTH, mockPositionInWorld, mockWorld);
-
         verify(mockConnectorNetworkService).isNetworkDisabled();
-        verify(mockNetwork).findNextIndex(-1);
+        verify(mockNetwork).findNextIndex(-1, settings);
     }
 
     @Test
     public void exportItemFromSlots_reinsertionFailure_noItemLoss()
     {
         when(mockConnectorNetworkService.isNetworkDisabled()).thenReturn(false);
-        when(mockNetwork.findNextIndex(anyInt())).thenReturn(0);
+        when(mockNetwork.findNextIndex(anyInt(), any())).thenReturn(0);
         when(mockConnectorInventoryLocator.findImportInventory(
             any(),
             any(),
