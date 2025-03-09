@@ -559,27 +559,27 @@ public class BlockConnector extends BaseCable implements IHasModel
     {
         int totalConnections = 0;
 
-        if (this.hasConnection(state, NORTH)) {
+        if (this.hasConnectionToConnector(state, NORTH)) {
             totalConnections++;
         }
 
-        if (this.hasConnection(state, EAST)) {
+        if (this.hasConnectionToConnector(state, EAST)) {
             totalConnections++;
         }
 
-        if (this.hasConnection(state, SOUTH)) {
+        if (this.hasConnectionToConnector(state, SOUTH)) {
             totalConnections++;
         }
 
-        if (this.hasConnection(state, WEST)) {
+        if (this.hasConnectionToConnector(state, WEST)) {
             totalConnections++;
         }
 
-        if (this.hasConnection(state, UP)) {
+        if (this.hasConnectionToConnector(state, UP)) {
             totalConnections++;
         }
 
-        if (this.hasConnection(state, DOWN)) {
+        if (this.hasConnectionToConnector(state, DOWN)) {
             totalConnections++;
         }
 
