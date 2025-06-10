@@ -77,9 +77,11 @@ public class GuiConnector extends GuiContainer
     private static final int COPY_SLOT_RANGE_BUTTON = 29;
     private static final int COPY_ITEM_COUNT_BUTTON = 30;
     private static final int COPY_DURABILITY_BUTTON = 31;
+    private static final int TOOLTIP = 32;
 
-    private static final int FILTER_START_ID = 32;
+    private static final int FILTER_START_ID = 33;
     private ConnectorSettingsFilter filter;
+    private GuiTooltip tooltipElement;
 
     public GuiConnector(
         InventoryPlayer player,
@@ -115,6 +117,21 @@ public class GuiConnector extends GuiContainer
                 this.copyFiltersMenu(tileSettings);
             }
 
+            this.tooltipElement = new GuiTooltip(
+                TOOLTIP,
+                new GuiTooltipData(
+                    0,
+                    0,
+                    new String[]{},
+                    -1,
+                    false,
+                    -1,
+                    false,
+                    true
+                )
+            );
+
+            this.buttonList.add(this.tooltipElement);
             return;
         }
 
@@ -123,8 +140,10 @@ public class GuiConnector extends GuiContainer
             checkboxX,
             checkboxInsertY,
             "Insert",
+            new String[]{},
             tileSettings.isInsertEnabled(),
-            false
+            false,
+            this::onHoverTooltip
         );
 
         GuiGear insertSettings = new GuiGear(
@@ -138,8 +157,10 @@ public class GuiConnector extends GuiContainer
             checkboxX,
             checkboxExtractY,
             "Extract",
+            new String[]{},
             tileSettings.isExtractEnabled(),
-            false
+            false,
+            this::onHoverTooltip
         );
         GuiGear extractSettings = new GuiGear(
             EXTRACT_SETTINGS_ID,
@@ -152,6 +173,21 @@ public class GuiConnector extends GuiContainer
         this.buttonList.add(insertSettings);
         this.buttonList.add(extractCheckbox);
         this.buttonList.add(extractSettings);
+        this.tooltipElement = new GuiTooltip(
+            TOOLTIP,
+            new GuiTooltipData(
+                0,
+                0,
+                new String[]{},
+                -1,
+                false,
+                -1,
+                false,
+                true
+            )
+        );
+
+        this.buttonList.add(this.tooltipElement);
     }
 
     private void copyFiltersMenu(ConnectorSettings tileSettings)
@@ -161,7 +197,8 @@ public class GuiConnector extends GuiContainer
             this.guiLeft + 88,
             this.guiTop + 19,
             this.filter.isOreDictEnabled(),
-            false
+            false,
+            this::onHoverTooltip
         );
 
         this.buttonList.add(oreDictionaryBox);
@@ -171,8 +208,9 @@ public class GuiConnector extends GuiContainer
             this.guiLeft + 88,
             this.guiTop + 19 + 18,
             this.filter.isNbtDataEnabled(),
-            false
-        );
+            false,
+            this::onHoverTooltip
+            );
 
         this.buttonList.add(nbtDataBox);
         GuiBlackListBox blackListBox = new GuiBlackListBox(
@@ -180,7 +218,8 @@ public class GuiConnector extends GuiContainer
             this.guiLeft + 88,
             this.guiTop + 19 + 18 + 18,
             this.filter.isBlackListEnabled(),
-            false
+            false,
+            this::onHoverTooltip
         );
 
         this.buttonList.add(blackListBox);
@@ -190,8 +229,12 @@ public class GuiConnector extends GuiContainer
             this.guiLeft + 10,
             this.guiTop + 19,
             "Durability",
+            new String[]{
+                "Copy the durability percentage of the item",
+            },
             tileSettings.isDynamicTickRateEnabled(),
-            false
+            false,
+            this::onHoverTooltip
         );
 
         this.buttonList.add(durability);
@@ -201,8 +244,12 @@ public class GuiConnector extends GuiContainer
             this.guiLeft + 10,
             this.guiTop + 39,
             "Slot Range",
+            new String[]{
+                "Copy the slot range of the items"
+            },
             tileSettings.isDynamicTickRateEnabled(),
-            false
+            false,
+            this::onHoverTooltip
         );
 
         this.buttonList.add(slotRange);
@@ -212,8 +259,12 @@ public class GuiConnector extends GuiContainer
             this.guiLeft + 10,
             this.guiTop + 59,
             "Item count",
+            new String[]{
+                "Copy the item count"
+            },
             tileSettings.isDynamicTickRateEnabled(),
-            false
+            false,
+            this::onHoverTooltip
         );
 
         this.buttonList.add(itemCount);
@@ -232,6 +283,22 @@ public class GuiConnector extends GuiContainer
         }
 
         this.settingsMenu(tileSettings);
+
+        this.tooltipElement = new GuiTooltip(
+            TOOLTIP,
+            new GuiTooltipData(
+                0,
+                0,
+                new String[]{},
+                -1,
+                false,
+                -1,
+                false,
+                true
+            )
+        );
+
+        this.buttonList.add(this.tooltipElement);
     }
 
     private void settingsMenu(ConnectorSettings tileSettings)
@@ -313,6 +380,14 @@ public class GuiConnector extends GuiContainer
         this.initGui();
     }
 
+    private void onHoverTooltip(GuiTooltipData tooltipData)
+    {
+        if (this.tooltipElement == null) {
+            return;
+        }
+        this.tooltipElement.update(tooltipData);
+    }
+
     private void drawSettings(ConnectorSettings tileSettings)
     {
         GuiCopyButton copyFiltersButton = new GuiCopyButton(
@@ -320,6 +395,7 @@ public class GuiConnector extends GuiContainer
             this.guiLeft + 155,
             this.guiTop + 3,
             this::onCopyFiltersClicked,
+            this::onHoverTooltip,
             this.isCopyFiltersOpen
         );
 
@@ -339,9 +415,14 @@ public class GuiConnector extends GuiContainer
             channelId,
             TextPosition.RIGHT,
             "Channel",
+            new String[]{
+                "Channel ID for this connector",
+                "A way to have multiple channels within the same network"
+            },
             0,
             999,
-            false
+            false,
+            this::onHoverTooltip
         );
 
         this.buttonList.add(channelInput);
@@ -366,7 +447,8 @@ public class GuiConnector extends GuiContainer
                 OVERWRITE_CHECKBOX_ID,
                 this.guiLeft - 80,
                 this.guiTop + 5 + 18,
-                this.filter.isOverwriteEnabled()
+                this.filter.isOverwriteEnabled(),
+                this::onHoverTooltip
             );
 
             this.buttonList.add(overwriteDefaultBox);
@@ -390,8 +472,19 @@ public class GuiConnector extends GuiContainer
             this.filter.minSlotRange(),
             this.filter.maxSlotRange(),
             "Slot range",
+            new String[]{
+                "Range of slots that this filter will apply to",
+                "Starting with 0, it goes left to right, top left to bottom right",
+                "If there is no minimum slot, set it to -1",
+            },
+            new String[]{
+                "Range of slots that this filter will apply to",
+                "Starting with 0, it goes left to right, top left to bottom right",
+                "If there is no maximum slot, set it to -1",
+            },
             -1,
-            disable
+            disable,
+            this::onHoverTooltip
         );
 
         this.buttonList.add(slotInput);
@@ -408,7 +501,8 @@ public class GuiConnector extends GuiContainer
             this.guiLeft - 80,
             this.guiTop + 100 + extraY,
             this.filter.isOreDictEnabled(),
-            disable
+            disable,
+            this::onHoverTooltip
         );
 
         this.buttonList.add(oreDictionaryBox);
@@ -421,7 +515,8 @@ public class GuiConnector extends GuiContainer
             this.guiLeft - (80 - 18),
             this.guiTop + 100 + extraY,
             this.filter.isNbtDataEnabled(),
-            disable
+            disable,
+            this::onHoverTooltip
         );
 
         this.buttonList.add(nbtDataBox);
@@ -434,7 +529,8 @@ public class GuiConnector extends GuiContainer
             this.guiLeft - (80 - 18 - 18),
             this.guiTop + 100 + extraY,
             this.filter.isBlackListEnabled(),
-            disable
+            disable,
+            this::onHoverTooltip
         );
 
         this.buttonList.add(blackListBox);
@@ -449,9 +545,15 @@ public class GuiConnector extends GuiContainer
             this.filter.itemCount(),
             TextPosition.TOP,
             this.isExtractSettingsOpen ? "Min item count" : "Max item count",
+            this.isExtractSettingsOpen ? new String[]{
+                "Amount of items that stays in this inventory",
+            } : new String[]{
+                "Maximum amount of items that can be in this inventory",
+            },
             0,
             999,
-            disable
+            disable,
+            this::onHoverTooltip
         );
 
         this.buttonList.add(itemCount);
@@ -467,7 +569,8 @@ public class GuiConnector extends GuiContainer
             this.guiTop + 65 + extraY,
             this.filter.durabilityType(),
             this.filter.durabilityPercentage(),
-            disable
+            disable,
+            this::onHoverTooltip
         );
 
         this.buttonList.add(durability);
@@ -494,9 +597,14 @@ public class GuiConnector extends GuiContainer
             tileSettings.priority(),
             TextPosition.RIGHT,
             "Priority",
+            new String[]{
+                "Priority of this connector",
+                "Higher priority means it will be used first"
+            },
             -99,
             999,
-            false
+            false,
+            this::onHoverTooltip
         );
 
         this.buttonList.add(priority);
@@ -512,9 +620,14 @@ public class GuiConnector extends GuiContainer
             tileSettings.tickRate(),
             TextPosition.RIGHT,
             "Tick rate",
+            new String[]{
+                "Tick rate of this connector",
+                "How often it will try to extract items"
+            },
             1,
             999,
-            false
+            false,
+            this::onHoverTooltip
         );
 
         this.buttonList.add(tickRate);
@@ -525,8 +638,12 @@ public class GuiConnector extends GuiContainer
             this.guiLeft + 180,
             this.guiTop + 35,
             "Dynamic",
+            new String[]{
+                "Enable dynamic tick rate",
+            },
             tileSettings.isDynamicTickRateEnabled(),
-            false
+            false,
+            this::onHoverTooltip
         );
 
         this.buttonList.add(dynamic);
@@ -541,8 +658,21 @@ public class GuiConnector extends GuiContainer
             tileSettings.dynamicTickRateMinimum(),
             tileSettings.dynamicTickRateMaximum(),
             "Dynamic range",
+            new String[]{
+                "Dynamic tick rate range",
+                "Minimum and maximum tick rate that this connector will use",
+                "If dynamic is enabled, it will use this range to determine the tick rate",
+                "It determines the tick rate based on how fast it has to try to extract items",
+            },
+            new String[]{
+                "Dynamic tick rate range",
+                "Minimum and maximum tick rate that this connector will use",
+                "If dynamic is enabled, it will use this range to determine the tick rate",
+                "It determines the tick rate based on how fast it has to try to extract items",
+            },
             1,
-            !dynamic.isChecked()
+            !dynamic.isChecked(),
+            this::onHoverTooltip
         );
 
         this.buttonList.add(dynamicRange);
@@ -556,7 +686,8 @@ public class GuiConnector extends GuiContainer
             EXTRACT_TYPE_BUTTON_ID,
             this.guiLeft + 180,
             this.guiTop + 95,
-            tileSettings.extractType()
+            tileSettings.extractType(),
+            this::onHoverTooltip
         );
 
         this.buttonList.add(extractType);
@@ -568,9 +699,13 @@ public class GuiConnector extends GuiContainer
             tileSettings.itemsPerExtract(),
             TextPosition.TOP,
             "Items per action",
+            new String[]{
+                "How many items will be extracted per action",
+            },
             1,
             999,
-            false
+            false,
+            this::onHoverTooltip
         );
 
         this.buttonList.add(itemsPerExtract);
@@ -583,9 +718,15 @@ public class GuiConnector extends GuiContainer
             tileSettings.powerSavingsSlotDisableTicks(),
             TextPosition.TOP,
             "Power savings",
+            new String[]{
+                "When it cannot extract from a given slot,",
+                "it will wait for x amount of ticks to enable again",
+                "-1 means that it will never disable the slot"
+            },
             -1,
             999,
-            false
+            false,
+            this::onHoverTooltip
         );
 
         this.buttonList.add(powerSaving);

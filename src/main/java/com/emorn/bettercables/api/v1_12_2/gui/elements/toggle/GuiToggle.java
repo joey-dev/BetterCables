@@ -1,6 +1,7 @@
 package com.emorn.bettercables.api.v1_12_2.gui.elements.toggle;
 
 import com.emorn.bettercables.api.v1_12_2.gui.elements.AbleToChangeDisabledState;
+import com.emorn.bettercables.api.v1_12_2.gui.elements.GuiTooltipData;
 import com.emorn.bettercables.core.common.Reference;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.client.gui.GuiButton;
@@ -8,6 +9,7 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ResourceLocation;
 
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.function.Consumer;
 
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
@@ -16,30 +18,40 @@ public class GuiToggle extends GuiButton implements AbleToChangeDisabledState
     private static final ResourceLocation TEXTURES = new ResourceLocation(
         Reference.MODID + ":textures/gui/gui_elements.png"
     );
+    private static final int WIDTH_OF_IMAGE = 18;
+    private static final int HEIGHT_OF_IMAGE = 18;
+
     private final ToggleImagePosition inactive;
     private final ToggleImagePosition active;
     private final ToggleImagePosition disabled;
+    private final Consumer<GuiTooltipData> callbackTooltip;
     private boolean isChecked;
+    private final String[] description;
     private boolean isDisabled;
+    private boolean wasCursorOverInputBox = false;
 
     public GuiToggle(
         int buttonId,
         int x,
         int y,
         String buttonText,
+        String[] description,
         boolean isChecked,
         ToggleImagePosition inactiveTogglePosition,
         ToggleImagePosition activeTogglePosition,
         ToggleImagePosition disabledTogglePosition,
-        boolean disabled
+        boolean disabled,
+        Consumer<GuiTooltipData> callbackTooltip
     )
     {
-        super(buttonId, x, y, 18, 18, buttonText);
+        super(buttonId, x, y, WIDTH_OF_IMAGE, HEIGHT_OF_IMAGE, buttonText);
+        this.description = description;
         this.isDisabled = disabled;
         this.isChecked = isChecked;
         this.inactive = inactiveTogglePosition;
         this.active = activeTogglePosition;
         this.disabled = disabledTogglePosition;
+        this.callbackTooltip = callbackTooltip;
     }
 
     @Override
@@ -54,6 +66,43 @@ public class GuiToggle extends GuiButton implements AbleToChangeDisabledState
             return;
         }
         setupRenderState(mc);
+
+        boolean isCursorOverInputBox = this.isMouseOverInputBox(mouseX, mouseY);
+
+        GuiTooltipData guiTooltipData = new GuiTooltipData(
+            this.x,
+            this.y + 1000,
+            this.description,
+            0,
+            false,
+            0,
+            false,
+            false
+        );
+
+        if (isCursorOverInputBox) {
+            this.callbackTooltip.accept(
+                guiTooltipData
+            );
+        } else if (this.wasCursorOverInputBox) {
+            guiTooltipData.setDisabled();
+            this.callbackTooltip.accept(
+                guiTooltipData
+            );
+        }
+
+        this.wasCursorOverInputBox = isCursorOverInputBox;
+    }
+
+    private boolean isMouseOverInputBox(
+        int mouseX,
+        int mouseY
+    )
+    {
+        return
+            (mouseX > this.x && mouseX < this.x + WIDTH_OF_IMAGE) &&
+                (mouseY > this.y && mouseY < this.y + HEIGHT_OF_IMAGE)
+            ;
     }
 
     private void setupRenderState(net.minecraft.client.Minecraft mc)

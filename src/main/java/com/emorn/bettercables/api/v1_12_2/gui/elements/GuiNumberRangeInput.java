@@ -7,6 +7,7 @@ import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.renderer.GlStateManager;
 
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.function.Consumer;
 
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
@@ -26,8 +27,11 @@ public class GuiNumberRangeInput extends GuiButton implements AbleToChangeDisabl
         int initialValueMin,
         int initialValueMax,
         String text,
+        String[] descriptionMin,
+        String[] descriptionMax,
         int minimumValue,
-        boolean disabled
+        boolean disabled,
+        Consumer<GuiTooltipData> callback
     )
     {
         super(buttonId, x, y, WIDTH_OF_IMAGE, HEIGHT_OF_IMAGE, text);
@@ -39,9 +43,11 @@ public class GuiNumberRangeInput extends GuiButton implements AbleToChangeDisabl
             initialValueMin,
             TextPosition.RIGHT,
             "Min",
+            descriptionMin,
             minimumValue,
             999,
-            disabled
+            disabled,
+            callback
         );
 
         this.maxInput = new GuiNumberInput(
@@ -51,9 +57,11 @@ public class GuiNumberRangeInput extends GuiButton implements AbleToChangeDisabl
             initialValueMax,
             TextPosition.RIGHT,
             "Max",
+            descriptionMax,
             minimumValue,
             999,
-            disabled
+            disabled,
+            callback
         );
     }
 

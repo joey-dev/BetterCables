@@ -5,6 +5,7 @@ import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.client.gui.GuiButton;
 
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.function.Consumer;
 
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
@@ -21,7 +22,8 @@ public class GuiDurability extends GuiButton implements AbleToChangeDisabledStat
         int y,
         ComparisonOperator comparisonOperator,
         int initialValue,
-        boolean disable
+        boolean disable,
+        Consumer<GuiTooltipData> callback
     )
     {
         super(buttonId, x, y, WIDTH_OF_IMAGE, HEIGHT_OF_IMAGE, "Durability");
@@ -31,10 +33,14 @@ public class GuiDurability extends GuiButton implements AbleToChangeDisabledStat
             x,
             y,
             "Durability%",
+            new String[]{
+                "Durability percentage of the item",
+            },
             comparisonOperator,
             initialValue,
             100,
-            disable
+            disable,
+            callback
         );
     }
 
