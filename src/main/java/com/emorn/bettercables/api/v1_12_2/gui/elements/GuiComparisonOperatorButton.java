@@ -8,6 +8,7 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ResourceLocation;
 
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.function.Consumer;
 
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
@@ -17,25 +18,33 @@ public class GuiComparisonOperatorButton extends GuiButton
         Reference.MODID + ":textures/gui/gui_elements.png"
     );
 
+    private static final int WIDTH_OF_IMAGE = 18;
+    private static final int HEIGHT_OF_IMAGE = 18;
+
     private ComparisonOperator comparisonOperator;
     private final GuiNumberInput numberInput;
     private int stringWidth = 0;
     private boolean disabled;
+    private final Consumer<GuiTooltipData> callback;
+    private boolean wasCursorOverInputBox = false;
 
     public GuiComparisonOperatorButton(
         int buttonId,
         int x,
         int y,
         String buttonText,
+        String[] description,
         ComparisonOperator comparisonOperator,
         int initialValue,
         int maximumValue,
-        boolean disable
+        boolean disable,
+        Consumer<GuiTooltipData> callback
     )
     {
-        super(buttonId, x, y, 18, 18, buttonText);
+        super(buttonId, x, y, WIDTH_OF_IMAGE, HEIGHT_OF_IMAGE, buttonText);
         this.comparisonOperator = comparisonOperator;
         this.disabled = disable;
+        this.callback = callback;
 
         this.numberInput = new GuiNumberInput(
             buttonId,
@@ -44,9 +53,11 @@ public class GuiComparisonOperatorButton extends GuiButton
             initialValue,
             TextPosition.RIGHT,
             "",
+            description,
             -1,
             maximumValue,
-            disable
+            disable,
+            callback
         );
     }
 
@@ -61,10 +72,18 @@ public class GuiComparisonOperatorButton extends GuiButton
         if (!this.visible) {
             return;
         }
-        setupRenderState(mc);
+        setupRenderState(
+            mc,
+            mouseX,
+            mouseY
+        );
     }
 
-    private void setupRenderState(net.minecraft.client.Minecraft mc)
+    private void setupRenderState(
+        net.minecraft.client.Minecraft mc,
+        int mouseX,
+        int mouseY
+    )
     {
         stringWidth = mc.fontRenderer.getStringWidth(this.displayString);
         mc.getTextureManager().bindTexture(TEXTURES);
@@ -105,6 +124,49 @@ public class GuiComparisonOperatorButton extends GuiButton
             this.y + ((this.height - 3) - mc.fontRenderer.FONT_HEIGHT) / 2,
             Reference.TEXT_COLOR
         );
+
+        boolean isCursorOverInputBox = this.isMouseOverInputBox(mouseX, mouseY, mc);
+
+        GuiTooltipData guiTooltipData = new GuiTooltipData(
+            this.x,
+            this.y + 1000,
+            new String[]{
+                "Click to change the operator",
+                "=: if the value is equal to the input",
+                ">: if the value is greater than the input",
+                "<: if the value is less than the input"
+            },
+            0,
+            false,
+            0,
+            false,
+            false
+        );
+
+        if (isCursorOverInputBox) {
+            this.callback.accept(
+                guiTooltipData
+            );
+        } else if (this.wasCursorOverInputBox) {
+            guiTooltipData.setDisabled();
+            this.callback.accept(
+                guiTooltipData
+            );
+        }
+
+        this.wasCursorOverInputBox = isCursorOverInputBox;
+    }
+
+    private boolean isMouseOverInputBox(
+        int mouseX,
+        int mouseY,
+        net.minecraft.client.Minecraft mc
+    )
+    {
+        return
+            (mouseX > this.x && mouseX < this.x + (WIDTH_OF_IMAGE / 2) + mc.fontRenderer.getStringWidth(this.displayString)) &&
+                (mouseY > this.y && mouseY < this.y + HEIGHT_OF_IMAGE)
+            ;
     }
 
     @Override

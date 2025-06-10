@@ -15,20 +15,26 @@ public class GuiCopyButton extends net.minecraft.client.gui.GuiButton
     private static final ResourceLocation TEXTURES = new ResourceLocation(
         Reference.MODID + ":textures/gui/gui_elements.png"
     );
+    private static final int WIDTH_OF_IMAGE = 18;
+    private static final int HEIGHT_OF_IMAGE = 18;
 
     private final Consumer<Integer> callback;
+    private final Consumer<GuiTooltipData> callbackTooltip;
     private final boolean isOpen;
+    private boolean wasCursorOverInputBox = false;
 
     public GuiCopyButton(
         int buttonId,
         int x,
         int y,
         Consumer<Integer> callback,
+        Consumer<GuiTooltipData> callbackTooltip,
         boolean isOpen
     )
     {
-        super(buttonId, x, y, 18, 18, "copy");
+        super(buttonId, x, y, WIDTH_OF_IMAGE, HEIGHT_OF_IMAGE, "copy");
         this.callback = callback;
+        this.callbackTooltip = callbackTooltip;
         this.isOpen = isOpen;
     }
 
@@ -44,6 +50,45 @@ public class GuiCopyButton extends net.minecraft.client.gui.GuiButton
             return;
         }
         setupRenderState(mc);
+
+        boolean isCursorOverInputBox = this.isMouseOverInputBox(mouseX, mouseY);
+
+        GuiTooltipData guiTooltipData = new GuiTooltipData(
+            this.x,
+            this.y + 1000,
+            new String[]{
+                "Copy the values from the connected input, to these settings"
+            },
+            0,
+            false,
+            0,
+            false,
+            false
+        );
+
+        if (isCursorOverInputBox) {
+            this.callbackTooltip.accept(
+                guiTooltipData
+            );
+        } else if (this.wasCursorOverInputBox) {
+            guiTooltipData.setDisabled();
+            this.callbackTooltip.accept(
+                guiTooltipData
+            );
+        }
+
+        this.wasCursorOverInputBox = isCursorOverInputBox;
+    }
+
+    private boolean isMouseOverInputBox(
+        int mouseX,
+        int mouseY
+    )
+    {
+        return
+            (mouseX > this.x && mouseX < this.x + WIDTH_OF_IMAGE) &&
+                (mouseY > this.y && mouseY < this.y + HEIGHT_OF_IMAGE)
+            ;
     }
 
     private void setupRenderState(net.minecraft.client.Minecraft mc)

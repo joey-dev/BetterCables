@@ -8,6 +8,7 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ResourceLocation;
 
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.function.Consumer;
 
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
@@ -28,12 +29,15 @@ public class GuiNumberInput extends GuiButton implements AbleToChangeDisabledSta
     private static final int MAXIMUM_CHARACTER_LENGTH = 3;
     private int value;
     private String valueString;
+    private final Consumer<GuiTooltipData> callback;
     private boolean isFocused;
     private int plusButtonY = 0;
     private int minusButtonY = 0;
+    private final String[] description;
     private boolean disabled = false;
     private final TextPosition textPosition;
     private int extraY = 0;
+    private boolean wasCursorOverInputBox;
 
     public GuiNumberInput(
         int buttonId,
@@ -42,19 +46,23 @@ public class GuiNumberInput extends GuiButton implements AbleToChangeDisabledSta
         int initialValue,
         TextPosition textPosition,
         String text,
+        String[] description,
         int minimumValue,
         int maximumValue,
-        boolean disabled
+        boolean disabled,
+        Consumer<GuiTooltipData> callback
     )
     {
         super(buttonId, x, y, WIDTH_OF_IMAGE, HEIGHT_OF_IMAGE, text);
         this.value = initialValue;
+        this.description = description;
         this.disabled = disabled;
         this.textPosition = textPosition;
 
         this.minimumValue = minimumValue;
         this.maximumValue = maximumValue;
         this.valueString = Integer.toString(initialValue);
+        this.callback = callback;
         this.plusButtonY = this.y + 1;
         this.minusButtonY = this.y + 6;
     }
@@ -120,6 +128,32 @@ public class GuiNumberInput extends GuiButton implements AbleToChangeDisabledSta
                 Reference.TEXT_COLOR
             );
         }
+
+        boolean isCursorOverInputBox = this.isMouseOverInputBox(mouseX, mouseY);
+
+        GuiTooltipData guiTooltipData = new GuiTooltipData(
+            this.x,
+            this.y + 1000,
+            description,
+            this.minimumValue,
+            true,
+            this.maximumValue,
+            true,
+            false
+        );
+
+        if (isCursorOverInputBox) {
+            this.callback.accept(
+                guiTooltipData
+            );
+        } else if (this.wasCursorOverInputBox) {
+            guiTooltipData.setDisabled();
+            this.callback.accept(
+                guiTooltipData
+            );
+        }
+
+        this.wasCursorOverInputBox = isCursorOverInputBox;
     }
 
     public void changeDisabledState(boolean disable)
@@ -158,6 +192,17 @@ public class GuiNumberInput extends GuiButton implements AbleToChangeDisabledSta
                 (mouseY >= this.y + extraY && mouseY < this.y + this.height + extraY);
 
         return false;
+    }
+
+    private boolean isMouseOverInputBox(
+        int mouseX,
+        int mouseY
+    )
+    {
+        return
+            (mouseX > this.x && mouseX < this.x + WIDTH_OF_IMAGE) &&
+                (mouseY > this.y + extraY && mouseY < this.y + HEIGHT_OF_IMAGE + extraY)
+            ;
     }
 
     private boolean isPlusButtonPressed(
