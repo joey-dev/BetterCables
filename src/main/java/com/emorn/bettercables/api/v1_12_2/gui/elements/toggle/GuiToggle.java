@@ -20,6 +20,7 @@ public class GuiToggle extends GuiButton implements AbleToChangeDisabledState
     );
     private static final int WIDTH_OF_IMAGE = 18;
     private static final int HEIGHT_OF_IMAGE = 18;
+    private static final int TOOLTIP_Y_OFFSET = 1000;
 
     private final ToggleImagePosition inactive;
     private final ToggleImagePosition active;
@@ -71,7 +72,7 @@ public class GuiToggle extends GuiButton implements AbleToChangeDisabledState
 
         GuiTooltipData guiTooltipData = new GuiTooltipData(
             this.x,
-            this.y + 1000,
+            this.y + TOOLTIP_Y_OFFSET,
             this.description,
             0,
             false,

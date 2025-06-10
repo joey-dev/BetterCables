@@ -24,7 +24,7 @@ public class GuiOverwriteDefaultBox extends GuiCheckbox
             y,
             "Overwrite",
             new String[]{
-                "When disables, it will follow the settings of the connector itself",
+                "When disabled, it will follow the settings of the connector itself",
                 "When enabled, it will overwrite all settings with the values set here",
             },
             isChecked,
